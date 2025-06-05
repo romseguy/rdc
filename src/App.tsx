@@ -6,7 +6,7 @@ import { createRoot } from "react-dom/client";
 import SplitPane from "react-split-pane";
 import { Switch, Route, getRouter } from "navigo-react";
 import "./App.scss";
-import { client, prefix } from "./client";
+import { client, config, prefix } from "./client";
 import { toCss } from "./toCss";
 import {
   ErrorBoundary,
@@ -94,6 +94,10 @@ function App() {
   const [accessToken, setAccessToken] = useStorage("accessToken", {
     type: "local",
   });
+  useEffect(() => {
+    client.defaults.headers.common["at"] = accessToken;
+    client.defaults.headers.common["rt"] = refreshToken;
+  }, [accessToken]);
   const [refreshToken, setRefreshToken] = useStorage("refreshToken", {
     type: "local",
   });
@@ -625,6 +629,7 @@ function App() {
                                     >
                                       Annuler
                                     </button>
+
                                     <button
                                       css={toCss({ background: "green" })}
                                       onClick={async () => {
@@ -641,12 +646,27 @@ function App() {
                                         });
 
                                         try {
-                                          const { data } = await client.put(
-                                            prefix + "/note",
-                                            {
-                                              note,
-                                            },
-                                          );
+                                          let data;
+                                          if (note.isNew) {
+                                            const res = await client.post(
+                                              prefix + "/notes",
+                                              {
+                                                note: {
+                                                  ...note,
+                                                  book_id: book.id,
+                                                },
+                                              },
+                                            );
+                                            data = res.data;
+                                          } else {
+                                            const res = await client.put(
+                                              prefix + "/note",
+                                              {
+                                                note,
+                                              },
+                                            );
+                                            data = res.data;
+                                          }
 
                                           if (data.error) {
                                             throw new Error(data.message);
@@ -699,6 +719,22 @@ function App() {
                                         return n;
                                       }),
                                     });
+                                  }}
+                                  onDeleteClick={async () => {
+                                    const ok = confirm(
+                                      "Êtes-vous sûr de vouloir supprimer cette citation ?",
+                                    );
+                                    if (ok) {
+                                      setBook({
+                                        ...book,
+                                        notes: book?.notes?.filter(
+                                          (n) => n.id !== note.id,
+                                        ),
+                                      });
+                                      await client.delete(
+                                        prefix + "/note?id=" + note.id,
+                                      );
+                                    }
                                   }}
                                 />
                               );

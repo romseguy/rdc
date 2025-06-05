@@ -2,7 +2,13 @@ import { css } from "@emotion/react";
 import { toCss } from "./toCss";
 import { MailTo, MailToTrigger, MailToBody } from "@slalombuild/react-mailto";
 
-export const Note = ({ note, onOpenClick, onEditClick, isEditing }) => {
+export const Note = ({
+  note,
+  onOpenClick,
+  onEditClick,
+  onDeleteClick,
+  isEditing,
+}) => {
   return (
     <div
       css={toCss({
@@ -31,7 +37,7 @@ export const Note = ({ note, onOpenClick, onEditClick, isEditing }) => {
             <a href="#" onClick={() => onEditClick()}>
               Modifier
             </a>
-            <a href="#" onClick={() => onOpenClick()}>
+            <a href="#" onClick={() => onDeleteClick()}>
               Supprimer
             </a>
             <MailTo
