@@ -323,7 +323,7 @@ function App() {
         <div
           css={toCss({
             position: "fixed",
-            bottom: "12px",
+            bottom: "8px",
             right: "36px",
           })}
         >
@@ -639,6 +639,7 @@ function App() {
                                             if (n.id === note.id)
                                               return {
                                                 ...note,
+                                                isNew: false,
                                                 isEditing: false,
                                               };
                                             return n;
@@ -748,6 +749,7 @@ function App() {
                   <div>
                     <button
                       css={toCss({ margin: "12px 0 0 12px" })}
+                      disabled={!!book?.notes?.find(({ isNew }) => isNew)}
                       onClick={() => {
                         const id = book?.notes.length + 1;
                         setBook({

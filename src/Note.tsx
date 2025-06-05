@@ -21,8 +21,6 @@ export const Note = ({
       <div
         css={toCss({
           padding: "6px",
-          display: "flex",
-          gap: "12px",
           background: "purple",
         })}
       >
@@ -30,31 +28,45 @@ export const Note = ({
           <>{note.isNew ? "Nouvelle citation" : "Modifier cette citation"}</>
         )}
         {!isEditing && (
-          <>
-            <a href="#" onClick={() => onOpenClick()}>
-              Ouvrir
-            </a>
-            <a href="#" onClick={() => onEditClick()}>
-              Modifier
-            </a>
-            <a href="#" onClick={() => onDeleteClick()}>
-              Supprimer
-            </a>
-            <MailTo
-              subject={"Citation du livre : " + "" + ""}
-              //cc={["cc1@example.com", "cc2@example.com"]}
-              //bcc={["bcc@example.com"]}
-              //obfuscate
+          <div
+            css={toCss({
+              display: "flex",
+              justifyContent: "space-between",
+            })}
+          >
+            <div>Cité par {note.email.replace(/@.+/, "")}</div>
+
+            <div
+              css={toCss({
+                display: "flex",
+                gap: "12px",
+              })}
             >
-              <MailToTrigger>Partager</MailToTrigger>
-              <MailToBody>
-                - Citation du livre {""} :
-                <br />
-                <br />
-                {note.desc}
-              </MailToBody>
-            </MailTo>
-          </>
+              <a href="#" onClick={() => onOpenClick()}>
+                Ouvrir
+              </a>
+              <a href="#" onClick={() => onEditClick()}>
+                Modifier
+              </a>
+              <a href="#" onClick={() => onDeleteClick()}>
+                Supprimer
+              </a>
+              <MailTo
+                subject={"Citation du livre : " + "" + ""}
+                //cc={["cc1@example.com", "cc2@example.com"]}
+                //bcc={["bcc@example.com"]}
+                //obfuscate
+              >
+                <MailToTrigger>Partager</MailToTrigger>
+                <MailToBody>
+                  - Citation du livre {""} :
+                  <br />
+                  <br />
+                  {note.desc}
+                </MailToBody>
+              </MailTo>
+            </div>
+          </div>
         )}
       </div>
 
