@@ -41,7 +41,7 @@ export const RTEditor = ({
   onBlur?: (html: string) => void;
   onChange?: ({ html }: { html: string }) => void;
 }) => {
-  const isDark = false;
+  const isDark = true;
   const isMobile = false;
 
   const currentIndex = 0;

@@ -41,6 +41,7 @@ export const Note = ({
             css={toCss({
               display: "flex",
               justifyContent: "space-between",
+              fontSize: "smaller",
             })}
           >
             <div>Cité par {toUsername(note.email)}</div>
@@ -71,7 +72,7 @@ export const Note = ({
                   - Citation du livre {""} :
                   <br />
                   <br />
-                  {note.desc}
+                  {note.desc.replace(/<\/?[^>]+(>|$)/g, "")}
                 </MailToBody>
               </MailTo>
             </div>
@@ -106,6 +107,7 @@ export const Note = ({
         {!isEditing && <div dangerouslySetInnerHTML={{ __html: note.desc }} />}
       </div>
 
+      {/* comments */}
       {!note.isNew && (
         <div css={toCss({})}>
           {!note.isEditing && (
@@ -116,14 +118,19 @@ export const Note = ({
                 padding: "6px",
                 background: "purple",
                 cursor: "pointer",
+                fontSize: "smaller",
               })}
               onClick={() => setIsShow(!isShow)}
             >
               <div>
-                {Array.isArray(note.comments)
-                  ? "Lire les " + note.comments.length
-                  : "0"}{" "}
-                commentaires {isShow ? "V" : ">"}
+                {Array.isArray(note.comments) && note.comments.length > 0
+                  ? "Lire les " +
+                    note.comments.length +
+                    " commentaires " +
+                    isShow
+                    ? "V"
+                    : ">"
+                  : "0 commentaires"}
               </div>
 
               <div>

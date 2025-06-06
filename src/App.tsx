@@ -105,11 +105,28 @@ function App() {
   const [user, setUser] = useState<null | User>();
   //#endregion
 
+  //#region toast
+  const [toasts, setToasts] = useState([]);
+  const showToast = (message: string, isError = false) => {
+    const toast = {
+      id: toasts.length,
+      message: message,
+      delay: 2500,
+      isError,
+    };
+    setToasts([...toasts, toast].reverse());
+  };
+  const onToastFinished = (id) => {
+    setToasts(toasts.filter((toast) => toast.id !== id));
+  };
+  //#endregion
+
   //#region state
   // const urlParams = new URLSearchParams(window.location.search);
   // const code = urlParams.get("code");
   const [isLoading, setIsLoading] = useState(true);
   const [libs, setLibs] = useState<Lib[]>();
+  console.log("🚀 ~ App ~ libs:", libs);
   const [lib, _setLib] = useState<Lib>();
   const setLib = (libName: string) => {
     const l = libs?.find((li) => li.name === libName);
@@ -138,7 +155,7 @@ function App() {
     return els;
   }, [book]);
   const url = getRouter().getCurrentLocation().url;
-  const [currentNoteIndex, setCurrentNoteIndex] = useState<null | number>(
+  const [currentNote, setCurrentNote] = useState<null | Note>(
     url.startsWith("note") ? url.substring(5, url.length) : null,
   );
   //#endregion
@@ -221,19 +238,19 @@ function App() {
     login();
   }, [accessToken, refreshToken]);
   useEffect(() => {
-    if (currentNoteIndex === null) {
+    if (currentNote === null) {
       getRouter().navigate("/");
       return;
     }
 
     if (!getRouter().getCurrentLocation().url.startsWith("/note")) {
-      getRouter().navigateByName("note", { id: currentNoteIndex });
+      getRouter().navigateByName("note", { id: currentNote.id });
     }
 
     if (lib) {
-      getNote(currentNoteIndex);
+      getNote(currentNote.id);
     }
-  }, [currentNoteIndex, lib]);
+  }, [currentNote, lib]);
   //#endregion
 
   //if (isLoading) return "Chargement...";
@@ -246,108 +263,56 @@ function App() {
     </button>
   );
 
-  const [toasts, setToasts] = useState([]);
-
-  const showToast = (message) => {
-    const toast = {
-      id: toasts.length,
-      message: message,
-      delay: 2500,
-    };
-    setToasts([...toasts, toast].reverse());
-  };
-
-  const onToastFinished = (id) => {
-    setToasts(toasts.filter((toast) => toast.id !== id));
-  };
-
   return (
     <>
       <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
 
       <Switch>
         <Route path="/note/:id" name="note">
-          {currentNoteIndex !== null && (
+          {currentNote !== null && (
             <div className="Resizer ">
-              <SplitPane
+              {/* <SplitPane
                 split="horizontal"
                 defaultSize={window.innerHeight / 2}
                 paneStyle={{ overflowY: "scroll", padding: "12px" }}
-              >
-                {/* note */}
-                <div>
-                  <div css={toCss({ display: "flex", alignItems: "center" })}>
-                    <Back
-                      onClick={() => {
-                        setCurrentNoteIndex(null);
-                        getRouter().navigate("/");
-                      }}
-                    />
-                    Citation du livre : {book?.id}
+              > */}
+              {/* note */}
+              <div>
+                <div css={toCss({ display: "flex", alignItems: "center" })}>
+                  <Back
+                    onClick={() => {
+                      setCurrentNote(null);
+                      getRouter().navigate("/");
+                    }}
+                  />
+                  <div>
+                    Citation du livre{" "}
+                    <i>
+                      {book?.title
+                        ? ": " + book.title
+                        : "" + book?.id + " de la bibliothèque " + lib?.name}
+                    </i>
                   </div>
-                  <br />
-                  {/*@ts-expect-error*/}
-                  {book?.notes?.find(({ id }) => id === currentNoteIndex).desc}
-                  <br />
                 </div>
 
-                {/* comments */}
-                <div>
-                  <div
-                    css={toCss({
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                    })}
-                  >
-                    <h1>Vos réflexions</h1>
-                    <button>Ajouter</button>
-                  </div>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                  <p>Test</p>
-                </div>
-              </SplitPane>
+                <div
+                  css={toCss({ padding: "12px" })}
+                  dangerouslySetInnerHTML={{ __html: currentNote.desc }}
+                />
+              </div>
+
+              {/* ? */}
+              <div></div>
+              {/* </SplitPane> */}
             </div>
           )}
         </Route>
 
         <Route path="/">
-          <div className="Resizer ">
+          <div
+            className="Resizer"
+            css={toCss({ visibility: isLoading ? "hidden" : "visible" })}
+          >
             <SplitPane
               css={toCss({ position: "unset !important" })}
               split="horizontal"
@@ -473,8 +438,16 @@ function App() {
                               })}
                             >
                               Bibliothèque :
-                              <select>
-                                <option>{lib?.name}</option>
+                              <select
+                                defaultValue={lib?.name}
+                                onChange={(e) => {
+                                  console.log("🚀 ~ App ~ e:", e.target.value);
+                                  setLib(e.target.value);
+                                }}
+                              >
+                                {libs?.map((l) => (
+                                  <option key={"lib-" + l.id}>{l.name}</option>
+                                ))}
                               </select>
                             </div>
                           </div>
@@ -503,9 +476,11 @@ function App() {
                                   css={toCss({
                                     display: "flex",
                                     alignItems: "center",
+                                    justifyContent: "center",
+                                    textAlign: "center",
                                     border: "1px solid white",
-                                    height: "150px",
-                                    padding: "24px",
+                                    height: "225px",
+                                    width: "140px",
                                     cursor: "pointer",
                                   })}
                                   onClick={() => {
@@ -564,7 +539,18 @@ function App() {
 
               <main>
                 {/* libs */}
-                {!book && bookIndex !== -1 && <></>}
+                {!book && bookIndex !== -1 && (
+                  <>
+                    <ul>
+                      <li>
+                        Auteur :{" "}
+                        <a href={lib?.author_url || "#"} target="_blank">
+                          {lib?.author || "Anonyme"}
+                        </a>
+                      </li>
+                    </ul>
+                  </>
+                )}
 
                 {/* book */}
                 {(book || bookIndex === -1) && (
@@ -649,19 +635,6 @@ function App() {
                                       <button
                                         css={toCss({ background: "green" })}
                                         onClick={async () => {
-                                          setBook({
-                                            ...book,
-                                            notes: book?.notes?.map((n) => {
-                                              if (n.id === note.id)
-                                                return {
-                                                  ...note,
-                                                  isNew: false,
-                                                  isEditing: false,
-                                                };
-                                              return n;
-                                            }),
-                                          });
-
                                           try {
                                             let data;
                                             if (note.isNew) {
@@ -688,7 +661,22 @@ function App() {
                                             if (data.error) {
                                               throw new Error(data.message);
                                             }
-                                          } catch (error) {}
+
+                                            setBook({
+                                              ...book,
+                                              notes: book?.notes?.map((n) => {
+                                                if (n.id === note.id)
+                                                  return {
+                                                    ...note,
+                                                    isNew: false,
+                                                    isEditing: false,
+                                                  };
+                                                return n;
+                                              }),
+                                            });
+                                          } catch (error) {
+                                            showToast(error.message, true);
+                                          }
                                         }}
                                       >
                                         Valider
@@ -720,7 +708,7 @@ function App() {
                                     key={"note-" + index}
                                     note={note}
                                     onOpenClick={() => {
-                                      setCurrentNoteIndex(index);
+                                      setCurrentNote(note);
                                     }}
                                     onEditClick={() => {
                                       setBook({

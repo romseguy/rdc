@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import "./Toast.scss";
+import { css } from "@emotion/react";
 
-const Toast = ({ id, delay = 5500, message, onHide }) => {
+const Toast = ({ id, delay = 5500, message, onHide, isError }) => {
   const [className, setClassname] = useState("toast-container show-toast");
 
   // console.log("🚀 ~ render toast");
@@ -22,12 +23,21 @@ const Toast = ({ id, delay = 5500, message, onHide }) => {
       clearTimeout(hideTimeout);
     };
   }, [id, delay, onHide]);
-  return <div className={className}>{message}</div>;
+  return (
+    <div
+      className={className}
+      css={css`
+        background-color: ${isError ? "red" : "skyblue"};
+      `}
+    >
+      {message}
+    </div>
+  );
 };
 
 export const ToastsContainer = ({ toasts, onToastFinished }) => {
   return (
-    <div className="toasts-container">
+    <div className="toasts-container" css={css``}>
       {toasts.map((toast, index) => (
         <Toast key={index} {...toast} onHide={onToastFinished} />
       ))}
