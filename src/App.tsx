@@ -110,7 +110,6 @@ function App() {
   // const code = urlParams.get("code");
   const [isLoading, setIsLoading] = useState(true);
   const [libs, setLibs] = useState<Lib[]>();
-  console.log("🚀 ~ libs:", libs);
   const [lib, _setLib] = useState<Lib>();
   const setLib = (libName: string) => {
     const l = libs?.find((li) => li.name === libName);
@@ -689,12 +688,7 @@ function App() {
                                             if (data.error) {
                                               throw new Error(data.message);
                                             }
-                                          } catch (error) {
-                                            // console.log(
-                                            // "🚀 ~ onClick={ ~ error:",
-                                            // error,
-                                            // );
-                                          }
+                                          } catch (error) {}
                                         }}
                                       >
                                         Valider

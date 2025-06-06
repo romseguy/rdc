@@ -3,6 +3,7 @@ import { fullDateString, toCss } from "./utils";
 import { MailTo, MailToTrigger, MailToBody } from "@slalombuild/react-mailto";
 import { useState } from "react";
 import { toUsername } from "./utils";
+import { RTEditor } from "./RTEditor";
 
 export const Note = ({
   note,
@@ -42,7 +43,6 @@ export const Note = ({
               justifyContent: "space-between",
             })}
           >
-            <div>Cité par {toUsername(note.email)}</div>
             <div>Cité par {toUsername(note.email)}</div>
 
             <div
@@ -85,62 +85,60 @@ export const Note = ({
         css={toCss({
           padding: "6px",
           background: "rgba(255,255,255,0.1)",
+          maxHeight: window.innerHeight - 250 + "px",
           //height: "100%",
           //height: "100px",
-          //overflowY: "scroll",
+          overflowY: "scroll",
           //overflowX: "hidden",
           //width: "200px",
           //textOverflow: "ellipsis",
         })}
       >
         {isEditing && (
-          <textarea
+          <RTEditor
             defaultValue={note.desc}
-            css={css`
-              height: 150px;
-              width: 100%;
-            `}
-            onChange={(e) => {
-              note.desc = e.target.value;
-            }}
             placeholder="Saisissez le texte de la note"
+            onChange={({ html }) => {
+              note.desc = html;
+            }}
           />
         )}
-        {!isEditing && <div dangerouslySetInnerHTML={{ __html: note.desc }} />}
         {!isEditing && <div dangerouslySetInnerHTML={{ __html: note.desc }} />}
       </div>
 
       {!note.isNew && (
         <div css={toCss({})}>
-          <div
-            css={toCss({
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "6px",
-              background: "purple",
-              cursor: "pointer",
-            })}
-            onClick={() => setIsShow(!isShow)}
-          >
-            <div>
-              {Array.isArray(note.comments)
-                ? "Lire les " + note.comments.length
-                : "0"}{" "}
-              commentaires {isShow ? "V" : ">"}
-            </div>
+          {!note.isEditing && (
+            <div
+              css={toCss({
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "6px",
+                background: "purple",
+                cursor: "pointer",
+              })}
+              onClick={() => setIsShow(!isShow)}
+            >
+              <div>
+                {Array.isArray(note.comments)
+                  ? "Lire les " + note.comments.length
+                  : "0"}{" "}
+                commentaires {isShow ? "V" : ">"}
+              </div>
 
-            <div>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!isAdd) setIsAdd(true);
-                }}
-              >
-                Ajouter un commentaire
-              </a>
+              <div>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isAdd) setIsAdd(true);
+                  }}
+                >
+                  Ajouter un commentaire
+                </a>
+              </div>
             </div>
-          </div>
+          )}
 
           {isAdd && (
             <div css={toCss({ padding: "12px 12px 0px 0px" })}>

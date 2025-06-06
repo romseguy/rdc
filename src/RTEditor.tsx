@@ -18,7 +18,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const bindEvent = (
   target: Document | Element,
   eventName: string,
-  fun: () => void
+  fun: () => void,
 ) => {
   if (target.addEventListener) {
     target.removeEventListener(eventName, fun, false);
@@ -49,7 +49,7 @@ export const RTEditor = ({
   const [isTouched, setIsTouched] = useState(false);
   const [shortId, setShortId] = useState<string | undefined>();
   const [maxHeight, setMaxHeight] = useState(0);
-  useEffect(() => setMaxHeight(window.innerHeight - 80), []);
+  useEffect(() => setMaxHeight(window.innerHeight - 250), []);
 
   //#region tinymce
   const editorRef = useRef<any | null>(null);
@@ -87,7 +87,7 @@ export const RTEditor = ({
       "lists",
       "media",
       //"paste",
-      "searchreplace"
+      "searchreplace",
     ],
     branding: false,
     browser_spellcheck: true,
@@ -135,7 +135,7 @@ export const RTEditor = ({
       // The following text patterns require the `lists` plugin
       { start: "1. ", cmd: "InsertOrderedList" },
       { start: "* ", cmd: "InsertUnorderedList" },
-      { start: "- ", cmd: "InsertUnorderedList" }
+      { start: "- ", cmd: "InsertUnorderedList" },
     ],
     contextmenu: false,
     menubar: false,
@@ -148,7 +148,7 @@ export const RTEditor = ({
           "code",
           "forecolor",
           "bold",
-          "hr"
+          "hr",
           //"styles",
           //"emoticons",
           // "searchreplace",
@@ -158,27 +158,27 @@ export const RTEditor = ({
           // "link",
           // "blockquote",
           // "removeformat"
-        ]
+        ],
       },
       {
         name: "texte",
         items: [
           "fontfamily",
-          "fontsizeinput"
+          "fontsizeinput",
           // "alignjustify",
           // "aligncenter",
           // "italic",
           // "strikethrough",
           // "charmap"
-        ]
+        ],
       },
       {
         name: "media",
         items: [
           //"link", "unlink", "image", "media", "help"
-        ]
-      }
-    ]
+        ],
+      },
+    ],
   };
 
   // function onImageClick(
@@ -274,7 +274,7 @@ export const RTEditor = ({
       {isLoading && (
         <div
           style={{
-            position: "relative"
+            position: "relative",
           }}
         >
           Loading...
