@@ -1,5 +1,6 @@
 import { Editor, IAllProps } from "@tinymce/tinymce-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { isMobile } from "react-device-detect";
 
 // interface BlobInfo {
 //   id: () => string;
@@ -35,14 +36,13 @@ export const RTEditor = ({
   onChange,
   ...props
 }: IAllProps["init"] & {
-  defaultValue?: string;
+  defaultValue?: string | null;
   setIsLoading?: (bool: boolean) => void;
   value?: string;
   onBlur?: (html: string) => void;
   onChange?: ({ html }: { html: string }) => void;
 }) => {
   const isDark = true;
-  const isMobile = false;
 
   const currentIndex = 0;
   const [isLoading, setIsLoading] = useState(true);
@@ -72,6 +72,7 @@ export const RTEditor = ({
     }
   }, [editorRef]);
   const init: IAllProps["init"] = {
+    auto_focus: true,
     plugins: [
       "anchor",
       "autolink",
@@ -147,7 +148,6 @@ export const RTEditor = ({
           "fullscreen",
           "code",
           "forecolor",
-          "bold",
           "hr",
           //"styles",
           //"emoticons",
@@ -156,7 +156,8 @@ export const RTEditor = ({
           // "redo",
           //"anchor",
           // "link",
-          // "blockquote",
+          "blockquote",
+          "bold",
           // "removeformat"
         ],
       },
@@ -277,7 +278,7 @@ export const RTEditor = ({
             position: "relative",
           }}
         >
-          Loading...
+          Veuillez patienter...
         </div>
       )}
 
@@ -286,7 +287,7 @@ export const RTEditor = ({
           disabled={readOnly}
           id={shortId}
           init={init}
-          initialValue={isTouched ? undefined : defaultValue}
+          initialValue={/*isTouched ? undefined :*/ defaultValue || ""}
           tinymceScriptSrc="/tinymce/tinymce.min.js"
           value={value}
           onBlur={(e, editor) => {

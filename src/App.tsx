@@ -3,6 +3,7 @@ import { useStorage } from "@charlietango/hooks/use-storage";
 import { MailTo, MailToBody, MailToTrigger } from "@slalombuild/react-mailto";
 import { StrictMode, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { isMobile } from "react-device-detect";
 import SplitPane from "react-split-pane";
 import { Switch, Route, getRouter } from "navigo-react";
 import "./App.scss";
@@ -16,22 +17,7 @@ import {
 import { css } from "@emotion/react";
 import { Note } from "./Note";
 import { ToastsContainer } from "./Toast";
-
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-type User = { email: string };
-type Note = { desc: string };
-type Book = {
-  id: string;
-  title?: string;
-  notes?: Note[];
-  src?: string;
-};
-type Lib = {
-  id: string;
-  name: string;
-  books: PartialBy<Book, "id">[];
-};
+import { Lib, User, Book, PartialBy, Note as NoteT } from "./types";
 
 const seed: Partial<Lib>[] = [
   {
@@ -91,11 +77,13 @@ const seed: Partial<Lib>[] = [
 
 function App() {
   const { showBoundary } = useErrorBoundary();
+
   //#region auth
   const [accessToken, setAccessToken] = useStorage("accessToken", {
     type: "local",
   });
   useEffect(() => {
+    login();
     client.defaults.headers.common["at"] = accessToken;
     client.defaults.headers.common["rt"] = refreshToken;
   }, [accessToken]);
@@ -126,7 +114,7 @@ function App() {
   // const code = urlParams.get("code");
   const [isLoading, setIsLoading] = useState(true);
   const [libs, setLibs] = useState<Lib[]>();
-  console.log("🚀 ~ App ~ libs:", libs);
+  // console.log("🚀 ~ App ~ libs:", libs);
   const [lib, _setLib] = useState<Lib>();
   const setLib = (libName: string) => {
     const l = libs?.find((li) => li.name === libName);
@@ -134,9 +122,9 @@ function App() {
   };
   const [bookIndex, setBookIndex] = useState<null | number>(null);
   const [book, setBook] = useState<null | Book | PartialBy<Book, "id">>();
-  const notes: Note[][] = useMemo(() => {
+  const notes: NoteT[][] = useMemo(() => {
     if (!book || !book.notes) return [[]];
-    const rows: Note[] = [...book.notes].sort((a, b) => {
+    const rows: NoteT[] = [...book.notes].sort((a, b) => {
       return a.id > b.id ? -1 : 1;
     });
     let c = -1;
@@ -155,7 +143,7 @@ function App() {
     return els;
   }, [book]);
   const url = getRouter().getCurrentLocation().url;
-  const [currentNote, setCurrentNote] = useState<null | Note>(
+  const [currentNote, setCurrentNote] = useState<null | NoteT>(
     url.startsWith("note") ? url.substring(5, url.length) : null,
   );
   //#endregion
@@ -164,7 +152,8 @@ function App() {
   const getLibsOnce = useDebouncedCallback(async function getLibs() {
     try {
       if (!libs) {
-        const { data } = await client.get(prefix);
+        const { data, error } = await client.get(prefix);
+        if (data.error) throw data.error;
         const libraries = data.libraries.map((lib) => {
           return {
             ...lib,
@@ -192,7 +181,7 @@ function App() {
       }
       setIsLoading(false);
     } catch (error: any) {
-      if (error.toString().includes("Network")) {
+      if (error.code === "ENOTFOUND" || error.message.includes("Network")) {
         setLibs(seed as Lib[]);
         _setLib(seed[0] as Lib);
         setIsLoading(false);
@@ -234,9 +223,6 @@ function App() {
   useEffect(() => {
     getLibsOnce();
   }, []);
-  useEffect(() => {
-    login();
-  }, [accessToken, refreshToken]);
   useEffect(() => {
     if (currentNote === null) {
       getRouter().navigate("/");
@@ -369,6 +355,7 @@ function App() {
                           <div
                             css={toCss({
                               display: "flex",
+                              flexDirection: isMobile ? "column" : "row",
                               alignItems: "center",
                               gap: "6px",
                             })}
@@ -421,6 +408,7 @@ function App() {
                                 height="1em"
                                 width="1em"
                                 xmlns="http://www.w3.org/2000/svg"
+                                version="1.0"
                               >
                                 <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"></path>
                               </svg>
@@ -430,26 +418,19 @@ function App() {
                                 "Connexion"
                               )}
                             </button>
-                            <div
-                              css={toCss({
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "6px",
-                              })}
+
+                            <div>Bibliothèque :</div>
+
+                            <select
+                              defaultValue={lib?.name}
+                              onChange={(e) => {
+                                setLib(e.target.value);
+                              }}
                             >
-                              Bibliothèque :
-                              <select
-                                defaultValue={lib?.name}
-                                onChange={(e) => {
-                                  console.log("🚀 ~ App ~ e:", e.target.value);
-                                  setLib(e.target.value);
-                                }}
-                              >
-                                {libs?.map((l) => (
-                                  <option key={"lib-" + l.id}>{l.name}</option>
-                                ))}
-                              </select>
-                            </div>
+                              {libs?.map((l) => (
+                                <option key={"lib-" + l.id}>{l.name}</option>
+                              ))}
+                            </select>
                           </div>
                           <div css={toCss({ display: "flex" })}>
                             {lib?.books.map((book, index) => {
@@ -557,7 +538,7 @@ function App() {
                   <SplitPane
                     css={toCss({ position: "relative" })}
                     split="horizontal"
-                    defaultSize={window.innerHeight - 125}
+                    defaultSize={window.innerHeight - 110}
                     maxSize={window.innerHeight - 60}
                     //primary="second"
                     pane1Style={{
@@ -603,7 +584,7 @@ function App() {
                               .map((note) => {
                                 return (
                                   <div key={"note-" + index}>
-                                    <Note note={note} isEditing />
+                                    <Note note={note} user={user} isEditing />
 
                                     <div
                                       css={toCss({
@@ -707,6 +688,7 @@ function App() {
                                   <Note
                                     key={"note-" + index}
                                     note={note}
+                                    user={user}
                                     onOpenClick={() => {
                                       setCurrentNote(note);
                                     }}
@@ -740,7 +722,8 @@ function App() {
                                       const { data } = await client.post(
                                         prefix + "/comments",
                                         {
-                                          comment,
+                                          ...comment,
+                                          note_id: note.id,
                                         },
                                       );
                                       if (data.error) {
