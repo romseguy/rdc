@@ -101,7 +101,7 @@ export const RTEditor = ({
       }
       hr {
         border-top-width: 3px;
-        margin: 0 24px;
+        margin: ${isMobile ? "0" : "0 24px"};
       }
       p {
         margin: 0;
@@ -143,12 +143,23 @@ export const RTEditor = ({
     statusbar: false,
     toolbar: [
       {
-        name: "outils",
+        name: "",
         items: [
           "fullscreen",
-          "code",
+          "bold",
+          "italic",
+          "underline",
           "forecolor",
+          "align",
+          "bullist",
+          "numlist",
+          "outdent",
+          "indent",
+          "fontsizeinput",
+          "code",
           "hr",
+          "blockquote",
+          //"export",
           //"styles",
           //"emoticons",
           // "searchreplace",
@@ -156,29 +167,25 @@ export const RTEditor = ({
           // "redo",
           //"anchor",
           // "link",
-          "blockquote",
-          "bold",
           // "removeformat"
         ],
       },
-      {
-        name: "texte",
-        items: [
-          "fontfamily",
-          "fontsizeinput",
-          // "alignjustify",
-          // "aligncenter",
-          // "italic",
-          // "strikethrough",
-          // "charmap"
-        ],
-      },
-      {
-        name: "media",
-        items: [
-          //"link", "unlink", "image", "media", "help"
-        ],
-      },
+      // {
+      //   name: "texte",
+      //   items: [
+      //     "fontfamily",
+      //     "alignjustify",
+      //     "aligncenter",
+      //     "strikethrough",
+      //     "charmap"
+      //   ],
+      // },
+      // {
+      //   name: "media",
+      //   items: [
+      //     "link", "unlink", "image", "media", "help"
+      //   ],
+      // },
     ],
   };
 

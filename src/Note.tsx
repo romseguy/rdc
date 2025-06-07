@@ -1,10 +1,11 @@
 import { css } from "@emotion/react";
 import { fullDateString, toCss, useScroll } from "./utils";
 import { MailTo, MailToTrigger, MailToBody } from "@slalombuild/react-mailto";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toUsername } from "./utils";
 import { RTEditor } from "./RTEditor";
 import { Note as NoteT, User } from "./types";
+import { isMobile } from "react-device-detect";
 
 export const Note = ({
   note,
@@ -26,13 +27,11 @@ export const Note = ({
   isEditing: boolean;
 }) => {
   const [locale, setLocale] = useState("fr");
-  console.log("🚀 ~ locale:", locale);
   const [comment, setComment] = useState();
   const [isShow, setIsShow] = useState(false);
   const [executeScroll, elementToScrollRef] = useScroll<HTMLDivElement>();
   const [isAdd, setIsAdd] = useState(false);
   const editor = (loc) => {
-    console.log("🚀 ~ editor ~ loc:", loc);
     //console.log(loc === "en" ? note.desc_en : note.desc);
     return (
       <RTEditor
@@ -71,7 +70,7 @@ export const Note = ({
                 />
               </clipPath>
             </defs>
-            <g clip-path="url(#id1)">
+            <g clipPath="url(#id1)">
               <path
                 fill="rgb(0%, 14.118958%, 49.01886%)"
                 d="M 2.519531 9.234375 L 2.519531 11.984375 L 6.375 11.984375 Z M 5.714844 24.546875 L 11.425781 24.546875 L 11.425781 20.472656 Z M 18.277344 20.472656 L 18.277344 24.546875 L 23.984375 24.546875 Z M 2.519531 18.964844 L 2.519531 21.714844 L 6.378906 18.964844 Z M 23.988281 6.402344 L 18.277344 6.402344 L 18.277344 10.472656 Z M 27.183594 21.714844 L 27.183594 18.964844 L 23.324219 18.964844 Z M 27.183594 11.984375 L 27.183594 9.234375 L 23.324219 11.984375 Z M 11.425781 6.402344 L 5.714844 6.402344 L 11.425781 10.472656 Z M 11.425781 6.402344 "
@@ -134,7 +133,7 @@ export const Note = ({
                 />
               </clipPath>
             </defs>
-            <g clip-path="url(#id1)">
+            <g clipPath="url(#id1)">
               <path
                 fill="rgb(92.939758%, 16.079712%, 22.349548%)"
                 d="M 27.574219 20.617188 C 27.574219 22.15625 26.3125 23.40625 24.753906 23.40625 L 19.113281 23.40625 L 19.113281 5.261719 L 24.753906 5.261719 C 26.3125 5.261719 27.574219 6.511719 27.574219 8.054688 Z M 27.574219 20.617188 "
@@ -142,7 +141,7 @@ export const Note = ({
                 fill-rule="nonzero"
               />
             </g>
-            <g clip-path="url(#id2)">
+            <g clipPath="url(#id2)">
               <path
                 fill="rgb(0%, 14.118958%, 58.428955%)"
                 d="M 5.011719 5.261719 C 3.453125 5.261719 2.191406 6.511719 2.191406 8.054688 L 2.191406 20.617188 C 2.191406 22.15625 3.453125 23.40625 5.011719 23.40625 L 10.652344 23.40625 L 10.652344 5.261719 Z M 5.011719 5.261719 "
@@ -150,7 +149,7 @@ export const Note = ({
                 fill-rule="nonzero"
               />
             </g>
-            <g clip-path="url(#id3)">
+            <g clipPath="url(#id3)">
               <path
                 fill="rgb(93.328857%, 93.328857%, 93.328857%)"
                 d="M 10.652344 5.261719 L 19.113281 5.261719 L 19.113281 23.40625 L 10.652344 23.40625 Z M 10.652344 5.261719 "
@@ -168,7 +167,7 @@ export const Note = ({
     <div
       css={toCss({
         fontSize: "smaller",
-        paddingBottom: "12px",
+        //paddingBottom: "12px",
         //display: "flex",
         //flexDirection: "column",
       })}
@@ -201,6 +200,7 @@ export const Note = ({
           <div
             css={toCss({
               display: "flex",
+              alignItems: "center",
               justifyContent: "space-between",
             })}
           >
@@ -214,6 +214,7 @@ export const Note = ({
             <div
               css={toCss({
                 display: "flex",
+                flexDirection: isMobile ? "column" : "row",
                 gap: "12px",
               })}
             >
@@ -300,8 +301,8 @@ export const Note = ({
               </div>
 
               <div>
-                <a
-                  href="#"
+                <button
+                  css={toCss({})}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (!isAdd) {
@@ -314,7 +315,7 @@ export const Note = ({
                   }}
                 >
                   Ajouter un commentaire
-                </a>
+                </button>
               </div>
             </div>
           )}
