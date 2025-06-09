@@ -260,44 +260,6 @@ export const moveDateToCurrentWeek = (date: Date) => {
 };
 //#endregion
 
-// export const scrollToBottomOfDynamicPage = (duration = 1000): Promise<void> => {
-//   return new Promise((resolve) => {
-//     const startTime: number = performance.now();
-//     const startY: number = window.scrollY;
-
-//     const step = (currentTime: number) => {
-//       const elapsed: number = currentTime - startTime;
-//       const progress: number = Math.min(elapsed / duration, 1);
-
-//       const targetY: number = document.body.scrollHeight - window.innerHeight;
-//       const newY: number = startY + (targetY - startY) * progress;
-
-//       window.scrollTo({ top: newY, behavior: "instant" });
-
-//       if (progress < 1) {
-//         requestAnimationFrame(step);
-//       } else {
-//         resolve();
-//       }
-//     };
-
-//     requestAnimationFrame(step);
-//   });
-// };
-
-// export const useScrollToBottomWhen = (condition: boolean) => {
-//   useEffect(() => {
-//     if (condition) {
-//       console.log("🚀 ~ useEffect ~ condition:", condition);
-//       window.scrollTo({
-//         top: document.documentElement.scrollHeight - window.innerHeight,
-//         left: 0,
-//         behavior: "smooth",
-//       });
-//     }
-//   }, [condition]);
-// };
-
 import { LegacyRef, useRef } from "react";
 
 export const useScroll = <T extends HTMLElement>(
@@ -312,3 +274,45 @@ export const useScroll = <T extends HTMLElement>(
 
   return [executeScroll, elRef];
 };
+
+{
+  /*
+    export const scrollToBottomOfDynamicPage = (duration = 1000): Promise<void> => {
+      return new Promise((resolve) => {
+        const startTime: number = performance.now();
+        const startY: number = window.scrollY;
+
+        const step = (currentTime: number) => {
+          const elapsed: number = currentTime - startTime;
+          const progress: number = Math.min(elapsed / duration, 1);
+
+          const targetY: number = document.body.scrollHeight - window.innerHeight;
+          const newY: number = startY + (targetY - startY) * progress;
+
+          window.scrollTo({ top: newY, behavior: "instant" });
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            resolve();
+          }
+        };
+
+        requestAnimationFrame(step);
+      });
+    };
+
+    export const useScrollToBottomWhen = (condition: boolean) => {
+      useEffect(() => {
+        if (condition) {
+          console.log("🚀 ~ useEffect ~ condition:", condition);
+          window.scrollTo({
+            top: document.documentElement.scrollHeight - window.innerHeight,
+            left: 0,
+            behavior: "smooth",
+          });
+        }
+      }, [condition]);
+    };
+  */
+}

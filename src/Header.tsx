@@ -13,6 +13,7 @@ export const Header = ({
   setUser,
   setAccessToken,
   setRefreshToken,
+  showToast,
 }) => {
   return (
     <div
@@ -45,22 +46,24 @@ export const Header = ({
               if (ok) {
                 setAccessToken();
                 setRefreshToken();
-                setUser(null);
+                setUser(undefined);
               }
             } else {
               const email = prompt("Saisissez votre adresse e-mail");
               const password = prompt("Saisissez votre mot de passe");
 
               if (email && password) {
-                const {
-                  data: { session, user },
-                } = await client.post(prefix + "/login", {
+                const { data } = await client.post(prefix + "/login", {
                   email,
                   password,
                 });
 
-                setAccessToken(session.access_token);
-                setRefreshToken(session.refresh_token);
+                if (data.error) {
+                  showToast(data.message, true);
+                } else {
+                  setAccessToken(data.session.access_token);
+                  setRefreshToken(data.session.refresh_token);
+                }
               }
             }
           }}

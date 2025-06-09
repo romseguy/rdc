@@ -22,7 +22,9 @@ import { Header } from "./Header";
 
 const seed: Partial<Lib>[] = [
   {
+    id: "1",
     name: "L'onde",
+    author: "Laura Knight-Jadczyk",
     books: [
       {
         title: "L'onde 1",
@@ -67,7 +69,9 @@ const seed: Partial<Lib>[] = [
     ],
   },
   {
+    id: "2",
     name: "BDM",
+    author: "Bernard de Montréal",
     books: [
       {
         title: "Psychologie évolutionnaire",
@@ -77,23 +81,6 @@ const seed: Partial<Lib>[] = [
 ];
 
 function App() {
-  const { showBoundary } = useErrorBoundary();
-
-  //#region auth
-  const [accessToken, setAccessToken] = useStorage("accessToken", {
-    type: "local",
-  });
-  useEffect(() => {
-    login();
-    client.defaults.headers.common["at"] = accessToken;
-    client.defaults.headers.common["rt"] = refreshToken;
-  }, [accessToken]);
-  const [refreshToken, setRefreshToken] = useStorage("refreshToken", {
-    type: "local",
-  });
-  const [user, setUser] = useState<null | User>();
-  //#endregion
-
   //#region toast
   const [toasts, setToasts] = useState([]);
   const showToast = (message: string, isError = false) => {
@@ -110,7 +97,31 @@ function App() {
   };
   //#endregion
 
+  //#region auth
+  const [accessToken, setAccessToken] = useStorage("accessToken", {
+    type: "local",
+  });
+  const [refreshToken, setRefreshToken] = useStorage("refreshToken", {
+    type: "local",
+  });
+  useEffect(() => {
+    (async () => {
+      if (user !== null && accessToken && refreshToken) {
+        client.defaults.headers.common["at"] = accessToken;
+        client.defaults.headers.common["rt"] = refreshToken;
+        const { data } = await client.get(prefix + "/login");
+        if (data.error) {
+          showToast(data.message, true);
+          setUser(null);
+        } else setUser(data);
+      }
+    })();
+  }, [accessToken, refreshToken]);
+  const [user, setUser] = useState<null | User>();
+  //#endregion
+
   //#region state
+  const url = getRouter().getCurrentLocation().url;
   // const urlParams = new URLSearchParams(window.location.search);
   // const code = urlParams.get("code");
   const [isLoading, setIsLoading] = useState(true);
@@ -141,18 +152,17 @@ function App() {
     }
     return els;
   }, [book]);
-  const url = getRouter().getCurrentLocation().url;
-  const [currentNote, setCurrentNote] = useState<null | NoteT>(
-    url.startsWith("note") ? url.substring(5, url.length) : null,
-  );
+  const [note, setNote] = useState<null | NoteT>(null);
   //#endregion
 
   //#region callbacks
-  const getLibsOnce = useDebouncedCallback(async function getLibs() {
+  const { showBoundary } = useErrorBoundary();
+  const load = useDebouncedCallback(async function getLibs() {
     try {
       if (!libs) {
-        const { data, error } = await client.get(prefix);
-        if (data.error) throw data.error;
+        const { data } = await client.get(prefix);
+        if (data.error) throw new Error(data.message);
+
         const libraries = data.libraries.map((lib) => {
           return {
             ...lib,
@@ -177,71 +187,51 @@ function App() {
         });
         setLibs(libraries);
         _setLib(libraries[0]);
+
+        if (getRouter().getCurrentLocation().url.startsWith("note")) {
+          const noteId = url.substring(5, url.length);
+          setNote(data.notes.find(({ id }) => id === noteId));
+        }
       }
       setIsLoading(false);
     } catch (error: any) {
-      if (error.code === "ENOTFOUND" || error.message.includes("Network")) {
+      console.log("🚀 ~ load ~ error:", error);
+      if (
+        error.code === "ENOTFOUND" ||
+        error.message.includes("ENOTFOUND") ||
+        error.message.includes("Network")
+      ) {
+        showToast("Vous êtes hors-ligne");
+        const seeds = seed.map(({ books, ...fields }) => ({
+          ...fields,
+          books: books?.map(({ src, ...bookFields }) => bookFields),
+        }));
+        console.log("🚀 ~ load ~ seeds:", seeds);
+        setLibs(seeds as Lib[]);
+        _setLib(seeds[0] as Lib);
+      } else {
+        showToast(error.message, true);
         setLibs(seed as Lib[]);
         _setLib(seed[0] as Lib);
-        setIsLoading(false);
       }
+      setIsLoading(false);
     }
-  }, 0);
-  const getNote = useDebouncedCallback(async function getNote(id) {
-    try {
-      const { data: note } = await client.get(prefix + "/note?id=" + id);
-      const book = lib?.books.find((b) => {
-        return b.id === note.book_id;
-      });
-      // we found the book belonging to the note!
-      setBook(book);
-    } catch (error: any) {
-      if (error.toString().includes("Network")) {
-      }
-    }
-  }, 0);
-  const login = useDebouncedCallback(async function login() {
-    const task = async () => {
-      if (accessToken) {
-        const { data } = await client.get(
-          prefix + "/login?at=" + accessToken + "&rt=" + refreshToken,
-        );
-        setUser(data);
-      }
-    };
-    //setInterval(task, 1000 * 30);
-    task();
   }, 0);
   //#endregion
 
   //#region effects
   window.onerror = (event, source, lineno, colno, error) => {
     showBoundary(error);
-    //setError(error);
+  };
+  window.onload = () => {
+    load();
   };
   useEffect(() => {
-    getLibsOnce();
-  }, []);
-  useEffect(() => {
-    if (currentNote === null) {
-      getRouter().navigate("/");
-      return;
-    }
-
-    if (!getRouter().getCurrentLocation().url.startsWith("/note")) {
-      getRouter().navigateByName("note", { id: currentNote.id });
-    }
-
-    if (lib) {
-      getNote(currentNote.id);
-    }
-  }, [currentNote, lib]);
+    if (note) getRouter().navigateByName("note", { id: note.id });
+  }, [note]);
   //#endregion
 
-  //if (isLoading) return "Chargement...";
-  // if (!libs) throw new Error("Aucune bibliothèques");
-  // if (!lib) throw new Error("Aucune bibliothèque sélectionnée");
-
+  //#region components
   const Back = ({ onClick }) => (
     <button css={toCss({ margin: "12px" })} onClick={onClick}>
       {"<"} Retour
@@ -273,6 +263,7 @@ function App() {
       </div>
     );
   };
+  //#endregion
 
   return (
     <>
@@ -295,6 +286,7 @@ function App() {
                 setUser={setUser}
                 setAccessToken={setAccessToken}
                 setRefreshToken={setRefreshToken}
+                showToast={showToast}
               />
             </header>
 
@@ -464,8 +456,9 @@ function App() {
                                   key={"note-" + index}
                                   note={note}
                                   user={user}
+                                  showToast={showToast}
                                   onOpenClick={() => {
-                                    setCurrentNote(note);
+                                    setNote(note);
                                   }}
                                   onEditClick={() => {
                                     setBook({
@@ -554,7 +547,7 @@ function App() {
                         </div>
                       );
                     })}
-                    {Array.isArray(notes) && notes.length > 0 && (
+                    {Array.isArray(book.notes) && book.notes.length > 0 && (
                       <AddNoteButton />
                     )}
                   </div>
@@ -565,7 +558,7 @@ function App() {
         </Route>
 
         <Route path="/note/:id" name="note">
-          {currentNote !== null && (
+          {note !== null && (
             <div className="Resizer ">
               {/* <SplitPane
                 split="horizontal"
@@ -577,7 +570,7 @@ function App() {
                 <div css={toCss({ display: "flex", alignItems: "center" })}>
                   <Back
                     onClick={() => {
-                      setCurrentNote(null);
+                      setNote(null);
                       getRouter().navigate("/");
                     }}
                   />
@@ -593,7 +586,7 @@ function App() {
 
                 <div
                   css={toCss({ padding: "12px" })}
-                  dangerouslySetInnerHTML={{ __html: currentNote.desc }}
+                  dangerouslySetInnerHTML={{ __html: note.desc }}
                 />
               </div>
 
@@ -666,156 +659,3 @@ createRoot(document.getElementById("root")!).render(
     </ErrorBoundary>
   </StrictMode>,
 );
-
-{
-  /*
-import Responsive from "react-grid-layout";
-const MyFirstGrid = ({ children }) => {
-  // layout is an array of objects, see the demo for more complete usage
-  const layout = [
-    { i: "note-0", x: 0, y: 0, w: 1, h: 1, static: true },
-    { i: "note-1", x: 1, y: 0, w: 1, h: 1, minW: 1, maxW: 3 },
-    { i: "note-2", x: 2, y: 0, w: 1, h: 1 },
-    { i: "note-3", x: 0, y: 1, w: 1, h: 1, static: false },
-    { i: "note-4", x: 1, y: 1, w: 1, h: 1, minW: 1, maxW: 1 },
-    { i: "note-5", x: 2, y: 1, w: 1, h: 1 },
-    { i: "note-6", x: 2, y: 1, w: 1, h: 1 }
-  ];
-  const cols = Math.round(window.innerWidth / 150);
-  const onC = useCallback(() => console.log("???"), []);
-  return (
-    <Responsive
-      layout={layout}
-      cols={3}
-      //rowHeight={30}
-      width={window.innerWidth / 2 - 50}
-    >
-      {children.map((child) => (
-        <div
-          key={"note-" + child.index}
-          css={toCss({
-            background: "red",
-            overflowY: "hidden"
-          }}
-        >
-          <div onClick={onC}>{child.desc}</div>
-        </div>
-      ))}
-    </Responsive>
-  );
-};
-  */
-}
-
-{
-  /* {[
-              {
-                index: 0,
-                desc: "very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long very long",
-              },
-              { index: 1, desc: "baaaaaaaaaaaaaaaaaaaaaa" },
-              { index: 2, desc: "c" },
-              { index: 3, desc: "b" },
-              { index: 4, desc: "c" },
-              { index: 5, desc: "b" },
-              { index: 6, desc: "c" },
-            ].map((note, index) => {
-              const Note = (
-                <div
-                  key={"note-" + index}
-                  css={toCss({
-                    background: "red",
-                    //height: "100px",
-                    minHeight: `${window.innerHeight - 370}px`,
-                    minWidth: "200px",
-                    overflow: "hidden",
-                    marginLeft: "10px",
-                  }}
-                  onClick={() => {
-                    console.log(index);
-                    //onClick(index);
-                  }}
-                >
-                  <Note note={note} index={index} />
-                  {note.desc}
-                </div>
-              );
-              return (
-                <>
-                  {index % 2 === 0 ? (
-                    <div
-                      css={toCss({
-                        display: "flex",
-                        //minHeight: "150px",
-                        //minWidth: "150px"
-                        //margin: "0 auto"
-                      }}
-                    >
-                      {Note}
-                    </div>
-                  ) : (
-                    <div>{Note}</div>
-                  )}
-                </>
-              );
-            })} */
-}
-
-{
-  /*
-            <SplitPane
-              css={toCss({ position: "unset !important" })}
-              split="horizontal"
-              defaultSize={book ? 20 : 230 + 32 + 12 + 12}
-              maxSize={
-                book
-                  ? window.innerHeight - 30
-                  : window.innerHeight - (230 + 32 + 12 + 12)
-              }
-              primary="first"
-              pane1Style={{
-                //height: "unset",
-                // display: "flex",
-                // alignItems: "center",
-                // whiteSpace: "nowrap",
-                overflowX: "scroll",
-                paddingTop: !book ? "12px" : 0,
-              }}
-              pane2Style={
-                {
-                  // padding: "12px",
-                  //margin: "0 " + window.innerHeight / 3 + "px",
-                  //overflowY: "scroll",
-                  //overflowX: "scroll",
-                  //maxHeight: window.innerHeight - 270 + "px"
-                }
-              }
-            >
-  */
-}
-
-{
-  /*
-                  <SplitPane
-                    css={toCss({ position: "relative" })}
-                    split="horizontal"
-                    defaultSize={window.innerHeight - 110}
-                    maxSize={window.innerHeight - 60}
-                    //primary="second"
-                    pane1Style={{
-                      //height: "unset",
-                      //whiteSpace: "nowrap",
-                      overflowY: "scroll",
-                      overflowX: "hidden",
-                    }}
-                    pane2Style={
-                      {
-                        //margin: "0 " + window.innerHeight / 3 + "px",
-                        //overflowY: "scroll",
-                        //overflowX: "scroll",
-                        //maxHeight: window.innerHeight - 270 + "px"
-                      }
-                    }
-                  >
-    */
-}
