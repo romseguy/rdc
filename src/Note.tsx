@@ -12,27 +12,33 @@ export const Note = ({
   user,
   onOpenClick,
   onEditClick,
+  onEditPageClick,
   onDeleteClick,
   onSubmitCommentClick,
   onDeleteCommentClick,
   isEditing = false,
+  isLoading = false,
   showToast,
 }: {
   note: NoteT;
   user?: User | null;
   onOpenClick?: any;
   onEditClick?: any;
+  onEditPageClick?: any;
   onDeleteClick?: any;
   onSubmitCommentClick?: any;
   onDeleteCommentClick?: any;
+  isLoading?: boolean;
   isEditing: boolean;
+  showToast: any;
 }) => {
   const [isEdit, setIsEdit] = useState(false);
-  console.log("🚀 ~ isEdit:", isEdit);
+  const [page, setPage] = useState("");
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [locale, setLocale] = useState("fr");
   const [comment, setComment] = useState();
-  const [isShow, setIsShow] = useState(false);
+  const [isShowComments, setIsShowComments] = useState(false);
+  const [isShowModal, setIsShowModal] = useState(false);
   const [executeScroll, elementToScrollRef] = useScroll<HTMLDivElement>();
   const [isAdd, setIsAdd] = useState(false);
   const editor = (loc) => {
@@ -167,6 +173,42 @@ export const Note = ({
     );
   };
 
+  const DeleteIcon = ({ ...props }) => (
+    <svg
+      css={css`
+        fill: red;
+        &:hover {
+          fill: white;
+          stroke: red;
+        }
+      `}
+      cursor="pointer"
+      height="1em"
+      width="1em"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path d="M19.452 7.5H4.547a.5.5 0 00-.5.545l1.287 14.136A2 2 0 007.326 24h9.347a2 2 0 001.992-1.819L19.95 8.045a.5.5 0 00-.129-.382.5.5 0 00-.369-.163zm-9.2 13a.75.75 0 01-1.5 0v-9a.75.75 0 011.5 0zm5 0a.75.75 0 01-1.5 0v-9a.75.75 0 011.5 0zM22 4h-4.75a.25.25 0 01-.25-.25V2.5A2.5 2.5 0 0014.5 0h-5A2.5 2.5 0 007 2.5v1.25a.25.25 0 01-.25.25H2a1 1 0 000 2h20a1 1 0 000-2zM9 3.75V2.5a.5.5 0 01.5-.5h5a.5.5 0 01.5.5v1.25a.25.25 0 01-.25.25h-5.5A.25.25 0 019 3.75z"></path>
+    </svg>
+  );
+
+  const EditIcon = ({ ...props }) => (
+    <svg
+      className="edit-icon"
+      cursor="pointer"
+      height="1em"
+      width="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <g strokeLinecap="round" strokeWidth="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+      </g>
+    </svg>
+  );
+
   return (
     <div
       css={toCss({
@@ -191,7 +233,7 @@ export const Note = ({
               gap: "6px",
             })}
           >
-            {note.isNew ? "Nouvelle citation" : "Modifier cette citation"}
+            {note.isNew ? "Nouvelle citation" : "Modifiez cette citation"}
             {!!setLocale && (
               <>
                 <LocaleSwitch />
@@ -213,33 +255,31 @@ export const Note = ({
             >
               <div>
                 {!isEdit ? (
-                  <button
-                    style={{ padding: "8px 8px 5px 8px" }}
-                    onClick={() => setIsEdit(true)}
-                  >
-                    p.
-                    <svg
-                      height="1em"
-                      width="1em"
-                      viewBox="0 0 24 24"
-                      focusable="false"
-                    >
-                      <g
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeWidth="2"
-                      >
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                      </g>
-                    </svg>
+                  <button className="with-icon" onClick={() => setIsEdit(true)}>
+                    p.{note.page}
+                    <EditIcon />
                   </button>
                 ) : (
-                  <>
-                    <input type="text" />
-                    <button onClick={() => setIsEdit(false)}>ok</button>
-                  </>
+                  <div
+                    css={toCss({
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    })}
+                  >
+                    <input
+                      type="number"
+                      onChange={(e) => setPage(e.target.value)}
+                    />
+                    <button
+                      onClick={() => {
+                        setIsEdit(false);
+                        onEditPageClick(page);
+                      }}
+                    >
+                      ok
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -255,121 +295,134 @@ export const Note = ({
                 gap: "12px",
               })}
             >
-              <a href="#" onClick={() => onOpenClick()}>
-                Ouvrir
-              </a>
-              <a href="#" onClick={() => onEditClick()}>
-                Modifier
-              </a>
-              <a href="#" onClick={() => onDeleteClick()}>
-                Supprimer
-              </a>
-              <a
-                href="#"
-                onClick={(event) => {
-                  event.preventDefault();
-                  // setMouse({
-                  //   x: window.innerHeight / 2,
-                  //   y: window.innerWidth / 2,
-                  // });
-                  // setMouse({ x: event.clientX, y: event.clientY });
-                  // setMouse({
-                  //   x: event.clientX - event.target.offsetLeft,
-                  //   y: event.clientY - event.target.offsetTop,
-                  // });
-                  setIsShow(!isShow);
-                }}
-              >
-                Partager
-              </a>
-              <div
-                css={css`
-                  visibility: ${isShow ? "visible" : "hidden"};
-
-                  position: absolute;
-                  top: 0;
-                  left: 0;
-
-                  height: ${window.innerHeight}px;
-                  width: ${window.innerWidth - 15}px;
-
-                  background: rgba(0, 0, 0, 0.6);
-                `}
-              >
+              {isLoading && (
+                <div className="spinner">
+                  <span>Chargement...</span>
+                </div>
+              )}
+              {!isLoading && (
                 <div
-                  css={css`
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    height: ${window.innerHeight}px;
-                    width: ${window.innerWidth - 15}px;
-                  `}
+                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
                 >
+                  <a href="#" onClick={() => onOpenClick()}>
+                    Ouvrir
+                  </a>
+                  <a
+                    href="#"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      // setMouse({
+                      //   x: window.innerHeight / 2,
+                      //   y: window.innerWidth / 2,
+                      // });
+                      // setMouse({ x: event.clientX, y: event.clientY });
+                      // setMouse({
+                      //   x: event.clientX - event.target.offsetLeft,
+                      //   y: event.clientY - event.target.offsetTop,
+                      // });
+                      setIsShowModal(!isShowModal);
+                    }}
+                  >
+                    Partager
+                  </a>
+                  {/* share */}
                   <div
                     css={css`
-                      display: flex;
-                      flex-direction: column;
-                      gap: 12px;
-                      background: rgba(255, 255, 255, 0.2);
-                      padding: 12px;
-                      a,
-                      button {
-                        color: black;
-                        background: #9ae6b4;
-                        font-weight: bold;
-                        &:hover {
-                          background: #68d391;
-                        }
-                      }
-                      a {
-                        padding: 12px;
-                        text-decoration: none;
-                      }
-                      button {
-                        border: 0;
-                      }
-                      button[type^="button"] {
-                        background: #feb2b2;
-                        &:hover {
-                          background: #fc8181;
-                        }
-                      }
+                      visibility: ${isShowModal ? "visible" : "hidden"};
+
+                      position: absolute;
+                      top: 0;
+                      left: 0;
+
+                      height: ${window.innerHeight}px;
+                      width: ${window.innerWidth - 15}px;
+
+                      background: rgba(0, 0, 0, 0.6);
                     `}
                   >
-                    <MailTo
-                      subject={"Citation du livre : " + "" + ""}
-                      //cc={["cc1@example.com", "cc2@example.com"]}
-                      //bcc={["bcc@example.com"]}
-                      //obfuscate
+                    <div
+                      css={css`
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: ${window.innerHeight}px;
+                        width: ${window.innerWidth - 15}px;
+                      `}
                     >
-                      <MailToTrigger>Envoyer un mail</MailToTrigger>
-                      <MailToBody>
-                        - Citation du livre {""} :
-                        <br />
-                        <br />
-                        {note.desc.replace(/<\/?[^>]+(>|$)/g, "")}
-                      </MailToBody>
-                    </MailTo>
+                      <div
+                        css={css`
+                          display: flex;
+                          flex-direction: column;
+                          gap: 12px;
+                          background: rgba(255, 255, 255, 0.2);
+                          padding: 12px;
+                          a,
+                          button {
+                            color: black;
+                            background: #9ae6b4;
+                            font-weight: bold;
+                            &:hover {
+                              background: #68d391;
+                            }
+                          }
+                          a {
+                            padding: 12px;
+                            text-decoration: none;
+                          }
+                          button {
+                            border: 0;
+                          }
+                          button[type^="button"] {
+                            background: #feb2b2;
+                            &:hover {
+                              background: #fc8181;
+                            }
+                          }
+                        `}
+                      >
+                        <MailTo
+                          subject={"Citation du livre : " + "" + ""}
+                          //cc={["cc1@example.com", "cc2@example.com"]}
+                          //bcc={["bcc@example.com"]}
+                          //obfuscate
+                        >
+                          <MailToTrigger>Envoyer un mail</MailToTrigger>
+                          <MailToBody>
+                            - Citation du livre {""} :
+                            <br />
+                            <br />
+                            {note.desc.replace(/<\/?[^>]+(>|$)/g, "")}
+                          </MailToBody>
+                        </MailTo>
 
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          import.meta.env.VITE_PUBLIC_URL + "/note/" + note.id,
-                        );
-                        showToast(
-                          "Le lien a été copié dans votre presse-papiers",
-                        );
-                      }}
-                    >
-                      Copier le lien
-                    </button>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              import.meta.env.VITE_PUBLIC_URL +
+                                "/note/" +
+                                note.id,
+                            );
+                            showToast(
+                              "Le lien a été copié dans votre presse-papiers",
+                            );
+                          }}
+                        >
+                          Copier le lien
+                        </button>
 
-                    <button type="button" onClick={() => setIsShow(false)}>
-                      Annuler
-                    </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsShowModal(false)}
+                        >
+                          Annuler
+                        </button>
+                      </div>
+                    </div>
                   </div>
+                  <EditIcon onClick={() => onEditClick()} />
+                  <DeleteIcon onClick={() => onDeleteClick()} />
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}
@@ -384,7 +437,7 @@ export const Note = ({
           maxHeight: window.innerHeight - 250 + "px",
           //height: "100%",
           //height: "100px",
-          overflowY: "scroll",
+          overflowY: isEditing ? "hidden" : "scroll",
           //overflowX: "hidden",
           //width: "200px",
           //textOverflow: "ellipsis",
@@ -413,8 +466,8 @@ export const Note = ({
                 cursor: "pointer",
               })}
               onClick={async () => {
-                setIsShow(!isShow);
-                if (!isShow) {
+                setIsShowComments(!isShowComments);
+                if (!isShowComments) {
                   setTimeout(() => {
                     executeScroll();
                   }, 100);
@@ -424,7 +477,7 @@ export const Note = ({
               <div>
                 {Array.isArray(note.comments) && note.comments.length > 0
                   ? `Lire les ${note.comments.length} commentaires ${
-                      isShow ? "V" : ">"
+                      isShowComments ? "V" : ">"
                     }`
                   : "0 commentaires"}
               </div>
@@ -436,7 +489,7 @@ export const Note = ({
                     e.stopPropagation();
                     if (!isAdd) {
                       setIsAdd(true);
-                      setIsShow(false);
+                      setIsShowComments(false);
                       setTimeout(() => {
                         executeScroll();
                       }, 200);
@@ -465,7 +518,7 @@ export const Note = ({
                 })}
               >
                 <button
-                  css={toCss({ background: "red" })}
+                  type="button"
                   onClick={() => {
                     setIsAdd(false);
                   }}
@@ -474,10 +527,9 @@ export const Note = ({
                 </button>
 
                 <button
-                  css={toCss({ background: "green" })}
                   onClick={() => {
                     setIsAdd(false);
-                    setIsShow(true);
+                    setIsShowComments(true);
                     onSubmitCommentClick(comment);
                   }}
                 >
@@ -487,9 +539,9 @@ export const Note = ({
             </div>
           )}
 
-          {isShow && (
+          {!note.isNew && isShowComments && (
             <div css={toCss({ background: "rgba(255, 255, 255, 0.2)" })}>
-              {note.comments.map((c) => {
+              {note.comments?.map((c) => {
                 return (
                   <div
                     key={"comment-" + c.id}
@@ -512,15 +564,6 @@ export const Note = ({
                         gap: "3px",
                         cursor: "pointer",
                       }}
-                      css={css`
-                        svg {
-                          fill: red;
-                        }
-                        svg:hover {
-                          stroke: red;
-                          fill: white;
-                        }
-                      `}
                     >
                       {/* comment date */}
                       <div css={toCss({ whiteSpace: "nowrap" })}>
@@ -529,19 +572,11 @@ export const Note = ({
 
                       {/* delete comment */}
                       {c.comment_email === user?.email && (
-                        <div>
-                          <svg
-                            viewBox="0 0 24 24"
-                            height="1em"
-                            width="1em"
-                            xmlns="http://www.w3.org/2000/svg"
-                            onClick={() => {
-                              onDeleteCommentClick(c);
-                            }}
-                          >
-                            <path d="M19.452 7.5H4.547a.5.5 0 00-.5.545l1.287 14.136A2 2 0 007.326 24h9.347a2 2 0 001.992-1.819L19.95 8.045a.5.5 0 00-.129-.382.5.5 0 00-.369-.163zm-9.2 13a.75.75 0 01-1.5 0v-9a.75.75 0 011.5 0zm5 0a.75.75 0 01-1.5 0v-9a.75.75 0 011.5 0zM22 4h-4.75a.25.25 0 01-.25-.25V2.5A2.5 2.5 0 0014.5 0h-5A2.5 2.5 0 007 2.5v1.25a.25.25 0 01-.25.25H2a1 1 0 000 2h20a1 1 0 000-2zM9 3.75V2.5a.5.5 0 01.5-.5h5a.5.5 0 01.5.5v1.25a.25.25 0 01-.25.25h-5.5A.25.25 0 019 3.75z"></path>
-                          </svg>
-                        </div>
+                        <DeleteIcon
+                          onClick={() => {
+                            onDeleteCommentClick(c);
+                          }}
+                        />
                       )}
                     </div>
                   </div>

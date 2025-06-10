@@ -1,35 +1,33 @@
+import "./App.scss";
 import { useDebouncedCallback } from "@charlietango/hooks/use-debounced-callback";
 import { useStorage } from "@charlietango/hooks/use-storage";
 import { MailTo, MailToBody, MailToTrigger } from "@slalombuild/react-mailto";
 import { StrictMode, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { isMobile } from "react-device-detect";
-import SplitPane from "react-split-pane";
 import { Switch, Route, getRouter } from "navigo-react";
-import "./App.scss";
 import { client, prefix } from "./client";
+import { css } from "@emotion/react";
 import { toCss } from "./utils";
 import {
   ErrorBoundary,
   FallbackProps,
   useErrorBoundary,
 } from "react-error-boundary";
-import { css } from "@emotion/react";
 import { Note } from "./Note";
 import { ToastsContainer } from "./Toast";
-import { Lib, User, Book, PartialBy, Note as NoteT } from "./types";
+import { Lib, User, Book, Note as NoteT, Seed } from "./types";
 import { Header } from "./Header";
+import { AddNoteButton, BackButton } from "./Controls";
 
-const seed: Partial<Lib>[] = [
+const seed: Seed[] = [
   {
-    id: "1",
     name: "L'onde",
     author: "Laura Knight-Jadczyk",
     books: [
       {
         title: "L'onde 1",
         src: "https://image.jimcdn.com/app/cms/image/transf/dimension=141x10000:format=png/path/sd7739c2374e37db5/image/id624acc08d96ca45/version/1456401001/image.png",
-        notes: [{ id: "1", desc: "desc" }],
+        notes: [{ desc: "desc" }],
       },
       {
         title: "L'onde 2",
@@ -69,7 +67,6 @@ const seed: Partial<Lib>[] = [
     ],
   },
   {
-    id: "2",
     name: "BDM",
     author: "Bernard de Montréal",
     books: [
@@ -111,7 +108,7 @@ function App() {
         client.defaults.headers.common["rt"] = refreshToken;
         const { data } = await client.get(prefix + "/login");
         if (data.error) {
-          showToast(data.message, true);
+          //showToast(data.message, true);
           setUser(null);
         } else setUser(data);
       }
@@ -124,22 +121,28 @@ function App() {
   const url = getRouter().getCurrentLocation().url;
   // const urlParams = new URLSearchParams(window.location.search);
   // const code = urlParams.get("code");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<
+    Record<string, boolean> & { global: boolean }
+  >({ global: true });
   const [libs, setLibs] = useState<Lib[]>();
   const [lib, _setLib] = useState<Lib>();
   const setLib = (libName: string) => {
     const l = libs?.find((li) => li.name === libName);
     if (l) _setLib(l);
   };
-  const [book, setBook] = useState<null | Book | PartialBy<Book, "id">>();
-  const notes: NoteT[][] = useMemo(() => {
+  const [book, setBook] = useState<null | Book>();
+  const hasEditing = useMemo(() => {
+    if (!book || !book.notes) return false;
+    return book?.notes?.filter((n) => n.isEditing).length > 0;
+  }, [book]);
+  const notesGrid = useMemo(() => {
     if (!book || !book.notes) return [[]];
     const rows: NoteT[] = [...book.notes].sort((a, b) => {
       return a.id > b.id ? -1 : 1;
     });
     let c = -1;
     let i = 0;
-    let els = [];
+    let els: NoteT[][] = [];
     for (const row of rows) {
       const n = { ...row, index: i };
       if (i % 3 === 0) {
@@ -161,6 +164,7 @@ function App() {
     try {
       if (!libs) {
         const { data } = await client.get(prefix);
+        //throw new Error("FORCE");
         if (data.error) throw new Error(data.message);
 
         const libraries = data.libraries.map((lib) => {
@@ -193,10 +197,10 @@ function App() {
           setNote(data.notes.find(({ id }) => id === noteId));
         }
       }
-      setIsLoading(false);
+      setIsLoading({ ...isLoading, global: false });
     } catch (error: any) {
-      console.log("🚀 ~ load ~ error:", error);
       if (
+        error.message === "FORCE" ||
         error.code === "ENOTFOUND" ||
         error.message.includes("ENOTFOUND") ||
         error.message.includes("Network")
@@ -206,7 +210,6 @@ function App() {
           ...fields,
           books: books?.map(({ src, ...bookFields }) => bookFields),
         }));
-        console.log("🚀 ~ load ~ seeds:", seeds);
         setLibs(seeds as Lib[]);
         _setLib(seeds[0] as Lib);
       } else {
@@ -214,7 +217,7 @@ function App() {
         setLibs(seed as Lib[]);
         _setLib(seed[0] as Lib);
       }
-      setIsLoading(false);
+      setIsLoading({ ...isLoading, global: false });
     }
   }, 0);
   //#endregion
@@ -231,40 +234,6 @@ function App() {
   }, [note]);
   //#endregion
 
-  //#region components
-  const Back = ({ onClick }) => (
-    <button css={toCss({ margin: "12px" })} onClick={onClick}>
-      {"<"} Retour
-    </button>
-  );
-
-  const AddNoteButton = () => {
-    return (
-      <div>
-        <button
-          css={toCss({ margin: "12px 12px 12px 12px" })}
-          disabled={!!book?.notes?.find(({ isNew }) => isNew)}
-          onClick={() => {
-            const id = book?.notes.length + 1;
-            setBook({
-              ...book,
-              notes: book.notes.concat([
-                {
-                  id: id.toString(),
-                  isEditing: true,
-                  isNew: true,
-                },
-              ]),
-            });
-          }}
-        >
-          Ajouter une citation
-        </button>
-      </div>
-    );
-  };
-  //#endregion
-
   return (
     <>
       <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
@@ -272,8 +241,9 @@ function App() {
       <Switch>
         <Route path="/">
           <div
-            className="Resizer"
-            css={toCss({ visibility: isLoading ? "hidden" : "visible" })}
+            css={toCss({
+              visibility: isLoading.global ? "hidden" : "visible",
+            })}
           >
             <header>
               <Header
@@ -308,43 +278,43 @@ function App() {
               {/* book */}
               {book && (
                 <>
-                  <div css={toCss({})}>
-                    <div css={toCss({ display: "flex", alignItems: "center" })}>
-                      <Back
-                        onClick={() => {
-                          setBook(null);
-                        }}
-                      />
-                      {book.title && (
-                        <div>
-                          Livre : <i>{book.title}</i>
-                        </div>
-                      )}
+                  <header
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <BackButton
+                      onClick={() => {
+                        setBook(null);
+                      }}
+                    />
 
-                      {!book.title && (
-                        <div>
-                          Livre {book.id} de la bibliothèque : <i>{lib.name}</i>
-                        </div>
-                      )}
-                    </div>
-                    {/* <h1>
-                      Notes de la bibliothèque <i>{lib.name}</i>
-                    </h1> */}
-                    {/* {book && (
+                    {book.title && (
+                      <h1>
+                        Livre : <i>{book.title}</i>
+                      </h1>
+                    )}
+
+                    {!book.title && (
+                      <h1>
+                        Livre {book.id} de la bibliothèque : <i>{lib.name}</i>
+                      </h1>
+                    )}
+                  </header>
+
+                  <section style={{ maxWidth: "50em", margin: "0 auto" }}>
+                    {!hasEditing && (
                       <div
-                        css={toCss({
-                          textAlign: "center",
-                          marginBottom: "12px",
-                        })}
+                        style={{ textAlign: "center", marginBottom: "12px" }}
                       >
-                        <h1>
-                          Citations du livre : <i>{book.title}</i>
-                        </h1>
+                        <AddNoteButton book={book} setBook={setBook} />
                       </div>
-                    )} */}
-                    <AddNoteButton />
+                    )}
+
                     {/* editable notes */}
-                    {notes.map((row, index) => {
+                    {notesGrid.map((row, index) => {
                       return (
                         <div key={"row-" + index}>
                           {row
@@ -358,77 +328,91 @@ function App() {
                                     css={toCss({
                                       display: "flex",
                                       justifyContent: "space-between",
+                                      background: "rgba(255,255,255,0.1)",
                                       marginBottom: "12px",
+                                      padding: "6px",
                                     })}
                                   >
+                                    {!isLoading[note.id] && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setBook({
+                                            ...book,
+                                            notes: book?.notes
+                                              ?.filter((n) => {
+                                                if (!note.isNew) return true;
+                                                return n.id !== note.id;
+                                              })
+                                              .map((n) => ({
+                                                ...n,
+                                                isEditing: false,
+                                              })),
+                                          });
+                                        }}
+                                      >
+                                        Annuler
+                                      </button>
+                                    )}
+
                                     <button
-                                      css={toCss({ background: "red" })}
-                                      onClick={() => {
+                                      onClick={async function onEditSubmit() {
+                                        setIsLoading({
+                                          ...isLoading,
+                                          [note.id]: true,
+                                        });
+                                        let data;
+                                        if (note.isNew) {
+                                          const res = await client.post(
+                                            prefix + "/notes",
+                                            {
+                                              note: {
+                                                ...note,
+                                                book_id: book.id,
+                                              },
+                                            },
+                                          );
+                                          data = res.data;
+                                        } else {
+                                          const res = await client.put(
+                                            prefix + "/note",
+                                            {
+                                              note,
+                                            },
+                                          );
+                                          data = res.data;
+                                        }
+
+                                        if (data.error) {
+                                          showToast(data.message, true);
+                                          setIsLoading({
+                                            ...isLoading,
+                                            [note.id]: false,
+                                          });
+                                          return;
+                                        }
+
                                         setBook({
                                           ...book,
-                                          notes: book?.notes
-                                            ?.filter((n) => {
-                                              if (!note.isNew) return true;
-                                              return n.id !== note.id;
-                                            })
-                                            .map((n) => ({
-                                              ...n,
-                                              isEditing: false,
-                                            })),
+                                          notes: book?.notes?.map((n) => {
+                                            if (n.id === note.id)
+                                              return {
+                                                ...note,
+                                                isNew: false,
+                                                isEditing: false,
+                                              };
+                                            return n;
+                                          }),
+                                        });
+                                        setIsLoading({
+                                          ...isLoading,
+                                          [note.id]: false,
                                         });
                                       }}
                                     >
-                                      Annuler
-                                    </button>
-
-                                    <button
-                                      css={toCss({ background: "green" })}
-                                      onClick={async () => {
-                                        try {
-                                          let data;
-                                          if (note.isNew) {
-                                            const res = await client.post(
-                                              prefix + "/notes",
-                                              {
-                                                note: {
-                                                  ...note,
-                                                  book_id: book.id,
-                                                },
-                                              },
-                                            );
-                                            data = res.data;
-                                          } else {
-                                            const res = await client.put(
-                                              prefix + "/note",
-                                              {
-                                                note,
-                                              },
-                                            );
-                                            data = res.data;
-                                          }
-
-                                          if (data.error) {
-                                            throw data.error;
-                                          }
-
-                                          setBook({
-                                            ...book,
-                                            notes: book?.notes?.map((n) => {
-                                              if (n.id === note.id)
-                                                return {
-                                                  ...note,
-                                                  isNew: false,
-                                                  isEditing: false,
-                                                };
-                                              return n;
-                                            }),
-                                          });
-                                        } catch (error) {
-                                          showToast(error.message, true);
-                                        }
-                                      }}
-                                    >
-                                      Valider
+                                      {isLoading[note.id]
+                                        ? "Veuillez patienter..."
+                                        : "Valider"}
                                     </button>
                                   </div>
                                 </div>
@@ -437,8 +421,9 @@ function App() {
                         </div>
                       );
                     })}
+
                     {/* readonly notes */}
-                    {notes.map((row, index) => {
+                    {notesGrid.map((row, index) => {
                       return (
                         <div
                           key={"note-" + index}
@@ -456,11 +441,16 @@ function App() {
                                   key={"note-" + index}
                                   note={note}
                                   user={user}
+                                  isLoading={isLoading[note.id]}
                                   showToast={showToast}
                                   onOpenClick={() => {
                                     setNote(note);
                                   }}
                                   onEditClick={() => {
+                                    setIsLoading({
+                                      ...isLoading,
+                                      [note.id]: true,
+                                    });
                                     setBook({
                                       ...book,
                                       notes: book?.notes?.map((n) => {
@@ -469,21 +459,60 @@ function App() {
                                         return n;
                                       }),
                                     });
+                                    setIsLoading({
+                                      ...isLoading,
+                                      [note.id]: false,
+                                    });
+                                  }}
+                                  onEditPageClick={async (page) => {
+                                    const { data } = await client.put(
+                                      prefix + "/note",
+                                      { ...note, page },
+                                    );
+                                    if (data.error) {
+                                      showToast(data.message, true);
+                                      return;
+                                    }
+
+                                    setBook({
+                                      ...book,
+                                      notes: book?.notes?.map((n) =>
+                                        n.id === note.id
+                                          ? { ...note, page }
+                                          : note,
+                                      ),
+                                    });
                                   }}
                                   onDeleteClick={async () => {
                                     const ok = confirm(
                                       "Êtes-vous sûr de vouloir supprimer cette citation ?",
                                     );
                                     if (ok) {
+                                      setIsLoading({
+                                        ...isLoading,
+                                        [note.id]: true,
+                                      });
+                                      const { data } = await client.delete(
+                                        prefix + "/note?id=" + note.id,
+                                      );
+                                      if (data.error) {
+                                        setIsLoading({
+                                          ...isLoading,
+                                          [note.id]: false,
+                                        });
+                                        showToast(data.message, true);
+                                        return;
+                                      }
                                       setBook({
                                         ...book,
                                         notes: book?.notes?.filter(
                                           (n) => n.id !== note.id,
                                         ),
                                       });
-                                      await client.delete(
-                                        prefix + "/note?id=" + note.id,
-                                      );
+                                      setIsLoading({
+                                        ...isLoading,
+                                        [note.id]: false,
+                                      });
                                     }
                                   }}
                                   onSubmitCommentClick={async (comment) => {
@@ -547,10 +576,15 @@ function App() {
                         </div>
                       );
                     })}
-                    {Array.isArray(book.notes) && book.notes.length > 0 && (
-                      <AddNoteButton />
-                    )}
-                  </div>
+
+                    {!hasEditing &&
+                      Array.isArray(book.notes) &&
+                      book.notes.length > 0 && (
+                        <div style={{ textAlign: "center", marginTop: "12px" }}>
+                          <AddNoteButton book={book} setBook={setBook} />
+                        </div>
+                      )}
+                  </section>
                 </>
               )}
             </main>
@@ -568,7 +602,7 @@ function App() {
               {/* note */}
               <div>
                 <div css={toCss({ display: "flex", alignItems: "center" })}>
-                  <Back
+                  <BackButton
                     onClick={() => {
                       setNote(null);
                       getRouter().navigate("/");

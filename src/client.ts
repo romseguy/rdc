@@ -14,6 +14,16 @@ export const config: AxiosRequestConfig = {
 };
 
 export const client = axios.create(config);
+client.interceptors.request.use(
+  function (config) {
+    console.log("🚀 ~ client ~ config:", config);
+    return config;
+  },
+  function (error) {
+    console.log("🚀 ~ client ~ error:", error);
+    return Promise.reject(error);
+  },
+);
 
 export const prefix =
   import.meta.env.VITE_PUBLIC_API || "http://localhost:3001/api";
