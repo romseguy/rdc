@@ -30,7 +30,7 @@ main {
 /* #region headlines */
 h1 {
   margin: 0;
-  font-size: 32px;
+  font-size: 24px;
   line-height: 1.1;
 }
 
@@ -138,11 +138,12 @@ textarea {
   stroke: $lightgreen;
   fill: none;
   &:hover {
-    stroke: white;
+    //stroke: white;
+    fill: $lightgreen;
   }
 }
 button .edit-icon {
-  stroke: white;
+  stroke: black;
   fill: none;
 }
 

@@ -1,4 +1,32 @@
 import { css } from "@emotion/react";
+import { isMobile } from "react-device-detect";
+
+export const iconProps = ({ title, ...props }: Record<string, any>) => {
+  const out: Record<string, any> = {
+    "aria-label": title,
+    style: {
+      cursor: "pointer",
+      ...(isMobile
+        ? {
+            height: "1em",
+            width: "1em",
+            padding: "6px",
+            border: "1px solid white",
+          }
+        : { height: "2em", width: "2em" }),
+      ...props.style,
+    },
+  };
+
+  if (props.onClick) {
+    out.onClick = (e) => {
+      e.preventDefault();
+      props.onClick();
+    };
+  }
+
+  return out;
+};
 
 export const BackButton = ({ onClick, ...props }) => (
   <button type="button" onClick={onClick} {...props}>
@@ -144,6 +172,60 @@ export const LocaleSwitch = ({ locale, setLocale }) => {
   );
 };
 
+export const PageSwitch = ({
+  isPageEdit,
+  setIsPageEdit,
+  page,
+  setPage,
+  note,
+  onClick,
+}) => {
+  return (
+    <div>
+      {!isPageEdit ? (
+        <button className="with-icon" onClick={() => setIsPageEdit(true)}>
+          p.{note.page}
+          <EditIcon
+            {...iconProps({
+              title: "Modifier la page",
+              style: {
+                height: "1em",
+                width: "1em",
+                border: "none",
+              },
+            })}
+          />
+        </button>
+      ) : (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <input
+            type="number"
+            defaultValue={page}
+            onChange={(e) => {
+              const p = Number(e.target.value);
+              if (p < 10000) setPage(p);
+            }}
+          />
+          <button
+            onClick={() => {
+              setIsPageEdit(false);
+              onClick(page);
+            }}
+          >
+            ok
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const ExternalIcon = ({ ...props }) => (
   <svg className="icon" viewBox="0 0 24 24" {...props}>
     <g fill="none" strokeLinecap="round" strokeWidth={2}>
@@ -164,10 +246,10 @@ export const DeleteIcon = ({ ...props }) => (
   <svg
     className="icon-fill"
     css={css`
-      fill: red;
+      fill: white;
+      stroke: red;
       &:hover {
-        fill: white;
-        stroke: red;
+        fill: red;
       }
     `}
     viewBox="0 0 24 24"

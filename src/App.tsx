@@ -28,7 +28,7 @@ const seed: Seed[] = [
         title: "L'onde 1",
         src: "https://image.jimcdn.com/app/cms/image/transf/dimension=141x10000:format=png/path/sd7739c2374e37db5/image/id624acc08d96ca45/version/1456401001/image.png",
         notes: [
-          { page: 123, desc: "desc" },
+          { page: 123, desc: "desc", desc_en: "en" },
           { page: 12, desc: "test" },
         ],
       },
@@ -131,6 +131,7 @@ function App() {
   //#endregion
 
   //#region state
+  const [locale, setLocale] = useState("fr");
   const url = getRouter().getCurrentLocation().url;
   // const urlParams = new URLSearchParams(window.location.search);
   // const code = urlParams.get("code");
@@ -212,7 +213,13 @@ function App() {
 
         if (getRouter().getCurrentLocation().url.startsWith("note")) {
           const noteId = url.substring(5, url.length);
-          setNote(data.notes.find(({ id }) => id === noteId));
+          const note = data.notes.find(({ id }) => id === noteId);
+          setNote(note);
+          const book = data.books.find(({ id }) => id === note.book_id);
+          setBook({
+            ...book,
+            notes: data.notes.filter(({ book_id }) => book_id === book.id),
+          });
         }
       }
       setIsLoading({ ...isLoading, global: false });
@@ -250,6 +257,23 @@ function App() {
       setIsLoading({ ...isLoading, global: false });
     }
   }, 0);
+  const onEditPageClick = async (n: NoteT) => {
+    const { data } = await client.put(prefix + "/note", {
+      note: n,
+    });
+    if (data.error) {
+      showToast(data.message, true);
+      return;
+    }
+
+    setBook({
+      ...book,
+      notes: book?.notes?.map((note) => {
+        if (note.id === n.id) return n;
+        return note;
+      }),
+    });
+  };
   //#endregion
 
   //#region effects
@@ -322,7 +346,11 @@ function App() {
                     - Citation du livre {""} :
                     <br />
                     <br />
-                    {modalState.note.desc.replace(/<\/?[^>]+(>|$)/g, "")}
+                    {modalState.note.desc
+                      .replace(/<\/?[^>]+(>|$)/g, "")
+                      .replace(/&#(\d+);/g, function (match, dec) {
+                        return String.fromCharCode(dec);
+                      })}
                   </MailToBody>
                 </MailTo>
 
@@ -367,10 +395,13 @@ function App() {
                 />
               </header>
 
-              <main>
+              <main style={{ maxWidth: "50em", margin: "0 auto" }}>
                 {/* libs */}
                 {!book && (
                   <>
+                    <h1>
+                      Bibliothèque : <i>{lib?.name}</i>
+                    </h1>
                     <ul>
                       <li>
                         Auteur :{" "}
@@ -389,7 +420,7 @@ function App() {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
+                        //justifyContent: "center",
                       }}
                     >
                       <BackButton
@@ -411,7 +442,7 @@ function App() {
                       )}
                     </header>
 
-                    <section style={{ maxWidth: "50em", margin: "0 auto" }}>
+                    <section>
                       {!hasEditing && (
                         <div
                           style={{
@@ -422,16 +453,24 @@ function App() {
                           }}
                         >
                           <AddNoteButton book={book} setBook={setBook} />
-                          <select
-                            onChange={(e) =>
-                              setOrder(e.target.value as unknown as ENoteOrder)
-                            }
-                          >
-                            <option value={ENoteOrder.ID}>Plus récent</option>
-                            <option value={ENoteOrder.PAGE}>Page</option>
-                          </select>
+
+                          {/* order */}
+                          {book.notes?.length > 0 && (
+                            <select
+                              onChange={(e) =>
+                                setOrder(
+                                  e.target.value as unknown as ENoteOrder,
+                                )
+                              }
+                            >
+                              <option value={ENoteOrder.ID}>Plus récent</option>
+                              <option value={ENoteOrder.PAGE}>Page</option>
+                            </select>
+                          )}
                         </div>
                       )}
+
+                      {!book.notes?.length && <>Aucune citations.</>}
 
                       {/* editable notes */}
                       {notesGrid.map((row, index) => {
@@ -441,8 +480,14 @@ function App() {
                               .filter((note) => note.isEditing)
                               .map((note) => {
                                 return (
-                                  <div key={"note-" + index}>
-                                    <Note note={note} user={user} isEditing />
+                                  <div key={"note-" + note.id}>
+                                    <Note
+                                      note={note}
+                                      user={user}
+                                      isEditing
+                                      locale={locale}
+                                      setLocale={setLocale}
+                                    />
 
                                     <div
                                       css={toCss({
@@ -483,11 +528,21 @@ function App() {
                                           });
                                           let data;
                                           if (note.isNew) {
+                                            let key = "desc";
+                                            if (locale === "en") key += "_en";
                                             const res = await client.post(
                                               prefix + "/notes",
                                               {
                                                 note: {
                                                   ...note,
+                                                  [key]:
+                                                    note[
+                                                      `desc${
+                                                        locale === "en"
+                                                          ? "_en"
+                                                          : ""
+                                                      }`
+                                                    ],
                                                   book_id: book.id,
                                                 },
                                               },
@@ -497,7 +552,19 @@ function App() {
                                             const res = await client.put(
                                               prefix + "/note",
                                               {
-                                                note,
+                                                note: {
+                                                  ...note,
+                                                  [`desc${
+                                                    locale === "en" ? "_en" : ""
+                                                  }`]:
+                                                    note[
+                                                      `desc${
+                                                        locale === "en"
+                                                          ? "_en"
+                                                          : ""
+                                                      }`
+                                                    ],
+                                                },
                                               },
                                             );
                                             data = res.data;
@@ -555,15 +622,17 @@ function App() {
                           >
                             {row
                               .filter((note) => !note.isEditing)
-                              .map((note, index) => {
+                              .map((note) => {
                                 return (
                                   <Note
-                                    key={"note-" + index}
+                                    key={"note-" + note.id}
                                     note={note}
                                     user={user}
                                     isLoading={isLoading[note.id]}
                                     toggleModal={toggleModal}
                                     showToast={showToast}
+                                    locale={locale}
+                                    setLocale={setLocale}
                                     onOpenClick={() => {
                                       setNote(note);
                                     }}
@@ -585,25 +654,9 @@ function App() {
                                         [note.id]: false,
                                       });
                                     }}
-                                    onEditPageClick={async (page: number) => {
-                                      const { data } = await client.put(
-                                        prefix + "/note",
-                                        { ...note, page },
-                                      );
-                                      if (data.error) {
-                                        showToast(data.message, true);
-                                        return;
-                                      }
-
-                                      setBook({
-                                        ...book,
-                                        notes: book?.notes?.map((n) =>
-                                          n.id === note.id
-                                            ? { ...note, page }
-                                            : note,
-                                        ),
-                                      });
-                                    }}
+                                    onEditPageClick={(page) =>
+                                      onEditPageClick({ ...note, page })
+                                    }
                                     onDeleteClick={async () => {
                                       const ok = confirm(
                                         "Êtes-vous sûr de vouloir supprimer cette citation ?",
@@ -719,41 +772,37 @@ function App() {
 
         <Route path="/note/:id" name="note">
           {note !== null && (
-            <div className="Resizer ">
-              {/* <SplitPane
-                split="horizontal"
-                defaultSize={window.innerHeight / 2}
-                paneStyle={{ overflowY: "scroll", padding: "12px" }}
-              > */}
-              {/* note */}
-              <div>
-                <div css={toCss({ display: "flex", alignItems: "center" })}>
-                  <BackButton
-                    onClick={() => {
-                      setNote(null);
-                      getRouter().navigate("/");
-                    }}
-                  />
-                  <div>
-                    Citation du livre{" "}
-                    <i>
-                      {book?.title
-                        ? ": " + book.title
-                        : "" + book?.id + " de la bibliothèque " + lib?.name}
-                    </i>
-                  </div>
-                </div>
-
-                <div
-                  css={toCss({ padding: "12px" })}
-                  dangerouslySetInnerHTML={{ __html: note.desc }}
+            <>
+              <div
+                css={toCss({
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "12px",
+                })}
+              >
+                <BackButton
+                  style={{ marginRight: "6px" }}
+                  onClick={() => {
+                    setNote(null);
+                    getRouter().navigate("/");
+                  }}
                 />
+
+                <h1>
+                  Citation du livre{" "}
+                  <i>
+                    {book?.title
+                      ? ": " + book.title
+                      : "" + book?.id + " de la bibliothèque " + lib?.name}
+                  </i>
+                </h1>
               </div>
 
-              {/* ? */}
-              <div></div>
-              {/* </SplitPane> */}
-            </div>
+              <div
+                css={toCss({ padding: "12px" })}
+                dangerouslySetInnerHTML={{ __html: note.desc }}
+              />
+            </>
           )}
         </Route>
       </Switch>

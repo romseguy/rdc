@@ -10,6 +10,8 @@ import {
   ShareIcon,
   DeleteIcon,
   LocaleSwitch,
+  PageSwitch,
+  iconProps,
 } from "./Controls";
 
 export const Note = ({
@@ -25,6 +27,8 @@ export const Note = ({
   isLoading = false,
   showToast,
   toggleModal,
+  locale,
+  setLocale,
 }: {
   note: NoteT;
   user?: User | null;
@@ -38,44 +42,34 @@ export const Note = ({
   isEditing: boolean;
   showToast: any;
 }) => {
+  const desc =
+    locale === "en"
+      ? note.desc_en
+        ? note.desc_en
+        : note.desc
+        ? "<p>You can translate the text below :</p><p>&nbsp;</p>" + note.desc
+        : "No english translation"
+      : note.desc;
+
   const [isPageEdit, setIsPageEdit] = useState(false);
   const [page, setPage] = useState<number>(note.page);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [locale, setLocale] = useState("fr");
   const [comment, setComment] = useState();
   const [isShowComments, setIsShowComments] = useState(false);
   const [executeScroll, elementToScrollRef] = useScroll<HTMLDivElement>();
   const [isAddComment, setIsAddComment] = useState(false);
 
-  const editor = (loc) => {
-    //console.log(loc === "en" ? note.desc_en : note.desc);
+  const editor = () => {
     return (
       <RTEditor
-        defaultValue={loc === "en" ? note.desc_en : note.desc}
+        defaultValue={desc}
         placeholder="Saisissez le texte de la citation"
         onChange={({ html }) => {
-          if (loc === "en") note.desc_en = html;
-          else note.desc = html;
+          note[`desc${locale === "en" ? "_en" : ""}`] = html;
         }}
       />
     );
   };
-
-  const iconProps = (title: string, override?: Record<string, string>) => ({
-    "aria-label": title,
-    style: {
-      cursor: "pointer",
-      ...(isMobile
-        ? {
-            height: "1em",
-            width: "1em",
-            padding: "6px",
-            border: "1px solid white",
-          }
-        : { height: "2em", width: "2em" }),
-      ...override,
-    },
-  });
 
   const NoteHeaderRight = (props) => (
     <div {...props}>
@@ -93,22 +87,29 @@ export const Note = ({
           }}
         >
           <ExternalIcon
-            onClick={() => onOpenClick()}
-            {...iconProps("Ouvrir la citation")}
+            {...iconProps({
+              title: "Ouvrir la citation",
+              onClick: onOpenClick,
+            })}
           />
           <ShareIcon
-            onClick={() => {
-              toggleModal(note);
-            }}
-            {...iconProps("Partager la citation")}
+            {...iconProps({
+              title: "Partager la citation",
+              onClick: () => toggleModal(note),
+            })}
           />
           <EditIcon
             onClick={() => onEditClick()}
-            {...iconProps("Modifier la citation")}
+            {...iconProps({
+              title: "Modifier la citation",
+              onClick: onEditClick,
+            })}
           />
           <DeleteIcon
-            onClick={() => onDeleteClick()}
-            {...iconProps("Supprimer la citation")}
+            {...iconProps({
+              title: "Supprimer la citation",
+              onClick: onDeleteClick,
+            })}
           />
         </div>
       )}
@@ -140,11 +141,7 @@ export const Note = ({
             })}
           >
             {note.isNew ? "Nouvelle citation" : "Modifiez cette citation"}
-            {!!setLocale && (
-              <>
-                <LocaleSwitch locale={locale} setLocale={setLocale} />
-              </>
-            )}
+            <LocaleSwitch locale={locale} setLocale={setLocale} />
           </div>
         )}
 
@@ -159,6 +156,15 @@ export const Note = ({
                   alignItems: "center",
                 }}
               >
+                <PageSwitch
+                  isPageEdit={isPageEdit}
+                  setIsPageEdit={setIsPageEdit}
+                  page={page}
+                  setPage={setPage}
+                  note={note}
+                  onClick={onEditPageClick}
+                />
+
                 <div
                   style={{
                     display: "flex",
@@ -191,47 +197,15 @@ export const Note = ({
                   })}
                 >
                   <LocaleSwitch locale={locale} setLocale={setLocale} />
-                  <div>
-                    {!isPageEdit ? (
-                      <button
-                        className="with-icon"
-                        onClick={() => setIsPageEdit(true)}
-                      >
-                        p.{note.page}
-                        <EditIcon
-                          {...iconProps("Modifier la page", {
-                            height: "1em",
-                            width: "1em",
-                          })}
-                        />
-                      </button>
-                    ) : (
-                      <div
-                        css={toCss({
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                        })}
-                      >
-                        <input
-                          type="number"
-                          defaultValue={page}
-                          onChange={(e) => {
-                            const p = Number(e.target.value);
-                            if (p < 10000) setPage(p);
-                          }}
-                        />
-                        <button
-                          onClick={() => {
-                            setIsPageEdit(false);
-                            onEditPageClick(page);
-                          }}
-                        >
-                          ok
-                        </button>
-                      </div>
-                    )}
-                  </div>
+
+                  <PageSwitch
+                    isPageEdit={isPageEdit}
+                    setIsPageEdit={setIsPageEdit}
+                    page={page}
+                    setPage={setPage}
+                    note={note}
+                    onClick={onEditPageClick}
+                  />
 
                   <div>Cité par {toUsername(note.note_email)}</div>
                 </div>
@@ -267,7 +241,7 @@ export const Note = ({
         {!isEditing && (
           <div
             dangerouslySetInnerHTML={{
-              __html: locale === "en" ? note.desc_en : note.desc,
+              __html: desc,
             }}
           />
         )}

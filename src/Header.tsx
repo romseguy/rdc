@@ -2,6 +2,7 @@ import { isMobile } from "react-device-detect";
 import "./App.scss";
 import { client, prefix } from "./client";
 import { toCss } from "./utils";
+import { css } from "@emotion/react";
 
 export const Header = ({
   lib,
@@ -104,7 +105,10 @@ export const Header = ({
               <img
                 key={"book-" + index}
                 src={b.src}
-                css={toCss({ cursor: "pointer" })}
+                css={css`
+                  cursor: pointer;
+                  ${b.id === book?.id ? "border: 5px solid yellow" : ""}
+                `}
                 onClick={() => {
                   if (b.id !== index) {
                     setBook(lib.books[index]);
