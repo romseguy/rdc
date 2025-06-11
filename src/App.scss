@@ -43,6 +43,23 @@ p {
   margin: 0;
 }
 
+/* #region icons */
+.icon,
+.icon-fill {
+}
+.icon {
+  stroke: currentColor;
+}
+.icon:hover {
+  stroke: green;
+}
+.icon-fill {
+  fill: currentColor;
+}
+.icon-fill:hover {
+  fill: green;
+}
+
 /* #region controls */
 button {
   // border: 1px solid transparent;
@@ -61,21 +78,26 @@ button {
   padding: 8px;
   background: $lightgreen;
 }
-
 button:hover {
   background: $green;
 }
-
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* specific button */
 button[type="button"] {
   background: red;
+  color: currentColor;
   &:hover {
     background: crimson;
   }
+}
+button.with-icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 button.with-icon:hover {
   background: white;
@@ -86,12 +108,12 @@ button.with-icon:hover {
   }
 }
 
+/* specific input */
 input[type="file"] {
   height: 0;
   width: 0;
   overflow: hidden;
 }
-
 input[type="file"] + label {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -102,9 +124,12 @@ input[type="file"] + label {
   background-color: rgba(255, 255, 255, 0.2);
   cursor: pointer;
 }
-
 input[type="number"] {
   width: 45px;
+}
+
+textarea {
+  padding: 6px;
 }
 /* #endregion */
 
@@ -117,7 +142,6 @@ input[type="number"] {
   }
 }
 button .edit-icon {
-  padding-left: 6px;
   stroke: white;
   fill: none;
 }
@@ -153,6 +177,12 @@ button .edit-icon {
     white-space: nowrap;
     position: absolute;
   }
+}
+/* #endregion */
+
+/* #region editor */
+.tox-tinymce {
+  border-radius: 0 !important;
 }
 /* #endregion */
 

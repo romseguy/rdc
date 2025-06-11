@@ -1,11 +1,16 @@
-import { css } from "@emotion/react";
 import { fullDateString, toCss, useScroll } from "./utils";
-import { MailTo, MailToTrigger, MailToBody } from "@slalombuild/react-mailto";
 import { useState } from "react";
 import { toUsername } from "./utils";
 import { RTEditor } from "./RTEditor";
 import { Note as NoteT, User } from "./types";
 import { isMobile } from "react-device-detect";
+import {
+  EditIcon,
+  ExternalIcon,
+  ShareIcon,
+  DeleteIcon,
+  LocaleSwitch,
+} from "./Controls";
 
 export const Note = ({
   note,
@@ -19,6 +24,7 @@ export const Note = ({
   isEditing = false,
   isLoading = false,
   showToast,
+  toggleModal,
 }: {
   note: NoteT;
   user?: User | null;
@@ -32,21 +38,21 @@ export const Note = ({
   isEditing: boolean;
   showToast: any;
 }) => {
-  const [isEdit, setIsEdit] = useState(false);
-  const [page, setPage] = useState("");
+  const [isPageEdit, setIsPageEdit] = useState(false);
+  const [page, setPage] = useState<number>(note.page);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [locale, setLocale] = useState("fr");
   const [comment, setComment] = useState();
   const [isShowComments, setIsShowComments] = useState(false);
-  const [isShowModal, setIsShowModal] = useState(false);
   const [executeScroll, elementToScrollRef] = useScroll<HTMLDivElement>();
-  const [isAdd, setIsAdd] = useState(false);
+  const [isAddComment, setIsAddComment] = useState(false);
+
   const editor = (loc) => {
     //console.log(loc === "en" ? note.desc_en : note.desc);
     return (
       <RTEditor
         defaultValue={loc === "en" ? note.desc_en : note.desc}
-        placeholder="Saisissez le texte de la note"
+        placeholder="Saisissez le texte de la citation"
         onChange={({ html }) => {
           if (loc === "en") note.desc_en = html;
           else note.desc = html;
@@ -55,158 +61,58 @@ export const Note = ({
     );
   };
 
-  const LocaleSwitch = () => {
-    return (
-      <div>
-        {locale === "en" && (
-          <svg
-            width="2em"
-            height="2em"
-            cursor="pointer"
-            viewBox="0 0 30 30.000001"
-            preserveAspectRatio="xMidYMid meet"
-            zoomAndPan="magnify"
-            xmlns="http://www.w3.org/2000/svg"
-            version="1.0"
+  const iconProps = (title: string, override?: Record<string, string>) => ({
+    "aria-label": title,
+    style: {
+      cursor: "pointer",
+      ...(isMobile
+        ? {
+            height: "1em",
+            width: "1em",
+            padding: "6px",
+            border: "1px solid white",
+          }
+        : { height: "2em", width: "2em" }),
+      ...override,
+    },
+  });
+
+  const NoteHeaderRight = (props) => (
+    <div {...props}>
+      {isLoading && (
+        <div className="spinner">
+          <span>Chargement...</span>
+        </div>
+      )}
+      {!isLoading && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <ExternalIcon
+            onClick={() => onOpenClick()}
+            {...iconProps("Ouvrir la citation")}
+          />
+          <ShareIcon
             onClick={() => {
-              setLocale("fr");
+              toggleModal(note);
             }}
-          >
-            <defs>
-              <clipPath id="id1">
-                <path
-                  d="M 2.511719 6.402344 L 27.191406 6.402344 L 27.191406 24.546875 L 2.511719 24.546875 Z M 2.511719 6.402344 "
-                  clipRule="nonzero"
-                />
-              </clipPath>
-            </defs>
-            <g clipPath="url(#id1)">
-              <path
-                fill="rgb(0%, 14.118958%, 49.01886%)"
-                d="M 2.519531 9.234375 L 2.519531 11.984375 L 6.375 11.984375 Z M 5.714844 24.546875 L 11.425781 24.546875 L 11.425781 20.472656 Z M 18.277344 20.472656 L 18.277344 24.546875 L 23.984375 24.546875 Z M 2.519531 18.964844 L 2.519531 21.714844 L 6.378906 18.964844 Z M 23.988281 6.402344 L 18.277344 6.402344 L 18.277344 10.472656 Z M 27.183594 21.714844 L 27.183594 18.964844 L 23.324219 18.964844 Z M 27.183594 11.984375 L 27.183594 9.234375 L 23.324219 11.984375 Z M 11.425781 6.402344 L 5.714844 6.402344 L 11.425781 10.472656 Z M 11.425781 6.402344 "
-                fillOpacity="1"
-                fillRule="nonzero"
-              />
-              <path
-                fill="rgb(81.17981%, 10.5896%, 16.859436%)"
-                d="M 19.742188 18.964844 L 26.394531 23.710938 C 26.71875 23.375 26.949219 22.953125 27.074219 22.488281 L 22.132812 18.964844 Z M 11.425781 18.964844 L 9.960938 18.964844 L 3.304688 23.707031 C 3.664062 24.078125 4.121094 24.34375 4.632812 24.464844 L 11.425781 19.621094 Z M 18.277344 11.984375 L 19.742188 11.984375 L 26.394531 7.238281 C 26.039062 6.867188 25.582031 6.605469 25.070312 6.480469 L 18.277344 11.324219 Z M 9.960938 11.984375 L 3.304688 7.238281 C 2.984375 7.574219 2.753906 7.992188 2.628906 8.460938 L 7.570312 11.984375 Z M 9.960938 11.984375 "
-                fillOpacity="1"
-                fillRule="nonzero"
-              />
-              <path
-                fill="rgb(93.328857%, 93.328857%, 93.328857%)"
-                d="M 27.183594 17.566406 L 16.90625 17.566406 L 16.90625 24.546875 L 18.277344 24.546875 L 18.277344 20.472656 L 23.984375 24.546875 L 24.441406 24.546875 C 25.207031 24.546875 25.898438 24.222656 26.394531 23.710938 L 19.742188 18.964844 L 22.132812 18.964844 L 27.074219 22.488281 C 27.136719 22.253906 27.183594 22.011719 27.183594 21.753906 L 27.183594 21.714844 L 23.324219 18.964844 L 27.183594 18.964844 Z M 2.519531 17.566406 L 2.519531 18.964844 L 6.378906 18.964844 L 2.519531 21.714844 L 2.519531 21.753906 C 2.519531 22.515625 2.820312 23.203125 3.304688 23.707031 L 9.960938 18.964844 L 11.425781 18.964844 L 11.425781 19.621094 L 4.632812 24.464844 C 4.835938 24.515625 5.042969 24.546875 5.261719 24.546875 L 5.714844 24.546875 L 11.425781 20.472656 L 11.425781 24.546875 L 12.796875 24.546875 L 12.796875 17.566406 Z M 27.183594 9.191406 C 27.183594 8.429688 26.882812 7.742188 26.394531 7.238281 L 19.742188 11.984375 L 18.277344 11.984375 L 18.277344 11.324219 L 25.070312 6.480469 C 24.867188 6.433594 24.660156 6.402344 24.441406 6.402344 L 23.988281 6.402344 L 18.277344 10.472656 L 18.277344 6.402344 L 16.90625 6.402344 L 16.90625 13.378906 L 27.183594 13.378906 L 27.183594 11.984375 L 23.324219 11.984375 L 27.183594 9.234375 Z M 11.425781 6.402344 L 11.425781 10.472656 L 5.714844 6.402344 L 5.261719 6.402344 C 4.496094 6.402344 3.804688 6.722656 3.304688 7.238281 L 9.960938 11.984375 L 7.570312 11.984375 L 2.628906 8.460938 C 2.566406 8.695312 2.519531 8.9375 2.519531 9.191406 L 2.519531 9.234375 L 6.375 11.984375 L 2.519531 11.984375 L 2.519531 13.378906 L 12.796875 13.378906 L 12.796875 6.402344 Z M 11.425781 6.402344 "
-                fillOpacity="1"
-                fillRule="nonzero"
-              />
-              <path
-                fill="rgb(81.17981%, 10.5896%, 16.859436%)"
-                d="M 16.90625 13.378906 L 16.90625 6.402344 L 12.796875 6.402344 L 12.796875 13.378906 L 2.519531 13.378906 L 2.519531 17.566406 L 12.796875 17.566406 L 12.796875 24.546875 L 16.90625 24.546875 L 16.90625 17.566406 L 27.183594 17.566406 L 27.183594 13.378906 Z M 16.90625 13.378906 "
-                fillOpacity="1"
-                fillRule="nonzero"
-              />
-            </g>
-          </svg>
-        )}
-
-        {locale === "fr" && (
-          <svg
-            width="2em"
-            height="2em"
-            cursor="pointer"
-            viewBox="0 0 30 30.000001"
-            preserveAspectRatio="xMidYMid meet"
-            zoomAndPan="magnify"
-            xmlns="http://www.w3.org/2000/svg"
-            version="1.0"
-            onClick={() => {
-              setLocale("en");
-            }}
-          >
-            <defs>
-              <clipPath id="id1">
-                <path
-                  d="M 19 5.261719 L 27.582031 5.261719 L 27.582031 23.40625 L 19 23.40625 Z M 19 5.261719 "
-                  clipRule="nonzero"
-                />
-              </clipPath>
-              <clipPath id="id2">
-                <path
-                  d="M 2.179688 5.261719 L 11 5.261719 L 11 23.40625 L 2.179688 23.40625 Z M 2.179688 5.261719 "
-                  clipRule="nonzero"
-                />
-              </clipPath>
-              <clipPath id="id3">
-                <path
-                  d="M 10 5.261719 L 20 5.261719 L 20 23.40625 L 10 23.40625 Z M 10 5.261719 "
-                  clipRule="nonzero"
-                />
-              </clipPath>
-            </defs>
-            <g clipPath="url(#id1)">
-              <path
-                fill="rgb(92.939758%, 16.079712%, 22.349548%)"
-                d="M 27.574219 20.617188 C 27.574219 22.15625 26.3125 23.40625 24.753906 23.40625 L 19.113281 23.40625 L 19.113281 5.261719 L 24.753906 5.261719 C 26.3125 5.261719 27.574219 6.511719 27.574219 8.054688 Z M 27.574219 20.617188 "
-                fillOpacity="1"
-                fillRule="nonzero"
-              />
-            </g>
-            <g clipPath="url(#id2)">
-              <path
-                fill="rgb(0%, 14.118958%, 58.428955%)"
-                d="M 5.011719 5.261719 C 3.453125 5.261719 2.191406 6.511719 2.191406 8.054688 L 2.191406 20.617188 C 2.191406 22.15625 3.453125 23.40625 5.011719 23.40625 L 10.652344 23.40625 L 10.652344 5.261719 Z M 5.011719 5.261719 "
-                fillOpacity="1"
-                fillRule="nonzero"
-              />
-            </g>
-            <g clipPath="url(#id3)">
-              <path
-                fill="rgb(93.328857%, 93.328857%, 93.328857%)"
-                d="M 10.652344 5.261719 L 19.113281 5.261719 L 19.113281 23.40625 L 10.652344 23.40625 Z M 10.652344 5.261719 "
-                fillOpacity="1"
-                fillRule="nonzero"
-              />
-            </g>
-          </svg>
-        )}
-      </div>
-    );
-  };
-
-  const DeleteIcon = ({ ...props }) => (
-    <svg
-      css={css`
-        fill: red;
-        &:hover {
-          fill: white;
-          stroke: red;
-        }
-      `}
-      cursor="pointer"
-      height="1em"
-      width="1em"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path d="M19.452 7.5H4.547a.5.5 0 00-.5.545l1.287 14.136A2 2 0 007.326 24h9.347a2 2 0 001.992-1.819L19.95 8.045a.5.5 0 00-.129-.382.5.5 0 00-.369-.163zm-9.2 13a.75.75 0 01-1.5 0v-9a.75.75 0 011.5 0zm5 0a.75.75 0 01-1.5 0v-9a.75.75 0 011.5 0zM22 4h-4.75a.25.25 0 01-.25-.25V2.5A2.5 2.5 0 0014.5 0h-5A2.5 2.5 0 007 2.5v1.25a.25.25 0 01-.25.25H2a1 1 0 000 2h20a1 1 0 000-2zM9 3.75V2.5a.5.5 0 01.5-.5h5a.5.5 0 01.5.5v1.25a.25.25 0 01-.25.25h-5.5A.25.25 0 019 3.75z"></path>
-    </svg>
-  );
-
-  const EditIcon = ({ ...props }) => (
-    <svg
-      className="edit-icon"
-      cursor="pointer"
-      height="1em"
-      width="1em"
-      viewBox="0 0 24 24"
-      {...props}
-    >
-      <g strokeLinecap="round" strokeWidth="2">
-        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-      </g>
-    </svg>
+            {...iconProps("Partager la citation")}
+          />
+          <EditIcon
+            onClick={() => onEditClick()}
+            {...iconProps("Modifier la citation")}
+          />
+          <DeleteIcon
+            onClick={() => onDeleteClick()}
+            {...iconProps("Supprimer la citation")}
+          />
+        </div>
+      )}
+    </div>
   );
 
   return (
@@ -221,7 +127,7 @@ export const Note = ({
       {/* note header */}
       <div
         css={toCss({
-          padding: "6px",
+          padding: isMobile ? "0 0 6px 0" : "6px",
           background: "purple",
         })}
       >
@@ -236,195 +142,109 @@ export const Note = ({
             {note.isNew ? "Nouvelle citation" : "Modifiez cette citation"}
             {!!setLocale && (
               <>
-                <LocaleSwitch />
+                <LocaleSwitch locale={locale} setLocale={setLocale} />
               </>
             )}
           </div>
         )}
 
         {!isEditing && (
-          <div
-            css={toCss({
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            })}
-          >
-            <div
-              css={toCss({ display: "flex", alignItems: "center", gap: "6px" })}
-            >
-              <div>
-                {!isEdit ? (
-                  <button className="with-icon" onClick={() => setIsEdit(true)}>
-                    p.{note.page}
-                    <EditIcon />
-                  </button>
-                ) : (
-                  <div
-                    css={toCss({
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    })}
-                  >
-                    <input
-                      type="number"
-                      onChange={(e) => setPage(e.target.value)}
-                    />
-                    <button
-                      onClick={() => {
-                        setIsEdit(false);
-                        onEditPageClick(page);
-                      }}
-                    >
-                      ok
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div>Cité par {toUsername(note.note_email)}</div>
-
-              <LocaleSwitch />
-            </div>
-
-            <div
-              css={toCss({
-                display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                gap: "12px",
-              })}
-            >
-              {isLoading && (
-                <div className="spinner">
-                  <span>Chargement...</span>
-                </div>
-              )}
-              {!isLoading && (
+          <>
+            {/* note header */}
+            {isMobile && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "6px" }}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
                 >
-                  <a href="#" onClick={() => onOpenClick()}>
-                    Ouvrir
-                  </a>
-                  <a
-                    href="#"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      // setMouse({
-                      //   x: window.innerHeight / 2,
-                      //   y: window.innerWidth / 2,
-                      // });
-                      // setMouse({ x: event.clientX, y: event.clientY });
-                      // setMouse({
-                      //   x: event.clientX - event.target.offsetLeft,
-                      //   y: event.clientY - event.target.offsetTop,
-                      // });
-                      setIsShowModal(!isShowModal);
-                    }}
-                  >
-                    Partager
-                  </a>
-                  {/* share */}
-                  <div
-                    css={css`
-                      visibility: ${isShowModal ? "visible" : "hidden"};
+                  <LocaleSwitch locale={locale} setLocale={setLocale} />
+                  <div>Cité par {toUsername(note.note_email)}</div>
+                </div>
 
-                      position: absolute;
-                      top: 0;
-                      left: 0;
+                <NoteHeaderRight />
+              </div>
+            )}
 
-                      height: ${window.innerHeight}px;
-                      width: ${window.innerWidth - 15}px;
-
-                      background: rgba(0, 0, 0, 0.6);
-                    `}
-                  >
-                    <div
-                      css={css`
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        height: ${window.innerHeight}px;
-                        width: ${window.innerWidth - 15}px;
-                      `}
-                    >
-                      <div
-                        css={css`
-                          display: flex;
-                          flex-direction: column;
-                          gap: 12px;
-                          background: rgba(255, 255, 255, 0.2);
-                          padding: 12px;
-                          a,
-                          button {
-                            color: black;
-                            background: #9ae6b4;
-                            font-weight: bold;
-                            &:hover {
-                              background: #68d391;
-                            }
-                          }
-                          a {
-                            padding: 12px;
-                            text-decoration: none;
-                          }
-                          button {
-                            border: 0;
-                          }
-                          button[type^="button"] {
-                            background: #feb2b2;
-                            &:hover {
-                              background: #fc8181;
-                            }
-                          }
-                        `}
+            {!isMobile && (
+              <div
+                css={toCss({
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                })}
+              >
+                <div
+                  css={toCss({
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  })}
+                >
+                  <LocaleSwitch locale={locale} setLocale={setLocale} />
+                  <div>
+                    {!isPageEdit ? (
+                      <button
+                        className="with-icon"
+                        onClick={() => setIsPageEdit(true)}
                       >
-                        <MailTo
-                          subject={"Citation du livre : " + "" + ""}
-                          //cc={["cc1@example.com", "cc2@example.com"]}
-                          //bcc={["bcc@example.com"]}
-                          //obfuscate
-                        >
-                          <MailToTrigger>Envoyer un mail</MailToTrigger>
-                          <MailToBody>
-                            - Citation du livre {""} :
-                            <br />
-                            <br />
-                            {note.desc.replace(/<\/?[^>]+(>|$)/g, "")}
-                          </MailToBody>
-                        </MailTo>
-
+                        p.{note.page}
+                        <EditIcon
+                          {...iconProps("Modifier la page", {
+                            height: "1em",
+                            width: "1em",
+                          })}
+                        />
+                      </button>
+                    ) : (
+                      <div
+                        css={toCss({
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        })}
+                      >
+                        <input
+                          type="number"
+                          defaultValue={page}
+                          onChange={(e) => {
+                            const p = Number(e.target.value);
+                            if (p < 10000) setPage(p);
+                          }}
+                        />
                         <button
                           onClick={() => {
-                            navigator.clipboard.writeText(
-                              import.meta.env.VITE_PUBLIC_URL +
-                                "/note/" +
-                                note.id,
-                            );
-                            showToast(
-                              "Le lien a été copié dans votre presse-papiers",
-                            );
+                            setIsPageEdit(false);
+                            onEditPageClick(page);
                           }}
                         >
-                          Copier le lien
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setIsShowModal(false)}
-                        >
-                          Annuler
+                          ok
                         </button>
                       </div>
-                    </div>
+                    )}
                   </div>
-                  <EditIcon onClick={() => onEditClick()} />
-                  <DeleteIcon onClick={() => onDeleteClick()} />
+
+                  <div>Cité par {toUsername(note.note_email)}</div>
                 </div>
-              )}
-            </div>
-          </div>
+
+                <NoteHeaderRight
+                  css={toCss({
+                    display: "flex",
+                    gap: "12px",
+                  })}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -432,7 +252,7 @@ export const Note = ({
       <div
         key={"note-" + note.id}
         css={toCss({
-          padding: "6px",
+          padding: isMobile ? "0px" : "6px",
           background: "rgba(255,255,255,0.1)",
           maxHeight: window.innerHeight - 250 + "px",
           //height: "100%",
@@ -455,11 +275,17 @@ export const Note = ({
 
       {/* comments */}
       {!note.isNew && (
-        <div css={toCss({})}>
+        <div
+          css={toCss({
+            background: "rgba(255, 255, 255, 0.1)",
+            marginBottom: "12px",
+          })}
+        >
           {!note.isEditing && (
             <div
               css={toCss({
                 display: "flex",
+                alignItems: "center",
                 justifyContent: "space-between",
                 padding: "6px",
                 background: "purple",
@@ -487,8 +313,8 @@ export const Note = ({
                   css={toCss({})}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (!isAdd) {
-                      setIsAdd(true);
+                    if (!isAddComment) {
+                      setIsAddComment(true);
                       setIsShowComments(false);
                       setTimeout(() => {
                         executeScroll();
@@ -502,11 +328,11 @@ export const Note = ({
             </div>
           )}
 
-          {isAdd && (
-            <div css={toCss({ padding: "12px 12px 0px 0px" })}>
+          {isAddComment && (
+            <div>
               <textarea
                 autoFocus
-                css={toCss({ width: "100%", height: "150px" })}
+                css={toCss({ width: "98%", height: "150px" })}
                 placeholder="Écrivez ici votre commentaire"
                 onChange={(e) => setComment({ html: e.target.value })}
               />
@@ -515,12 +341,13 @@ export const Note = ({
                   display: "flex",
                   justifyContent: "space-between",
                   marginBottom: "12px",
+                  padding: "6px",
                 })}
               >
                 <button
                   type="button"
                   onClick={() => {
-                    setIsAdd(false);
+                    setIsAddComment(false);
                   }}
                 >
                   Annuler
@@ -528,7 +355,7 @@ export const Note = ({
 
                 <button
                   onClick={() => {
-                    setIsAdd(false);
+                    setIsAddComment(false);
                     setIsShowComments(true);
                     onSubmitCommentClick(comment);
                   }}
