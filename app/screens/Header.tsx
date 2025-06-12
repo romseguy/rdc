@@ -1,8 +1,6 @@
-import { isMobile } from "react-device-detect";
-import "./App.scss";
-import { client, prefix } from "./client";
-import { toCss } from "./utils";
 import { css } from "@emotion/react";
+import { isMobile } from "react-device-detect";
+import { client, prefix, toCss } from "~/utils";
 
 export const Header = ({
   lib,

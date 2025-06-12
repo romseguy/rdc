@@ -1,4 +1,4 @@
-import { Editor, IAllProps } from "@tinymce/tinymce-react";
+import { Editor } from "@tinymce/tinymce-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { bindEvent, getImageSize, MB } from "./utils";
@@ -22,7 +22,7 @@ export const RTEditor = ({
   onBlur,
   onChange,
   ...props
-}: IAllProps["init"] & {
+}: {
   defaultValue?: string | null;
   setIsLoading?: (bool: boolean) => void;
   value?: string;

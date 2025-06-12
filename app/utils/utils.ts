@@ -110,7 +110,7 @@ import {
   setSeconds,
   startOfMonth,
 } from "date-fns";
-import { fr } from "date-fns/locale";
+import {fr} from "date-fns/locale";
 
 /*
 compareAsc
@@ -292,11 +292,11 @@ export async function getImageSize(file: File | Blob | string) {
 //#endregion
 
 //#region hooks
-import { LegacyRef, useRef } from "react";
+import React, { useRef } from "react";
 
 export const useScroll = <T extends HTMLElement>(
   options?: boolean | ScrollIntoViewOptions,
-): [() => void, LegacyRef<T>] => {
+): [() => void, React.LegacyRef<T>] => {
   const elRef = useRef<T>(null);
   const executeScroll = (): void => {
     if (elRef.current) {

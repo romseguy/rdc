@@ -1,10 +1,8 @@
-import { fullDateString, toCss, useScroll } from "./utils";
 import { useState } from "react";
-import { toUsername } from "./utils";
-import { RTEditor } from "./RTEditor";
-import { Note as NoteT, User } from "./types";
 import { isMobile } from "react-device-detect";
 import {
+  RTEditor,
+  toUsername,
   EditIcon,
   ExternalIcon,
   ShareIcon,
@@ -12,7 +10,12 @@ import {
   LocaleSwitch,
   PageSwitch,
   iconProps,
-} from "./Controls";
+  fullDateString,
+  toCss,
+  useScroll,
+  type Note as NoteT,
+  type User,
+} from "~/utils";
 
 export const Note = ({
   note,
