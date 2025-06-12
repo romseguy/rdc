@@ -522,10 +522,12 @@ function App() {
 
                                       <button
                                         onClick={async function onEditSubmit() {
+                                          let id;
                                           setIsLoading({
                                             ...isLoading,
                                             [note.id]: true,
                                           });
+
                                           let data;
                                           if (note.isNew) {
                                             let key = "desc";
@@ -548,6 +550,7 @@ function App() {
                                               },
                                             );
                                             data = res.data;
+                                            id = data.id;
                                           } else {
                                             const res = await client.put(
                                               prefix + "/note",
@@ -585,6 +588,7 @@ function App() {
                                               if (n.id === note.id)
                                                 return {
                                                   ...note,
+                                                  id: id || note.id,
                                                   isNew: false,
                                                   isEditing: false,
                                                 };

@@ -1,6 +1,18 @@
 import { css } from "@emotion/react";
 import unitless from "@emotion/unitless";
-import { useEffect, type CSSProperties } from "react";
+import { type CSSProperties } from "react";
+export const MB = 1000000;
+
+export const bindEvent = (
+  target: Document | Element,
+  eventName: string,
+  fun: () => void,
+) => {
+  if (target.addEventListener) {
+    target.removeEventListener(eventName, fun, false);
+    target.addEventListener(eventName, fun, false);
+  }
+};
 
 export const toCss = (
   styleMap: Record<string, string>,
@@ -260,6 +272,26 @@ export const moveDateToCurrentWeek = (date: Date) => {
 };
 //#endregion
 
+//#region image
+export async function getImageSize(file: File | Blob | string) {
+  let img = new Image();
+  if (typeof file === "string") {
+    img.src = file;
+  } else {
+    img.src = URL.createObjectURL(file);
+  }
+
+  await img.decode();
+  let width = img.width;
+  let height = img.height;
+  return {
+    width,
+    height,
+  };
+}
+//#endregion
+
+//#region hooks
 import { LegacyRef, useRef } from "react";
 
 export const useScroll = <T extends HTMLElement>(
@@ -274,6 +306,7 @@ export const useScroll = <T extends HTMLElement>(
 
   return [executeScroll, elRef];
 };
+//#endregion
 
 {
   /*

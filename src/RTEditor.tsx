@@ -1,31 +1,18 @@
 import { Editor, IAllProps } from "@tinymce/tinymce-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
+import { bindEvent, getImageSize, MB } from "./utils";
 
-// interface BlobInfo {
-//   id: () => string;
-//   name: () => string;
-//   filename: () => string;
-//   blob: () => Blob;
-//   base64: () => string;
-//   blobUri: () => string;
-//   uri: () => string | undefined;
-// }
-
-// interface UploadFailureOptions {
-//   remove?: boolean;
-// }
-
-const bindEvent = (
-  target: Document | Element,
-  eventName: string,
-  fun: () => void,
-) => {
-  if (target.addEventListener) {
-    target.removeEventListener(eventName, fun, false);
-    target.addEventListener(eventName, fun, false);
-  }
-};
+type ProgressFn = (percent: number) => void;
+interface BlobInfo {
+  id: () => string;
+  name: () => string;
+  filename: () => string;
+  blob: () => Blob;
+  base64: () => string;
+  blobUri: () => string;
+  uri: () => string | undefined;
+}
 
 export const RTEditor = ({
   defaultValue,
@@ -72,7 +59,10 @@ export const RTEditor = ({
     }
   }, [editorRef]);
   const init: IAllProps["init"] = {
-    auto_focus: true,
+    //contextmenu: "",
+    contextmenu_never_use_native: true,
+    menubar: false,
+    statusbar: false,
     plugins: [
       "anchor",
       "autolink",
@@ -90,6 +80,42 @@ export const RTEditor = ({
       //"paste",
       "searchreplace",
     ],
+    toolbar: [
+      {
+        name: "",
+        items: [
+          "fullscreen",
+          "searchreplace",
+          "undo",
+          "redo",
+          "removeformat",
+          "emoticons",
+          "bold",
+          "italic",
+          "underline",
+          "forecolor",
+          "align",
+          "bullist",
+          "numlist",
+          "outdent",
+          "indent",
+          "fontsizeinput",
+          "blockquote",
+          "hr",
+          "link",
+          "unlink",
+          "image",
+          "media",
+          "code",
+          "help",
+        ],
+      },
+    ],
+    images_upload_handler,
+    file_picker_types: "image",
+    file_picker_callback: onImageClick,
+
+    auto_focus: true,
     branding: false,
     browser_spellcheck: true,
     content_css: isDark ? "dark" : undefined,
@@ -98,6 +124,12 @@ export const RTEditor = ({
         font-family: 'Spectral', Georgia, ui-serif, serif;
         font-size: ${isMobile ? "16px" : "19px"};
         text-align: justify;
+      }
+      blockquote {
+        border-left: 2px solid white;
+        margin-left: 3px;
+        margin-right: 12px;
+        padding-left: 12px;
       }
       hr {
         border-top-width: 3px;
@@ -114,6 +146,8 @@ export const RTEditor = ({
     //font_family_formats: "Spectral",
     font_family_formats:
       "Spectral;Andale Mono=andale mono,times;Arial=arial,helvetica,sans-serif;Arial Black=arial black,avant garde;Book Antiqua=book antiqua,palatino;Comic Sans MS=comic sans ms,sans-serif;Courier New=courier new,courier;Georgia=georgia,palatino;Helvetica=helvetica;Impact=impact,chicago;Symbol=symbol;Tahoma=tahoma,arial,helvetica,sans-serif;Terminal=terminal,monaco;Times New Roman=times new roman,times;Trebuchet MS=trebuchet ms,geneva;Verdana=verdana,geneva;",
+    // https://www.tiny.cloud/docs/tinymce/6/content-behavior-options/#newline_behavior
+    forced_root_block_attrs: { style: "text-align: justify;" },
     height: props.height,
     language: "fr_FR",
     language_url: "/tinymce/langs/fr_FR.js",
@@ -137,55 +171,6 @@ export const RTEditor = ({
       { start: "1. ", cmd: "InsertOrderedList" },
       { start: "* ", cmd: "InsertUnorderedList" },
       { start: "- ", cmd: "InsertUnorderedList" },
-    ],
-    contextmenu: false,
-    menubar: false,
-    statusbar: false,
-    toolbar: [
-      {
-        name: "",
-        items: [
-          "fullscreen",
-          "bold",
-          "italic",
-          "underline",
-          "forecolor",
-          "align",
-          "bullist",
-          "numlist",
-          "outdent",
-          "indent",
-          "fontsizeinput",
-          "code",
-          "hr",
-          "blockquote",
-          //"export",
-          //"styles",
-          //"emoticons",
-          // "searchreplace",
-          // "undo",
-          // "redo",
-          //"anchor",
-          // "link",
-          // "removeformat"
-        ],
-      },
-      // {
-      //   name: "texte",
-      //   items: [
-      //     "fontfamily",
-      //     "alignjustify",
-      //     "aligncenter",
-      //     "strikethrough",
-      //     "charmap"
-      //   ],
-      // },
-      // {
-      //   name: "media",
-      //   items: [
-      //     "link", "unlink", "image", "media", "help"
-      //   ],
-      // },
     ],
   };
 
@@ -277,15 +262,102 @@ export const RTEditor = ({
     //   }
   }, []);
 
+  function images_upload_handler(
+    blobInfo: BlobInfo,
+    progress: ProgressFn,
+  ): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      const file = blobInfo.blob();
+
+      if (file.size >= 10 * MB) {
+        // showToast({
+        //    "L'image ne doit pas dépasser 10Mo.",true
+        // });
+        reject("L'image ne doit pas dépasser 10Mo.");
+      }
+
+      // const { width, height } = await getImageSize(file);
+      // let payload: AddDocumentPayload = {
+      //   documentName: blobInfo.filename(),
+      //   documentHeight: height,
+      //   documentWidth: width,
+      //   documentTime: new Date().getTime(),
+      //   documentBytes: file.size,
+      // };
+      // const { documentId } = await addDocument(payload).unwrap();
+
+      // if (documentId) {
+      const formData = new FormData();
+      formData.append("file", file, blobInfo.filename());
+      const xhr = new XMLHttpRequest();
+      xhr.overrideMimeType("application/json");
+      //xhr.responseType = "json";
+      xhr.withCredentials = false;
+      xhr.open("POST", import.meta.env.VITE_PUBLIC_API2);
+
+      xhr.upload.onprogress = (e) => {
+        progress((e.loaded / e.total) * 100);
+      };
+
+      xhr.onload = () => {
+        if (xhr.status !== 200) {
+          reject({ message: "HTTP Error: " + xhr.status, remove: true });
+          return;
+        }
+        const data = JSON.parse(xhr.responseText);
+        if (!data || typeof data.file !== "string") {
+          reject("Invalid JSON: " + xhr.responseText);
+          return;
+        }
+        resolve(import.meta.env.VITE_PUBLIC_FILES + "/" + data.file);
+      };
+
+      xhr.onerror = () => {
+        reject(
+          "Image upload failed due to a XHR Transport error. Code: " +
+            xhr.status,
+        );
+      };
+      xhr.send(formData);
+      //}
+    });
+  }
+
+  function onImageClick(
+    cb: Function,
+    /*
+      value: any,
+      meta: Record<string, any>
+      */
+  ) {
+    const input = document.createElement("input");
+    input.setAttribute("type", "file");
+    input.setAttribute("accept", "image/*");
+    input.onchange = onFileInputChange;
+    input.click();
+
+    function onFileInputChange() {
+      //@ts-expect-error
+      const file = this.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result !== "string") return;
+        const id = "blobid" + new Date().getTime();
+        const blobCache = editorRef.current!.editorUpload.blobCache;
+        const base64 = reader.result.split(",")[1];
+        const blobInfo = blobCache.create(id, file, base64);
+        blobCache.add(blobInfo);
+        cb(blobInfo.blobUri(), { title: file.name });
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   return (
     <>
       {isLoading && (
-        <div
-          style={{
-            position: "relative",
-          }}
-        >
-          Veuillez patienter...
+        <div className="spinner">
+          <span>Veuillez patienter...</span>
         </div>
       )}
 
@@ -325,89 +397,3 @@ export const RTEditor = ({
     </>
   );
 };
-
-{
-  /*
-    const init: IAllProps["init"] = {
-      //#region styling
-      branding: false,
-      content_css: "default",
-      content_style: `
-      body {
-        font-family:Helvetica,Arial,sans-serif;
-        font-size:14px;
-        overflow-y: scroll;
-      }
-      p { margin: 0; padding: 0; }
-      `,
-      height: props.height,
-      max_height: 500,
-      placeholder,
-      //endregion
-
-      language: "fr_FR",
-      language_url: "/tinymce/langs/fr_FR.js",
-      //contextmenu: "copy paste link",
-      contextmenu: false,
-      menubar: false,
-      statusbar: false,
-      plugins: [
-        "anchor",
-        "autolink",
-        "charmap",
-        "code",
-        "emoticons",
-        "fullscreen",
-        "help",
-        //"hr",
-        "image",
-        "link",
-        "media",
-        //"paste",
-        "searchreplace"
-      ],
-      toolbar: [
-        {
-          name: "",
-          items: [
-            "fullscreen",
-            "removeformat",
-            "undo",
-            "redo",
-            "link",
-            "anchor",
-            "hr"
-          ]
-        },
-        {
-          name: "texte",
-          items: [
-            "fontsize",
-            "forecolor",
-            "alignleft",
-            "aligncenter",
-            "bold",
-            "italic",
-            "charmap"
-          ]
-        },
-        {
-          name: "media",
-          items: ["emoticons", "link", "unlink", "image", "media", "code", "help"]
-        }
-      ],
-      //extended_valid_elements: "a[id|name|href|target=_blank]",
-      file_picker_types: "image",
-      file_picker_callback: onImageClick,
-      image_upload_handler: uploadImage,
-      relative_urls: true,
-      //remove_script_host: false,
-      document_base_url: process.env.NEXT_PUBLIC_URL + "/",
-
-      mobile: {
-        //   toolbar_location: "bottom",
-        toolbar_mode: "floating"
-      }
-    };
-  */
-}

@@ -205,6 +205,7 @@ export const PageSwitch = ({
           }}
         >
           <input
+            autoFocus
             type="number"
             defaultValue={page}
             onChange={(e) => {

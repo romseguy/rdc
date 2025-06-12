@@ -16,11 +16,21 @@ export const config: AxiosRequestConfig = {
 export const client = axios.create(config);
 client.interceptors.request.use(
   function (config) {
-    console.log("🚀 ~ client ~ config:", config);
+    console.log("🚀 ~ request :", config);
     return config;
   },
   function (error) {
-    console.log("🚀 ~ client ~ error:", error);
+    console.log("🚀 ~ request ~ error:", error);
+    return Promise.reject(error);
+  },
+);
+client.interceptors.response.use(
+  function (config) {
+    console.log("🚀 ~ response :", config);
+    return config;
+  },
+  function (error) {
+    console.log("🚀 ~ response ~ error:", error);
     return Promise.reject(error);
   },
 );
