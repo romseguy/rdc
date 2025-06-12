@@ -20,6 +20,7 @@ import {
 import { css } from "@emotion/react";
 import { Note } from "~/screens/Note";
 import { Header } from "~/screens/Header";
+import { useNavigate } from "react-router";
 
 const seed: Seed[] = [
   {
@@ -82,13 +83,14 @@ const seed: Seed[] = [
   },
 ];
 
-const getRouter = () => ({
-  getCurrentLocation: () => ({ url: "/" }),
-  navigate: () => {},
-  navigateByName: () => {},
-});
-
 export function App() {
+  const navigate = useNavigate();
+  const getRouter = () => ({
+    getCurrentLocation: () => ({ url: "/" }),
+    navigate,
+    navigateByName: () => {},
+  });
+
   //#region modal
   const [modalState, setModalState] = useState<{
     note?: NoteT;
@@ -296,7 +298,7 @@ export function App() {
     load();
   }, []);
   useEffect(() => {
-    if (note) getRouter().navigateByName("note", { id: note.id });
+    if (note) getRouter().navigate("/note/" + note.id);
   }, [note]);
   //#endregion
 
@@ -771,40 +773,6 @@ export function App() {
             )}
           </main>
         </div>
-      )}
-
-      {note !== null && (
-        <>
-          <div
-            css={toCss({
-              display: "flex",
-              alignItems: "center",
-              padding: "12px",
-            })}
-          >
-            <BackButton
-              style={{ marginRight: "6px" }}
-              onClick={() => {
-                setNote(null);
-                getRouter().navigate("/");
-              }}
-            />
-
-            <h1>
-              Citation du livre{" "}
-              <i>
-                {book?.title
-                  ? ": " + book.title
-                  : "" + book?.id + " de la bibliothèque " + lib?.name}
-              </i>
-            </h1>
-          </div>
-
-          <div
-            css={toCss({ padding: "12px" })}
-            dangerouslySetInnerHTML={{ __html: note.desc }}
-          />
-        </>
       )}
     </>
   );

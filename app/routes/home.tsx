@@ -4,8 +4,12 @@ import { App } from "~/screens/App";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "Pour une nouvelle conscience | recueildecitations.fr" },
+    {
+      name: "description",
+      content:
+        "Partagez des citations de livres qui participent à l'avènement d'une nouvelle conscience",
+    },
   ];
 }
 

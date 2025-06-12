@@ -5,5 +5,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   server: { port: 3000 },
   preview: { port: 5000 },
+  ssr: {
+    noExternal: ["date-fns"],
+  },
   plugins: [reactRouter(), tsconfigPaths()],
 });
