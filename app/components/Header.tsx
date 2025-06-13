@@ -1,19 +1,22 @@
 import { css } from "@emotion/react";
 import { isMobile } from "react-device-detect";
-import { client, prefix, toCss } from "~/utils";
+import { client, baseUrl, toCss } from "~/utils";
 
-export const Header = ({
-  lib,
-  setLib,
-  libs,
-  book,
-  setBook,
-  user,
-  setUser,
-  setAccessToken,
-  setRefreshToken,
-  showToast,
-}) => {
+export const Header = ({ ...props }) => {
+  // console.log("🚀 ~ Header ~ props:", props);
+  const {
+    lib,
+    setLib,
+    libs,
+    book,
+    setBook,
+    user,
+    setUser,
+    setAccessToken,
+    setRefreshToken,
+    showToast,
+  } = props;
+
   return (
     <div
       css={toCss({
@@ -52,7 +55,7 @@ export const Header = ({
               const password = prompt("Saisissez votre mot de passe");
 
               if (email && password) {
-                const { data } = await client.post(prefix + "/login", {
+                const { data } = await client.post("/login", {
                   email,
                   password,
                 });

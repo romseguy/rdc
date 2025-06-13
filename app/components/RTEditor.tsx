@@ -1,7 +1,7 @@
 import { Editor } from "@tinymce/tinymce-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
-import { bindEvent, getImageSize, MB } from "./utils";
+import { bindEvent, getImageSize, MB } from "~/utils";
 
 type ProgressFn = (percent: number) => void;
 interface BlobInfo {
@@ -59,8 +59,8 @@ export const RTEditor = ({
     }
   }, [editorRef]);
   const init: IAllProps["init"] = {
-    //contextmenu: "",
-    contextmenu_never_use_native: true,
+    contextmenu: "",
+    //contextmenu_never_use_native: true,
     menubar: false,
     statusbar: false,
     plugins: [
@@ -141,7 +141,7 @@ export const RTEditor = ({
       }
     `,
     convert_urls: false,
-    document_base_url: "http://localhost:3000/",
+    document_base_url: import.meta.VITE_PUBLIC_URL,
     font_css: "/fonts/spectral.css",
     //font_family_formats: "Spectral",
     font_family_formats:

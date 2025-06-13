@@ -1,12 +1,18 @@
 import { reactRouter } from "@react-router/dev/vite";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  server: { port: 3000 },
-  preview: { port: 5000 },
+  // build: {
+  //   rollupOptions: {
+  //     external: ["pkgname"],
+  //   },
+  // },
   ssr: {
     noExternal: ["date-fns"],
   },
-  plugins: [reactRouter(), tsconfigPaths()],
+  plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+  server: { port: 3000 },
+  preview: { port: 5000 },
 });

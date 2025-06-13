@@ -28,9 +28,9 @@ export const iconProps = ({ title, ...props }: Record<string, any>) => {
   return out;
 };
 
-export const BackButton = ({ onClick, ...props }) => (
+export const BackButton = ({ onClick, label = "Retour", ...props }) => (
   <button type="button" onClick={onClick} {...props}>
-    {"<"} Retour
+    {"<"} {label}
   </button>
 );
 

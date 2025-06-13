@@ -1,3 +1,7 @@
+import "@radix-ui/themes/styles.css";
+import "./root.scss";
+import { Theme } from "@radix-ui/themes";
+import type { Route } from "./+types/root";
 import {
   isRouteErrorResponse,
   Links,
@@ -5,9 +9,9 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigate,
 } from "react-router";
-
-import type { Route } from "./+types/root";
+import { MailTo, MailToTrigger, MailToBody, BackButton } from "./components";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -32,7 +36,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <Theme appearance="dark">{children}</Theme>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -40,20 +44,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
+export async function loader({ ...params }) {
+  // console.log("🚀 ~ loader ~ params:", params)
+  return { root: "value" };
+}
+
+export default function Root({ ...props }) {
+  // console.log("🚀 ~ Root ~ props:", props);
   return <Outlet />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
-  let details = "An unexpected error occurred.";
+  const navigate = useNavigate();
+  let message = "Erreur";
+  let details = "Une erreur est survenue.";
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
     message = error.status === 404 ? "404" : "Error";
     details =
       error.status === 404
-        ? "The requested page could not be found."
+        ? "La page demandée n'a pas pu être trouvée."
         : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
@@ -61,14 +72,68 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
-    </main>
+    <div
+      id="page"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "6px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <BackButton
+            label="Précédent"
+            onClick={() => {
+              navigate(-1);
+            }}
+          />
+          <h1>{message}</h1>
+        </div>
+        <p>{details}</p>
+        {stack && (
+          <pre>
+            <code>{stack}</code>
+          </pre>
+        )}
+        {message !== "404" && (
+          <MailTo
+            to={import.meta.env.VITE_PUBLIC_EMAIL}
+            subject="Rapport d'erreur"
+            //cc={["cc1@example.com", "cc2@example.com"]}
+            //bcc={["bcc@example.com"]}
+            obfuscate
+          >
+            <MailToTrigger>
+              Envoyer un message pour m'aider à améliorer le site
+            </MailToTrigger>
+            <MailToBody>
+              - Décrivez ci-dessous ce qui vous a fait rencontrer une erreur :
+              <br />
+              <br />
+              J'ai cliqué sur la couverture d'un livre
+              <br />
+              <br />
+              - Contenu de l'erreur :
+              <br />
+              <br />
+              {message}
+              <br />
+              <br />
+              - Détails de l'erreur :
+              <br />
+              <br />
+              {message}
+            </MailToBody>
+          </MailTo>
+        )}
+      </div>
+    </div>
   );
 }

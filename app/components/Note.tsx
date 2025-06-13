@@ -2,7 +2,6 @@ import { useState } from "react";
 import { isMobile } from "react-device-detect";
 import {
   RTEditor,
-  toUsername,
   EditIcon,
   ExternalIcon,
   ShareIcon,
@@ -10,6 +9,9 @@ import {
   LocaleSwitch,
   PageSwitch,
   iconProps,
+} from "~/components";
+import {
+  toUsername,
   fullDateString,
   toCss,
   useScroll,

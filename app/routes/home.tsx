@@ -1,6 +1,5 @@
 import type { Route } from "./+types/home";
-import "~/screens/App.scss";
-import { App } from "~/screens/App";
+import { Page, loader } from "./Page";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -13,6 +12,10 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Home() {
-  return <App />;
+export { loader };
+
+import { Home } from "./Home";
+export default function HomeRoute({ ...props }) {
+  // console.log("🚀 ~ HomeRoute ~ props:", props);
+  return <Page element={Home} {...props} />;
 }
