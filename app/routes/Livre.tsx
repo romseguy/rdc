@@ -28,8 +28,10 @@ export const Livre = ({ ...props }) => {
   const [locale, setLocale] = useState("fr");
   const [book, setBook] = useState<null | Book>(props.loaderData.book);
   useEffect(() => {
-    if (book) setBook(props.loaderData.book);
-    else showToast("Le livre n'a pas été trouvé.");
+    if (props.loaderData.book) {
+      if (book) setBook(props.loaderData.book);
+      else showToast("Le livre n'a pas été trouvé.");
+    }
   }, [props.loaderData]);
   const hasEditing = useMemo(() => {
     if (!book || !book.notes) return false;

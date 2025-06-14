@@ -20,6 +20,7 @@ export const Header = ({ ...props }) => {
 
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
+  console.log("🚀 ~ Header ~ isLoading:", isLoading);
 
   const onBookClick = async (b) => {
     setIsLoading({ ...isLoading, [b.id]: true });

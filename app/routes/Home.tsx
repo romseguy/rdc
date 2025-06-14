@@ -28,3 +28,17 @@ export function Home({ ...props }) {
     </div>
   );
 }
+
+{
+  /*
+
+  home.tsx
+
+    export { loader } from "./Page";
+    import { Home } from "./Home";
+    export default function HomeRoute({ ...props }) {
+      console.log("🚀 ~ HomeRoute ~ props:", props);
+      return <Page element={Home} {...props} />;
+    }
+*/
+}
