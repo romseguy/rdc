@@ -5,8 +5,6 @@ import { useNavigate } from "react-router";
 import { client, toCss } from "~/utils";
 
 export const Header = ({ ...props }) => {
-  // console.log("🚀 ~ Header ~ props:", props);
-
   const {
     loaderData: { libs, book },
     user,
@@ -105,24 +103,7 @@ export const Header = ({ ...props }) => {
 
       <div css={toCss({ display: "flex", overflowX: "scroll" })}>
         {lib?.books.map((b, index) => {
-          //if (b.id !== book?.id) return null;
-
-          if (b.src) {
-            if (!isLoading[b.id])
-              return (
-                <img
-                  key={"book-" + index}
-                  src={b.src}
-                  css={css`
-                    cursor: pointer;
-                    border: ${b.id === book?.id
-                      ? "1px solid yellow"
-                      : "1px solid white"};
-                  `}
-                  onClick={() => onBookClick(b)}
-                />
-              );
-
+          if (isLoading[b.id])
             return (
               <div
                 key={"book-" + index}
@@ -143,6 +124,21 @@ export const Header = ({ ...props }) => {
                 <div className="spinner" />
               </div>
             );
+
+          if (b.src) {
+            return (
+              <img
+                key={"book-" + index}
+                src={b.src}
+                css={css`
+                  cursor: pointer;
+                  border: ${b.id === book?.id
+                    ? "1px solid yellow"
+                    : "1px solid white"};
+                `}
+                onClick={() => onBookClick(b)}
+              />
+            );
           }
 
           return (
@@ -162,8 +158,7 @@ export const Header = ({ ...props }) => {
               `}
               onClick={() => onBookClick(b)}
             >
-              {isLoading[b.id] && <div className="spinner" />}
-              {!isLoading[b.id] && b.title}
+              {b.title}
             </div>
           );
         })}

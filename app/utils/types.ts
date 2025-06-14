@@ -16,13 +16,14 @@ export type Note = {
   desc_en?: string;
   isEditing?: boolean;
   page?: number;
+  book_id: string;
 };
 export type Book = {
   id: string;
   title?: string;
   notes?: Note[];
   src?: string;
-  page?: string;
+  library_id?: string;
   is_conf?: boolean;
 };
 export type Lib = {

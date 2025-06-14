@@ -11,7 +11,7 @@ import { toCss } from "~/utils";
 //const Slider = lazy(() => import("rc-slider"));
 
 export const Note = ({ ...props }) => {
-  console.log("🚀 ~ Note ~ props:", props);
+  // console.log("🚀 ~ Note ~ props:", props);
   const {
     loaderData: { lib, book, note },
   } = props;
