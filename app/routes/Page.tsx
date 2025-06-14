@@ -1,15 +1,12 @@
 import { useStorage } from "@charlietango/hooks/use-storage";
 import React, { useEffect, useState } from "react";
+import { Header } from "~/components";
 import { ToastsContainer } from "~/components/Toast";
 import { client, seed } from "~/utils";
 import type { Book, Lib, Note, User } from "~/utils/types";
 
 export async function loader({ ...props }) {
-  // //console.log("🚀 ~ loader ~ props:", props);
-
-  const noteId = props.params.id;
-  // console.log("🚀 ~ loader ~ noteId:", noteId);
-
+  // //console.log("🚀 ~ PageLoader :", props);
   let libs = seed.map((lib, i) => ({ ...lib, id: "" + i } as Lib));
   let out: { libs: Lib[]; lib: Lib; book?: Book; note?: Note } = {
     libs,
@@ -23,25 +20,7 @@ export async function loader({ ...props }) {
         ...lib,
         books: books?.map(({ ...book }) => ({ ...book, src: undefined })),
       }));
-
-      // TODO
-      // if (noteId) {
-      //   const note = libs.find((lib) =>
-      //     lib.books?.find((book) =>
-      //       book.notes?.find((note) => note.id === noteId),
-      //     ),
-      //   );
-      //   const book = libs.find((lib) =>
-      //     lib.books?.find((book) => book.id === note.book_id),
-      //   );
-      //   out = {
-      //     ...out,
-      //     book,
-      //     note,
-      //   };
-      // }
     } else {
-      // //console.log("🚀 ~ loader ~ data:", data.books[0]);
       out.libs = data.libraries.map((lib, i) => {
         return {
           ...lib,
@@ -66,27 +45,11 @@ export async function loader({ ...props }) {
         };
       });
       out.lib = out.libs[0];
-
-      if (noteId) {
-        const note = data.notes.find(({ id }) => id === noteId);
-        let book = data.books.find(({ id }) => id === note.book_id);
-        out.lib = data.libraries.find((lib) => lib.id === book.library_id);
-        book = {
-          ...book,
-          notes: data.notes.filter(({ book_id }) => book_id === book.id),
-        };
-
-        out = {
-          ...out,
-          book,
-          note,
-        };
-      }
     }
 
     return out;
   } catch (error: any) {
-    // console.log("🚀 ~ loader ~ error:", error);
+    // // console.log("🚀 ~ loader ~ error:", error);
     return out;
   }
   /*
@@ -163,23 +126,53 @@ export const Page = ({ ...props }) => {
   };
   //#endregion
 
+  const [lib, _setLib] = useState<Lib>();
+  const setLib = (libName: string) => {
+    const l = loaderData.libs?.find((li) => li.name === libName);
+    if (l) _setLib(l);
+  };
+  // const [book, setBook] = useState<null | Book>();
+  const childProps = {
+    ...{ loaderData },
+    ...{
+      lib,
+      setLib,
+      // auth
+      accessToken,
+      setAccessToken,
+      refreshToken,
+      setRefreshToken,
+      user,
+      setUser,
+      // toast
+      showToast,
+    },
+  };
+
   return (
     <>
       <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
 
       <div id="page">
-        {React.createElement(element, {
-          ...{ loaderData },
-          ...{
-            showToast,
-            accessToken,
-            setAccessToken,
-            refreshToken,
-            setRefreshToken,
-            user,
-            setUser,
-          },
-        })}
+        <header>
+          <Header
+            // lib={lib}
+            // setLib={setLib}
+            //libs={loaderData.libs}
+            // book={book}
+            // setBook={setBook}
+            // user={user}
+            // setUser={setUser}
+            // setAccessToken={setAccessToken}
+            // setRefreshToken={setRefreshToken}
+            // showToast={showToast}
+            {...childProps}
+          />
+        </header>
+
+        <main style={{ maxWidth: "50em", margin: "0 auto" }}>
+          {React.createElement(element, childProps)}
+        </main>
       </div>
     </>
   );

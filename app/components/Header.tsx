@@ -1,21 +1,31 @@
 import { css } from "@emotion/react";
+import { useState } from "react";
 import { isMobile } from "react-device-detect";
-import { client, baseUrl, toCss } from "~/utils";
+import { useNavigate } from "react-router";
+import { client, toCss } from "~/utils";
 
 export const Header = ({ ...props }) => {
   // console.log("🚀 ~ Header ~ props:", props);
+
   const {
-    lib,
-    setLib,
-    libs,
-    book,
-    setBook,
+    loaderData: { libs, book },
     user,
     setUser,
     setAccessToken,
     setRefreshToken,
     showToast,
   } = props;
+
+  const lib = props.lib || props.loaderData.lib;
+
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
+
+  const onBookClick = async (b) => {
+    setIsLoading({ ...isLoading, [b.id]: true });
+    await navigate("/livre/" + b.id);
+    setIsLoading({ ...isLoading, [b.id]: false });
+  };
 
   return (
     <div
@@ -35,11 +45,7 @@ export const Header = ({ ...props }) => {
         })}
       >
         <button
-          css={toCss({
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          })}
+          className="with-icon"
           onClick={async (e) => {
             e.stopPropagation();
 
@@ -88,7 +94,7 @@ export const Header = ({ ...props }) => {
         <select
           defaultValue={lib?.name}
           onChange={(e) => {
-            setLib(e.target.value);
+            props.setLib(e.target.value);
           }}
         >
           {libs?.map((l) => (
@@ -101,43 +107,63 @@ export const Header = ({ ...props }) => {
         {lib?.books.map((b, index) => {
           //if (b.id !== book?.id) return null;
 
-          if (b.src)
+          if (b.src) {
+            if (!isLoading[b.id])
+              return (
+                <img
+                  key={"book-" + index}
+                  src={b.src}
+                  css={css`
+                    cursor: pointer;
+                    border: ${b.id === book?.id
+                      ? "1px solid yellow"
+                      : "1px solid white"};
+                  `}
+                  onClick={() => onBookClick(b)}
+                />
+              );
+
             return (
-              <img
+              <div
                 key={"book-" + index}
-                src={b.src}
                 css={css`
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  text-align: center;
+                  height: 225px;
+                  min-width: 146px;
                   cursor: pointer;
-                  ${b.id === book?.id ? "border: 5px solid yellow" : ""}
+                  border: ${b.id === book?.id
+                    ? "1px solid yellow"
+                    : "1px solid white"};
                 `}
-                onClick={() => {
-                  if (b.id !== index) {
-                    setBook(lib.books[index]);
-                  }
-                }}
-              />
+                onClick={() => onBookClick(b)}
+              >
+                <div className="spinner" />
+              </div>
             );
+          }
 
           return (
             <div
               key={"book-" + index}
-              css={toCss({
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                textAlign: "center",
-                border: "1px solid white",
-                height: "225px",
-                width: "140px",
-                cursor: "pointer",
-              })}
-              onClick={() => {
-                if (b.id !== index) {
-                  setBook(lib.books[index]);
-                }
-              }}
+              css={css`
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                height: 225px;
+                width: 140px;
+                cursor: pointer;
+                border: ${b.id === book?.id
+                  ? "1px solid yellow"
+                  : "1px solid white"};
+              `}
+              onClick={() => onBookClick(b)}
             >
-              {b.title}
+              {isLoading[b.id] && <div className="spinner" />}
+              {!isLoading[b.id] && b.title}
             </div>
           );
         })}

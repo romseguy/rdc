@@ -23,11 +23,13 @@ export type Book = {
   notes?: Note[];
   src?: string;
   page?: string;
+  is_conf?: boolean;
 };
 export type Lib = {
   id: string;
   name: string;
   author: string;
+  author_url: string;
   books?: Book[];
 };
 

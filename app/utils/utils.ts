@@ -110,7 +110,7 @@ import {
   setSeconds,
   startOfMonth,
 } from "date-fns";
-import {fr} from "date-fns/locale";
+import { fr } from "date-fns/locale";
 
 /*
 compareAsc

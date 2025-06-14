@@ -29,7 +29,7 @@ export const iconProps = ({ title, ...props }: Record<string, any>) => {
 };
 
 export const BackButton = ({ onClick, label = "Retour", ...props }) => (
-  <button type="button" onClick={onClick} {...props}>
+  <button className="back-btn" onClick={onClick} {...props}>
     {"<"} {label}
   </button>
 );

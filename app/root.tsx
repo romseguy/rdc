@@ -73,7 +73,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
   return (
     <div
-      id="page"
+      id="error-page"
       style={{
         display: "flex",
         alignItems: "center",
@@ -97,11 +97,6 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
           <h1>{message}</h1>
         </div>
         <p>{details}</p>
-        {stack && (
-          <pre>
-            <code>{stack}</code>
-          </pre>
-        )}
         {message !== "404" && (
           <MailTo
             to={import.meta.env.VITE_PUBLIC_EMAIL}
@@ -132,6 +127,13 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
               {message}
             </MailToBody>
           </MailTo>
+        )}
+        {stack && (
+          <pre>
+            <code style={{ fontSize: "x-small", whiteSpace: "break-spaces" }}>
+              {stack}
+            </code>
+          </pre>
         )}
       </div>
     </div>

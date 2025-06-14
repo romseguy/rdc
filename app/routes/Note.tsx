@@ -1,7 +1,8 @@
+import { SunIcon, InfoCircledIcon, MoonIcon } from "@radix-ui/react-icons";
 import { Slider } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { BackButton } from "~/components";
+import { BackButton, Flex } from "~/components";
 import { toCss } from "~/utils";
 //import * as Slider from "@radix-ui/react-slider";
 //import { Slider } from "~/components/ui/slider";
@@ -10,17 +11,16 @@ import { toCss } from "~/utils";
 //const Slider = lazy(() => import("rc-slider"));
 
 export const Note = ({ ...props }) => {
-  // console.log("🚀 ~ Note ~ props:", props);
+  console.log("🚀 ~ Note ~ props:", props);
   const {
     loaderData: { lib, book, note },
   } = props;
   const navigate = useNavigate();
-  const getRouter = () => ({
-    getCurrentLocation: () => ({ url: "note" }),
-    navigate,
-    navigateByName: () => {},
-  });
-  const [value, setValue] = useState(95);
+
+  const [isDark, setIsDark] = useState(true);
+  const [lineHeight, setLineHeight] = useState(2);
+  const [size, setSize] = useState(16);
+  const [width, setWidth] = useState(50);
   const [isLoaded, setIsLoaded] = useState(false);
   useEffect(() => {
     setIsLoaded(true);
@@ -41,7 +41,7 @@ export const Note = ({ ...props }) => {
             <BackButton
               style={{ marginRight: "6px" }}
               onClick={() => {
-                getRouter().navigate(-1);
+                navigate(-1);
               }}
             />
 
@@ -49,7 +49,16 @@ export const Note = ({ ...props }) => {
               Citation p.{note.page}{" "}
               {book?.title ? (
                 <>
-                  du livre : <i>{book?.title}</i>
+                  {book.is_conf && (
+                    <>
+                      de la conférence : <i>{lib.name}</i>
+                    </>
+                  )}
+                  {!book.is_conf && (
+                    <>
+                      du livre : <i>{book?.title}</i>
+                    </>
+                  )}
                 </>
               ) : (
                 <>
@@ -60,20 +69,92 @@ export const Note = ({ ...props }) => {
             </h1>
           </div>
 
-          <main style={{ maxWidth: value + "em", margin: "0 auto" }}>
+          <Flex
+            direction="column"
+            align="start"
+            gap="3"
+            style={{
+              // borderBottom: "1px solid white",
+              // borderTop: "1px solid white",
+              padding: "12px",
+            }}
+          >
+            <button className="with-icon" onClick={() => setIsDark(!isDark)}>
+              {isDark ? (
+                <>
+                  <SunIcon />
+                  Utiliser le thème clair
+                </>
+              ) : (
+                <>
+                  <MoonIcon />
+                  Utiliser le thème sombre
+                </>
+              )}
+            </button>
+
+            <Flex>
+              <InfoCircledIcon stroke="lightblue" />
+              Taille du texte
+            </Flex>
             {isLoaded && (
               <Slider
-                defaultValue={[100]}
-                min={20}
-                max={95}
+                defaultValue={[16]}
+                min={1}
+                max={72}
                 step={1}
-                className="w-[60%]"
                 onValueChange={(v) => {
-                  setValue(v[0]);
+                  setSize(v[0]);
                 }}
               />
             )}
 
+            <Flex>
+              <InfoCircledIcon stroke="lightblue" />
+              Largeur du texte
+            </Flex>
+            {isLoaded && (
+              <Slider
+                defaultValue={[50]}
+                min={20}
+                max={95}
+                step={1}
+                onValueChange={(v) => {
+                  setWidth(v[0]);
+                }}
+              />
+            )}
+
+            <Flex>
+              <InfoCircledIcon stroke="lightblue" />
+              Espace entre les lignes
+            </Flex>
+            {isLoaded && (
+              <Slider
+                defaultValue={[2]}
+                min={0.1}
+                max={10}
+                step={0.1}
+                onValueChange={(v) => {
+                  setLineHeight(v[0]);
+                }}
+              />
+            )}
+          </Flex>
+
+          <main
+            style={{
+              ...(isDark
+                ? { color: "white", background: "rgba(0,0,0,0.6)" }
+                : { color: "black", background: "rgba(255,255,255,0.8)" }),
+              ...{
+                fontSize: size + "px",
+                lineHeight: lineHeight,
+                maxWidth: width + "em",
+                margin: "0 auto",
+              },
+            }}
+          >
             <div dangerouslySetInnerHTML={{ __html: note.desc }} />
           </main>
         </>

@@ -91,12 +91,29 @@ export const Note = ({
             gap: "6px",
           }}
         >
-          <ExternalIcon
-            {...iconProps({
-              title: "Ouvrir la citation",
-              onClick: onOpenClick,
-            })}
-          />
+          {!isMobile && (
+            <button
+              className="with-icon"
+              style={{ padding: "3px 3px 3px 6px" }}
+              onClick={onOpenClick}
+            >
+              Ouvrir le lecteur
+              <ExternalIcon
+                {...iconProps({
+                  title: "Ouvrir le lecteur",
+                })}
+              />
+            </button>
+          )}
+
+          {isMobile && (
+            <ExternalIcon
+              {...iconProps({
+                title: "Ouvrir le lecteur",
+                onClick: onOpenClick,
+              })}
+            />
+          )}
           <ShareIcon
             {...iconProps({
               title: "Partager la citation",
@@ -233,7 +250,9 @@ export const Note = ({
         css={toCss({
           padding: isMobile ? "0px" : "6px",
           background: "rgba(255,255,255,0.1)",
-          maxHeight: window.innerHeight - 250 + "px",
+          maxHeight: "250px",
+          lineHeight: "2",
+          //maxHeight: window.innerHeight - 250 + "px",
           //height: "100%",
           //height: "100px",
           overflowY: isEditing ? "hidden" : "scroll",
@@ -289,7 +308,6 @@ export const Note = ({
 
               <div>
                 <button
-                  css={toCss({})}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (!isAddComment) {
@@ -324,7 +342,7 @@ export const Note = ({
                 })}
               >
                 <button
-                  type="button"
+                  className="cancel-btn"
                   onClick={() => {
                     setIsAddComment(false);
                   }}
