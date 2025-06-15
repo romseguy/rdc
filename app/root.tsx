@@ -1,4 +1,3 @@
-import "@radix-ui/themes/styles.css";
 import "./root.scss";
 import { Theme } from "@radix-ui/themes";
 import type { Route } from "./+types/root";
@@ -16,7 +15,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <Theme appearance="dark">{children}</Theme>
+        {children}
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -24,8 +23,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+//
+
 export default function Root({ ...props }) {
-  return <Outlet />;
+  return (
+    <Theme appearance="dark">
+      <Outlet />
+    </Theme>
+  );
 }
 
 export const links: Route.LinksFunction = () => [

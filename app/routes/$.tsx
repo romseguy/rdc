@@ -1,6 +1,5 @@
-import "@radix-ui/themes/styles.css";
 import { isbot } from "isbot";
-import { useRoutes } from "react-router";
+import { useLocation, useRoutes } from "react-router";
 import Sitemap from "~/components/Sitemap";
 import { Page } from "~/routes/Page";
 import { Livre } from "~/routes/Livre";
@@ -8,6 +7,7 @@ import { Note } from "~/routes/Note";
 
 import { loader as rootLoader } from "./_index";
 import type { Route } from "./+types/$";
+
 export const loader = async (props: Route.LoaderArgs) => {
   const data = await rootLoader(props);
   const id = props.params["*"] || "";
@@ -43,7 +43,8 @@ export const loader = async (props: Route.LoaderArgs) => {
 export default function CatchAllRoute(props) {
   const loaderData = props.loaderData || {};
   const { is404 } = loaderData;
-  if (is404) return "404";
+  const location = useLocation();
+  if (is404 && location.pathname !== "/login") return "404";
   if (isbot()) return <Sitemap {...props} />;
 
   return useRoutes([

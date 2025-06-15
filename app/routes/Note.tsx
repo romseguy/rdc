@@ -45,18 +45,24 @@ export const Note = ({ ...props }) => {
               }}
             />
 
-            <h1>
-              Citation p.{note.page}{" "}
+            <h2>
+              Citation {note.page && `p.${note.page} `}
               {book?.title ? (
                 <>
                   {book.is_conf && (
                     <>
-                      de la conférence : <i>{lib.name}</i>
+                      de la conférence :{" "}
+                      <i>
+                        {book.title} ({lib.name})
+                      </i>
                     </>
                   )}
                   {!book.is_conf && (
                     <>
-                      du livre : <i>{book?.title}</i>
+                      du livre :{" "}
+                      <i>
+                        {book?.title} ({lib.name})
+                      </i>
                     </>
                   )}
                 </>
@@ -66,7 +72,7 @@ export const Note = ({ ...props }) => {
                   bibliothèque : <i>{lib?.name}</i>
                 </>
               )}
-            </h1>
+            </h2>
           </div>
 
           <Flex

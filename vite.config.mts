@@ -1,7 +1,7 @@
 import { reactRouter } from "@react-router/dev/vite";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import tailwindcss from "@tailwindcss/vite";
+//import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   // build: {
@@ -12,7 +12,11 @@ export default defineConfig({
   ssr: {
     noExternal: ["date-fns"],
   },
-  plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+  plugins: [
+    reactRouter(),
+    //tailwindcss(),
+    tsconfigPaths(),
+  ],
   server: { port: 3000 },
   preview: { port: 5000 },
 });

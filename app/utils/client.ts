@@ -1,3 +1,5 @@
+import { createClient } from "@supabase/supabase-js";
+
 export const baseUrl =
   import.meta.env.VITE_PUBLIC_API || "http://localhost:3001/api";
 
@@ -117,3 +119,11 @@ export const client = {
     }
   },
 };
+
+export const tokenKey =
+  "sb-" + import.meta.env.VITE_SUPABASE_PROJECT_ID + "-auth-token";
+const auth = createClient(
+  `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
+);
+export const supabase = () => auth;

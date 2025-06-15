@@ -2,15 +2,14 @@ import { css } from "@emotion/react";
 import { useState } from "react";
 import { isMobile } from "react-device-detect";
 import { useNavigate } from "react-router";
-import { client, toCss } from "~/utils";
+import { toCss } from "~/utils";
 
 export const Header = ({ ...props }) => {
   const {
     loaderData: { libs, book },
     user,
     setUser,
-    setAccessToken,
-    setRefreshToken,
+    setAuthToken,
     showToast,
   } = props;
 
@@ -50,27 +49,27 @@ export const Header = ({ ...props }) => {
             if (user) {
               const ok = confirm("Êtes-vous sûr de vouloir vous déconnecter?");
               if (ok) {
-                setAccessToken();
-                setRefreshToken();
+                setAuthToken();
                 setUser(undefined);
               }
             } else {
-              const email = prompt("Saisissez votre adresse e-mail");
-              const password = prompt("Saisissez votre mot de passe");
+              props.setModalState({ ...props.modalState, isOpen: true });
+              // const email = prompt("Saisissez votre adresse e-mail");
+              // const password = prompt("Saisissez votre mot de passe");
 
-              if (email && password) {
-                const { data } = await client.post("/login", {
-                  email,
-                  password,
-                });
+              // if (email && password) {
+              //   const { data } = await client.post("/login", {
+              //     email,
+              //     password,
+              //   });
 
-                if (data.error) {
-                  showToast(data.message, true);
-                } else {
-                  setAccessToken(data.session.access_token);
-                  setRefreshToken(data.session.refresh_token);
-                }
-              }
+              //   if (data.error) {
+              //     showToast(data.message, true);
+              //   } else {
+              //     setAccessToken(data.session.access_token);
+              //     setRefreshToken(data.session.refresh_token);
+              //   }
+              // }
             }
           }}
         >

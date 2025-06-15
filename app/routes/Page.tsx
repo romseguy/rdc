@@ -1,20 +1,21 @@
 import { useStorage } from "@charlietango/hooks/use-storage";
 import React, { useEffect, useState } from "react";
-import { Header } from "~/components";
+import { BackButton, FullScreen, Header } from "~/components";
+import { Login } from "~/components/Login";
 import { ToastsContainer } from "~/components/Toast";
-import { client } from "~/utils";
+import { client, tokenKey } from "~/utils";
 import type { Lib, User } from "~/utils/types";
 
 export const Page = ({ ...props }) => {
   const { element, loaderData } = props;
 
   //#region auth
-  const [accessToken, setAccessToken] = useStorage("accessToken", {
+  const [authToken, setAuthToken] = useStorage(tokenKey, {
     type: "local",
   });
-  const [refreshToken, setRefreshToken] = useStorage("refreshToken", {
-    type: "local",
-  });
+  const { access_token: accessToken, refresh_token: refreshToken } = authToken
+    ? JSON.parse(authToken)
+    : {};
   const [user, setUser] = useState<null | User>();
   useEffect(() => {
     (async () => {
@@ -41,6 +42,9 @@ export const Page = ({ ...props }) => {
     setToasts(toasts.filter((toast) => toast.id !== id));
   };
   //#endregion
+  //#region modal
+  const [modalState, setModalState] = useState({ isOpen: false });
+  //#endregion
 
   const [lib, _setLib] = useState<Lib>();
   const setLib = (libName: string) => {
@@ -54,13 +58,15 @@ export const Page = ({ ...props }) => {
       setLib,
       // auth
       accessToken,
-      setAccessToken,
       refreshToken,
-      setRefreshToken,
+      setAuthToken,
       user,
       setUser,
       // toast
       showToast,
+      // modal
+      modalState,
+      setModalState,
     },
   };
 
@@ -68,15 +74,28 @@ export const Page = ({ ...props }) => {
     <>
       <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
 
-      <div id="page">
-        <header>
-          <Header {...childProps} />
-        </header>
+      {modalState.isOpen && (
+        <FullScreen direction="column">
+          <Login
+            authToken={authToken}
+            setAuthToken={setAuthToken}
+            modalState={modalState}
+            setModalState={setModalState}
+          />
+        </FullScreen>
+      )}
 
-        <main style={{ maxWidth: "50em", margin: "0 auto" }}>
-          {React.createElement(element, childProps)}
-        </main>
-      </div>
+      {!modalState.isOpen && (
+        <div id="page">
+          <header>
+            <Header {...childProps} />
+          </header>
+
+          <main style={{ maxWidth: "50em", margin: "0 auto" }}>
+            {React.createElement(element, childProps)}
+          </main>
+        </div>
+      )}
     </>
   );
 };
