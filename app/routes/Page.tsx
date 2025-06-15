@@ -81,6 +81,7 @@ export const Page = ({ ...props }) => {
             setAuthToken={setAuthToken}
             modalState={modalState}
             setModalState={setModalState}
+            showToast={showToast}
           />
         </FullScreen>
       )}

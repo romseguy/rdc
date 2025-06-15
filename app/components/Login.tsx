@@ -3,6 +3,7 @@ import { Input } from "./ui/input";
 import { supabase } from "~/utils";
 import { Flex } from "./Containers";
 import { BackButton } from "./Controls";
+import { Button } from "@radix-ui/themes";
 
 const variables = {
   email_label: "Adresse e-mail",
@@ -18,14 +19,18 @@ const i18n = {
   sign_in: variables,
   sign_up: {
     ...variables,
-    link_text: "Vous n'avez pas de mot de passe ? Créez en un",
+    button_label: "Créer le compte",
+    link_text: "Créer un compte",
     confirmation_text: "Confirmer",
   },
   magic_link: {
+    ...variables,
     link_text: "Envoyer un mail de connexion",
+    button_label: "Envoyer un mail de connexion",
   },
   forgotten_password: {
     ...variables,
+    button_label: "Envoyer un mail de connexion",
     link_text: "Mot de passe oublié ?",
   },
 };
@@ -37,11 +42,19 @@ function ForgottenPassword({
   i18n,
   appearance,
   showLinks = false,
+  showToast,
 }) {
+  const labels = i18n?.forgotten_password;
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
+  const [message, setMessage] = useState<string>();
+  useEffect(() => {
+    if (error) showToast(error, true);
+  }, [error]);
+  useEffect(() => {
+    if (message) showToast(message);
+  }, [message]);
 
   const handlePasswordReset = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -56,26 +69,27 @@ function ForgottenPassword({
     setLoading(false);
   };
 
-  const labels = i18n?.forgotten_password;
-
   return (
     <form id="auth-forgot-password" onSubmit={handlePasswordReset}>
-      <Flex direction="column">
-        <Flex direction="column">
+      <Flex direction="column" gap="3">
+        <Flex direction="column" gap="3">
           <div>
             <label htmlFor="email">{labels?.email_label}</label>
-            <input
+            <Input
               id="email"
-              name="email"
               type="email"
-              autoFocus
+              name="email"
               placeholder={labels?.email_input_placeholder}
+              defaultValue={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
             />
           </div>
+
           <button type="submit" color="primary" loading={loading}>
             {loading ? labels?.loading_button_label : labels?.button_label}
           </button>
+
           {showLinks && (
             <a
               href="#auth-sign-in"
@@ -87,8 +101,6 @@ function ForgottenPassword({
               {i18n?.sign_in?.link_text}
             </a>
           )}
-          {message && <span>{message}</span>}
-          {error && <span color="danger">{error}</span>}
         </Flex>
       </Flex>
     </form>
@@ -110,17 +122,23 @@ function EmailAuth({
   i18n,
   appearance,
   passwordLimit = false,
+  showToast,
   onBackClick,
   onSuccess,
 }) {
   const isMounted = useRef<boolean>(true);
+  const labels = i18n?.[authView];
   const [email, setEmail] = useState(defaultEmail);
   const [password, setPassword] = useState(defaultPassword);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const labels = i18n?.[authView];
-
+  const [error, setError] = useState<string>();
+  const [message, setMessage] = useState<string>();
+  useEffect(() => {
+    if (error) showToast(error, true);
+  }, [error]);
+  useEffect(() => {
+    if (message) showToast(message);
+  }, [message]);
   useEffect(() => {
     isMounted.current = true;
     setEmail(defaultEmail);
@@ -133,7 +151,6 @@ function EmailAuth({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
     switch (authView) {
       case "sign_in":
@@ -191,8 +208,30 @@ function EmailAuth({
       autoComplete={"on"}
     >
       <Flex direction="column" gap="3">
-        <BackButton onClick={onBackClick} />
+        <Flex>
+          <BackButton
+            onClick={(e) => {
+              e.preventDefault();
+              if (authView === "sign_in") onBackClick();
+              else {
+                handleViewChange("sign_in");
+              }
+            }}
+          />
+          {authView === "sign_in" && (
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                handleViewChange("sign_up");
+              }}
+            >
+              {i18n?.sign_up?.link_text} {">"}
+            </Button>
+          )}
+        </Flex>
+
         <Flex direction="column" gap="3">
+          {/* email */}
           <div>
             <label htmlFor="email">{labels?.email_label}</label>
             <Input
@@ -206,82 +245,59 @@ function EmailAuth({
             />
           </div>
 
-          <div>
-            <label htmlFor="password">{labels?.password_label}</label>
-            <Input
-              id="password"
-              type="password"
-              name="password"
-              placeholder={labels?.password_input_placeholder}
-              defaultValue={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete={
-                authView === "sign_in" ? "current-password" : "new-password"
-              }
-            />
-          </div>
+          {/* password */}
+          {["sign_in", "sign_up"].includes(authView) && (
+            <div>
+              <label htmlFor="password">{labels?.password_label}</label>
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                placeholder={labels?.password_input_placeholder}
+                defaultValue={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete={
+                  authView === "sign_in" ? "current-password" : "new-password"
+                }
+              />
+            </div>
+          )}
         </Flex>
-        <button type="submit">
+
+        {authView === "sign_in" && (
+          <a
+            href="#auth-forgot-password"
+            onClick={(e) => {
+              e.preventDefault();
+              setAuthView("forgotten_password");
+            }}
+          >
+            {i18n?.forgotten_password?.link_text}
+          </a>
+        )}
+
+        <button>
           {loading ? labels?.loading_button_label : labels?.button_label}
         </button>
-        {showLinks && (
-          <Flex direction="column">
-            {authView === "sign_in" && magicLink && (
-              <a
-                href="#auth-magic-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setAuthView("magic_link");
-                }}
-              >
-                {i18n?.magic_link?.link_text}
-              </a>
-            )}
-            {authView === "sign_in" && (
-              <a
-                href="#auth-forgot-password"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setAuthView("forgotten_password");
-                }}
-              >
-                {i18n?.forgotten_password?.link_text}
-              </a>
-            )}
-            {authView === "sign_in" ? (
-              <a
-                href="#auth-sign-up"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleViewChange("sign_up");
-                }}
-              >
-                {i18n?.sign_up?.link_text}
-              </a>
-            ) : (
-              <a
-                href="#auth-sign-in"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleViewChange("sign_in");
-                }}
-              >
-                {i18n?.sign_in?.link_text}
-              </a>
-            )}
-          </Flex>
+
+        {authView === "sign_in" && magicLink && (
+          <a
+            href="#auth-magic-link"
+            onClick={(e) => {
+              e.preventDefault();
+              setAuthView("magic_link");
+            }}
+          >
+            {i18n?.magic_link?.link_text}
+          </a>
         )}
       </Flex>
-
-      {message && <span>{message}</span>}
-      {error && <span>{error}</span>}
     </form>
   );
 }
 
-export const Login = ({ authToken, modalState, setModalState }) => {
+export const Login = ({ authToken, modalState, setModalState, showToast }) => {
   const [view, setView] = useState();
-
   if (authToken) {
     return <>Vous êtes déjà connecté.</>;
   }
@@ -289,27 +305,37 @@ export const Login = ({ authToken, modalState, setModalState }) => {
   if (view === "forgotten_password")
     return (
       <>
+        <BackButton
+          onClick={(e) => {
+            e.preventDefault();
+            setView("sign_in");
+          }}
+        />
         <ForgottenPassword
           supabaseClient={supabase()}
           i18n={i18n}
           setAuthView={(viewName) => setView(viewName)}
+          showToast={showToast}
           onSuccess={() => {
             setModalState({ ...modalState, isOpen: false });
           }}
         />
-        <BackButton onClick={() => setView("sign_in")} />
       </>
     );
 
   return (
-    <EmailAuth
-      supabaseClient={supabase()}
-      i18n={i18n}
-      setAuthView={(viewName) => setView(viewName)}
-      onBackClick={() => setModalState({ ...modalState, isOpen: false })}
-      onSuccess={() => {
-        setModalState({ ...modalState, isOpen: false });
-      }}
-    />
+    <>
+      <EmailAuth
+        authView={view}
+        setAuthView={(viewName) => setView(viewName)}
+        supabaseClient={supabase()}
+        i18n={i18n}
+        showToast={showToast}
+        onBackClick={() => setModalState({ ...modalState, isOpen: false })}
+        onSuccess={() => {
+          setModalState({ ...modalState, isOpen: false });
+        }}
+      />
+    </>
   );
 };

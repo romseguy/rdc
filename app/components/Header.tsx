@@ -3,6 +3,9 @@ import { useState } from "react";
 import { isMobile } from "react-device-detect";
 import { useNavigate } from "react-router";
 import { toCss } from "~/utils";
+import { Flex } from "./Containers";
+import { ArrowRightIcon } from "@radix-ui/react-icons";
+import { Select } from "@radix-ui/themes";
 
 export const Header = ({ ...props }) => {
   const {
@@ -37,10 +40,51 @@ export const Header = ({ ...props }) => {
           display: "flex",
           flexDirection: isMobile ? "column" : "row",
           alignItems: "center",
+          justifyContent: "space-between",
           gap: "6px",
           marginBottom: isMobile ? "12px" : "0px",
+          padding: "5px 0 6px 0",
         })}
       >
+        <Flex>
+          <Flex>
+            <ArrowRightIcon />
+            Sélectionnez une bibliothèque
+          </Flex>
+
+          <Select.Root
+            defaultValue={lib?.name}
+            onValueChange={(value) => {
+              props.setLib(value);
+            }}
+          >
+            <Select.Trigger variant="classic" />
+            <Select.Content>
+              {libs?.map((l) => (
+                <Select.Item key={"lib-" + l.id} value={l.name}>
+                  {l.name}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+
+          <div>ou une thématique</div>
+
+          <Select.Root
+            defaultValue="0"
+            onOpenChange={(isOpen) => {
+              if (isOpen)
+                alert(
+                  "Si vous êtes intéressé par cette fonctionnalité, vous pouvez envoyer un mail à contact@romseguy.com pour me le faire savoir.",
+                );
+            }}
+          >
+            <Select.Trigger variant="classic" />
+            <Select.Content>
+              <Select.Item value="0">À venir...</Select.Item>
+            </Select.Content>
+          </Select.Root>
+        </Flex>
         <button
           className="with-icon"
           onClick={async (e) => {
@@ -54,22 +98,6 @@ export const Header = ({ ...props }) => {
               }
             } else {
               props.setModalState({ ...props.modalState, isOpen: true });
-              // const email = prompt("Saisissez votre adresse e-mail");
-              // const password = prompt("Saisissez votre mot de passe");
-
-              // if (email && password) {
-              //   const { data } = await client.post("/login", {
-              //     email,
-              //     password,
-              //   });
-
-              //   if (data.error) {
-              //     showToast(data.message, true);
-              //   } else {
-              //     setAccessToken(data.session.access_token);
-              //     setRefreshToken(data.session.refresh_token);
-              //   }
-              // }
             }
           }}
         >
@@ -85,19 +113,6 @@ export const Header = ({ ...props }) => {
           </svg>
           {user ? <div css={toCss({})}>{user.email}</div> : "Connexion"}
         </button>
-
-        <div>Bibliothèque :</div>
-
-        <select
-          defaultValue={lib?.name}
-          onChange={(e) => {
-            props.setLib(e.target.value);
-          }}
-        >
-          {libs?.map((l) => (
-            <option key={"lib-" + l.id}>{l.name}</option>
-          ))}
-        </select>
       </div>
 
       <div css={toCss({ display: "flex", overflowX: "scroll" })}>

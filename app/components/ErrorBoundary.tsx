@@ -67,12 +67,16 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
               <br />
               <br />
               {message}
-              <br />
-              <br />
-              - Détails de l'erreur :
-              <br />
-              <br />
-              {message}
+              {details && (
+                <>
+                  <br />
+                  <br />
+                  - Détails de l'erreur :
+                  <br />
+                  <br />
+                  {details}
+                </>
+              )}
             </MailToBody>
           </MailTo>
         )}
