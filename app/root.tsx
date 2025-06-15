@@ -1,7 +1,7 @@
 import "./root.scss";
-import { Theme } from "@radix-ui/themes";
 import type { Route } from "./+types/root";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import { useEffect } from "react";
 
 export { ErrorBoundary } from "~/components/ErrorBoundary";
 
@@ -26,11 +26,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
 //
 
 export default function Root({ ...props }) {
-  return (
-    <Theme appearance="dark">
-      <Outlet />
-    </Theme>
-  );
+  useEffect(() => {
+    (async () => {
+      const countryIS = "https://api.ipify.org?format=json";
+
+      try {
+        const res = await fetch(countryIS);
+        const data = res.json();
+        //await api.post("/", { ip: data.ip });
+      } catch (error) {
+        console.log("🚀 ~ ipLocation ~ error:", error);
+      }
+    })();
+  }, []);
+
+  return <Outlet />;
 }
 
 export const links: Route.LinksFunction = () => [

@@ -1,3 +1,4 @@
+import { decode } from "html-entities";
 import locale from "date-fns/locale/af";
 import { useEffect, useMemo, useState } from "react";
 import { MailTo, MailToBody, MailToTrigger } from "@slalombuild/react-mailto";
@@ -100,34 +101,36 @@ export const Livre = ({ ...props }) => {
         <>
           {!modalState.isOpen && (
             <>
-              <header
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  //justifyContent: "center",
-                }}
-              >
-                <BackButton
-                  onClick={() => {
-                    navigate("/");
-                    //setBook(null);
+              {!hasEditing && (
+                <header
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    //justifyContent: "center",
                   }}
-                />
+                >
+                  <BackButton
+                    onClick={() => {
+                      navigate("/");
+                      //setBook(null);
+                    }}
+                  />
 
-                {book.title && (
-                  <h1>
-                    {book.is_conf ? "Conférence" : "Livre"} :{" "}
-                    <i>{book.title}</i>
-                  </h1>
-                )}
+                  {book.title && (
+                    <h1>
+                      {book.is_conf ? "Conférence" : "Livre"} :{" "}
+                      <i>{book.title}</i>
+                    </h1>
+                  )}
 
-                {!book.title && (
-                  <h1>
-                    Livre {book.id} de la bibliothèque :{" "}
-                    <i>{props.loaderData.lib.name}</i>
-                  </h1>
-                )}
-              </header>
+                  {!book.title && (
+                    <h1>
+                      Livre {book.id} de la bibliothèque :{" "}
+                      <i>{props.loaderData.lib.name}</i>
+                    </h1>
+                  )}
+                </header>
+              )}
 
               <section>
                 {!hasEditing && (
@@ -301,11 +304,11 @@ export const Livre = ({ ...props }) => {
                     >
                       {row
                         .filter((note) => !note.isEditing)
-                        .map((note) => {
+                        .map((note, index) => {
                           return (
                             <Note
                               key={"note-" + note.id}
-                              note={note}
+                              note={{ ...note, index }}
                               user={user}
                               isLoading={isLoading[note.id]}
                               toggleModal={toggleModal}
@@ -485,7 +488,20 @@ export const Livre = ({ ...props }) => {
                   {modalState.note.page ? "p." + modalState.note.page : ""}
                 </h1>
                 <MailTo
-                  subject={"Citation du livre : " + "" + ""}
+                  subject={`Citation ${
+                    modalState.note.page ? "p." + modalState.note.page : ""
+                  } du ${
+                    book.title
+                      ? ""
+                      : modalState.note.index === 0
+                      ? "premier"
+                      : Number(modalState.note.index + 1) + "ème"
+                  }${
+                    book.title
+                      ? " livre : " + book.title
+                      : " livre de la bibliothèque : " +
+                        props.loaderData.lib.name
+                  } `}
                   //cc={["cc1@example.com", "cc2@example.com"]}
                   //bcc={["bcc@example.com"]}
                   //obfuscate
@@ -495,11 +511,7 @@ export const Livre = ({ ...props }) => {
                     - Citation du livre {""} :
                     <br />
                     <br />
-                    {modalState.note.desc
-                      .replace(/<\/?[^>]+(>|$)/g, "")
-                      .replace(/&#(\d+);/g, function (match, dec) {
-                        return String.fromCharCode(dec);
-                      })}
+                    {decode(modalState.note.desc.replace(/(<([^>]+)>)/gi, ""))}
                   </MailToBody>
                 </MailTo>
 

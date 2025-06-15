@@ -1,8 +1,8 @@
 import { useStorage } from "@charlietango/hooks/use-storage";
+import { Theme } from "@radix-ui/themes";
 import React, { useEffect, useState } from "react";
-import { BackButton, FullScreen, Header } from "~/components";
+import { FullScreen, Header, ToastsContainer } from "~/components";
 import { Login } from "~/components/Login";
-import { ToastsContainer } from "~/components/Toast";
 import { client, tokenKey } from "~/utils";
 import type { Lib, User } from "~/utils/types";
 
@@ -46,6 +46,7 @@ export const Page = ({ ...props }) => {
   const [modalState, setModalState] = useState({ isOpen: false });
   //#endregion
 
+  const [appearance, setAppearance] = useState("dark");
   const [lib, _setLib] = useState<Lib>();
   const setLib = (libName: string) => {
     const l = loaderData.libs?.find((li) => li.name === libName);
@@ -56,6 +57,8 @@ export const Page = ({ ...props }) => {
     ...{
       lib,
       setLib,
+      appearance,
+      setAppearance,
       // auth
       accessToken,
       refreshToken,
@@ -74,28 +77,31 @@ export const Page = ({ ...props }) => {
     <>
       <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
 
-      {modalState.isOpen && (
-        <FullScreen direction="column">
-          <Login
-            authToken={authToken}
-            setAuthToken={setAuthToken}
-            modalState={modalState}
-            setModalState={setModalState}
-          />
-        </FullScreen>
-      )}
+      <Theme appearance={appearance}>
+        {modalState.isOpen && (
+          <FullScreen direction="column">
+            <Login
+              authToken={authToken}
+              setAuthToken={setAuthToken}
+              modalState={modalState}
+              setModalState={setModalState}
+              showToast={showToast}
+            />
+          </FullScreen>
+        )}
 
-      {!modalState.isOpen && (
-        <div id="page">
-          <header>
-            <Header {...childProps} />
-          </header>
+        {!modalState.isOpen && (
+          <div id="page">
+            <header>
+              <Header {...childProps} />
+            </header>
 
-          <main style={{ maxWidth: "50em", margin: "0 auto" }}>
-            {React.createElement(element, childProps)}
-          </main>
-        </div>
-      )}
+            <main style={{ maxWidth: "50em", margin: "0 auto" }}>
+              {React.createElement(element, childProps)}
+            </main>
+          </div>
+        )}
+      </Theme>
     </>
   );
 };

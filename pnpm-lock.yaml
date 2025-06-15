@@ -29,6 +29,9 @@ dependencies:
   '@radix-ui/react-slot':
     specifier: ^1.2.3
     version: 1.2.3(@types/react@19.1.8)(react@19.1.0)
+  '@radix-ui/react-toggle':
+    specifier: ^1.1.9
+    version: 1.1.9(@types/react-dom@19.1.6)(@types/react@19.1.8)(react-dom@19.1.0)(react@19.1.0)
   '@radix-ui/themes':
     specifier: ^3.2.1
     version: 3.2.1(@types/react-dom@19.1.6)(@types/react@19.1.8)(react-dom@19.1.0)(react@19.1.0)
@@ -74,6 +77,9 @@ dependencies:
   globals:
     specifier: 15.11.0
     version: 15.11.0
+  html-entities:
+    specifier: ^2.6.0
+    version: 2.6.0
   isbot:
     specifier: ^5.1.27
     version: 5.1.28
@@ -4464,6 +4470,10 @@ packages:
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
       lru-cache: 7.18.3
+    dev: false
+
+  /html-entities@2.6.0:
+    resolution: {integrity: sha512-kig+rMn/QOVRvr7c86gQ8lWXq+Hkv6CbAH1hLu+RG338StTpE8Z0b44SDVaqVu7HGKf27frdmUYEs9hTUX/cLQ==}
     dev: false
 
   /http-errors@2.0.0:

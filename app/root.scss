@@ -1,16 +1,21 @@
 //@import "tailwindcss";
 @import "tailwindcss/base";
 @import "@radix-ui/themes/styles.css";
-
 @tailwind components;
 @tailwind utilities;
 
-$lightgreen: #81e6d9;
-$green: #4fd1c5;
+.radix-themes {
+  --cursor-button: pointer;
+}
+.radix-themes.light {
+  background: rgba(211, 211, 211, 0.9);
+}
+.radix-themes.dark {
+  background: rgba(0, 0, 0, 0.9);
+}
 
 :root {
-  // react-router
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  //font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.87);
@@ -18,26 +23,23 @@ $green: #4fd1c5;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  // radix-themes
 }
 
 :root,
 html,
 body,
-.radix-themes,
 #page {
   margin: 0;
   padding: 0;
 }
 
 body {
+  font-family: var(--default-font-family);
   background-image: url("/bg.jpg");
   background-repeat: repeat;
 }
-
-.radix-themes {
-  background: rgba(0, 0, 0, 0.9);
+* {
+  font-family: var(--default-font-family);
 }
 
 #error-page > div {
@@ -87,11 +89,11 @@ p {
   fill: green;
 }
 .edit-icon {
-  stroke: $lightgreen;
+  stroke: var(--green-a11);
   fill: none;
   &:hover {
     //stroke: white;
-    fill: $lightgreen;
+    fill: #81e6d9;
   }
 }
 
@@ -109,13 +111,12 @@ button {
   justify-content: center;
   border: 0;
   border-radius: 4px;
-  color: black;
   cursor: pointer;
   padding: 8px;
-  background: $lightgreen;
+  background: var(--green-9);
 }
 button:hover {
-  background: $green;
+  background: var(--green-8);
 }
 button:focus,
 button:focus-visible {
@@ -133,12 +134,15 @@ button:focus-visible {
 }
 button.with-icon {
   gap: 6px;
+  & svg {
+    stroke: black;
+  }
 }
 button.with-icon:hover {
-  background: white;
+  background: var(--green-10);
   &:hover {
     svg {
-      stroke: green;
+      stroke: white;
     }
   }
 }

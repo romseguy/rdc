@@ -9,8 +9,9 @@ import { loader as rootLoader } from "./_index";
 import type { Route } from "./+types/$";
 
 export const loader = async (props: Route.LoaderArgs) => {
-  const data = await rootLoader(props);
+  const data = await rootLoader();
   const id = props.params["*"] || "";
+
   if (id.includes("livre")) {
     const bookId = id.substring(6);
     for (const lib of data.libs) {
@@ -36,8 +37,9 @@ export const loader = async (props: Route.LoaderArgs) => {
     if (data.book && data.note) data.is404 = false;
   }
 
-  data.lib =
-    data.libs.find((lib) => lib.id === data.book?.library_id) || data.libs[0];
+  if (data.book)
+    data.lib = data.libs.find((lib) => lib.id === data.book.library_id);
+
   return data;
 };
 export default function CatchAllRoute(props) {
