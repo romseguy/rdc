@@ -1,4 +1,4 @@
-import { Editor } from "@tinymce/tinymce-react";
+import { Editor, type IAllProps } from "@tinymce/tinymce-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { bindEvent, getImageSize, MB } from "~/utils";
@@ -16,7 +16,6 @@ interface BlobInfo {
 
 export const RTEditor = ({
   defaultValue,
-  placeholder,
   readOnly,
   value,
   onBlur,
@@ -24,6 +23,10 @@ export const RTEditor = ({
   ...props
 }: {
   defaultValue?: string | null;
+  height?: number;
+  minHeight?: number;
+  maxHeight?: number;
+  readOnly?: boolean;
   setIsLoading?: (bool: boolean) => void;
   value?: string;
   onBlur?: (html: string) => void;

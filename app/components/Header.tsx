@@ -1,14 +1,15 @@
 import { css } from "@emotion/react";
 import { ArrowRightIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { Select } from "@radix-ui/themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
-import { useNavigate } from "react-router";
+import { useNavigate, useNavigation } from "react-router";
 import { Flex } from "~/components";
 import { Toggle } from "~/components/ui/toggle";
 import { toCss } from "~/utils";
 
 export const Header = ({ ...props }) => {
+  const lib = props.lib || props.loaderData.lib;
   const {
     loaderData: { libs, book },
     user,
@@ -19,15 +20,21 @@ export const Header = ({ ...props }) => {
     setAppearance,
   } = props;
 
-  const lib = props.lib || props.loaderData.lib;
-
+  const navigation = useNavigation();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
-
+  useEffect(() => {
+    if (navigation.state === "idle")
+      setIsLoading(
+        Object.keys(isLoading).reduce(
+          (ret, key) => ({ ...ret, [key]: false }),
+          {},
+        ),
+      );
+  }, [navigation.state]);
   const onBookClick = async (b) => {
     setIsLoading({ ...isLoading, [b.id]: true });
     await navigate("/livre/" + b.id);
-    setIsLoading({ ...isLoading, [b.id]: false });
   };
 
   return (
@@ -134,66 +141,32 @@ export const Header = ({ ...props }) => {
       </div>
 
       <div css={toCss({ display: "flex", overflowX: "scroll" })}>
-        {lib?.books.map((b, index) => {
-          if (isLoading[b.id])
-            return (
-              <div
-                key={"book-" + index}
-                css={css`
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  text-align: center;
-                  height: 225px;
-                  min-width: 146px;
-                  cursor: pointer;
-                  border: ${b.id === book?.id
-                    ? "1px solid yellow"
-                    : "1px solid white"};
-                `}
-                onClick={() => onBookClick(b)}
-              >
-                <div className="spinner" />
-              </div>
-            );
-
-          if (b.src) {
-            return (
-              <img
-                key={"book-" + index}
-                src={b.src}
-                css={css`
-                  cursor: pointer;
-                  border: ${b.id === book?.id
-                    ? "1px solid yellow"
-                    : "1px solid white"};
-                `}
-                onClick={() => onBookClick(b)}
-              />
-            );
-          }
-
-          return (
-            <div
-              key={"book-" + index}
-              css={css`
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                height: 225px;
-                width: 140px;
-                cursor: pointer;
-                border: ${b.id === book?.id
-                  ? "1px solid yellow"
-                  : "1px solid white"};
-              `}
-              onClick={() => onBookClick(b)}
-            >
-              {b.title}
-            </div>
-          );
-        })}
+        {lib?.books.map((b, index) => (
+          <div
+            key={"book-" + index}
+            css={css`
+              ${b.src && "background: url(" + b.src + ");"}
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              text-align: center;
+              height: 225px;
+              width: 140px;
+              cursor: pointer;
+              border: ${b.id === book?.id
+                ? "1px solid yellow"
+                : "1px solid white"};
+            `}
+            onClick={() =>
+              !Object.keys(isLoading).find((key) => !!isLoading[key]) &&
+              !isLoading[b.id] &&
+              onBookClick(b)
+            }
+          >
+            {isLoading[b.id] && <div className="spinner" />}
+            {!isLoading[b.id] && b.title}
+          </div>
+        ))}
       </div>
     </div>
   );

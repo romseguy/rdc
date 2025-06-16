@@ -7,9 +7,11 @@ import { Note } from "~/routes/Note";
 
 import { loader as rootLoader } from "./_index";
 import type { Route } from "./+types/$";
+import type { Book, Note as NoteT, RootData } from "~/utils";
+import { Theme } from "@radix-ui/themes";
 
 export const loader = async (props: Route.LoaderArgs) => {
-  const data = await rootLoader();
+  const data: RootData & { book?: Book; note?: NoteT } = await rootLoader();
   const id = props.params["*"] || "";
 
   if (id.includes("livre")) {
@@ -37,11 +39,14 @@ export const loader = async (props: Route.LoaderArgs) => {
     if (data.book && data.note) data.is404 = false;
   }
 
-  if (data.book)
-    data.lib = data.libs.find((lib) => lib.id === data.book.library_id);
+  if (data.book) {
+    const lib = data.libs.find((lib) => lib.id === data.book!.library_id);
+    if (lib) data.lib = lib;
+  }
 
   return data;
 };
+
 export default function CatchAllRoute(props) {
   const loaderData = props.loaderData || {};
   const { is404 } = loaderData;
@@ -54,6 +59,9 @@ export default function CatchAllRoute(props) {
       path: "livre/:id",
       element: <Page element={Livre} loaderData={loaderData} {...props} />,
     },
-    { path: "note/:id", element: <Note loaderData={loaderData} {...props} /> },
+    {
+      path: "note/:id",
+      element: <Page element={Note} simple {...props} />,
+    },
   ]);
 }

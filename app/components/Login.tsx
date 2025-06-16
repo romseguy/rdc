@@ -1,9 +1,8 @@
+import { Button } from "@radix-ui/themes";
 import { useEffect, useRef, useState } from "react";
 import { Input } from "./ui/input";
+import { BackButton, Flex } from "~/components";
 import { supabase } from "~/utils";
-import { Flex } from "./Containers";
-import { BackButton } from "./Controls";
-import { Button } from "@radix-ui/themes";
 
 const variables = {
   email_label: "Adresse e-mail",
@@ -36,13 +35,20 @@ const i18n = {
 };
 
 function ForgottenPassword({
+  i18n,
+  redirectTo,
   setAuthView = (string) => {},
   supabaseClient,
-  redirectTo,
-  i18n,
-  appearance,
   showLinks = false,
   showToast,
+}: {
+  i18n: any;
+  redirectTo?: string;
+  setAuthView?: (string: any) => void;
+  supabaseClient: any;
+  showLinks?: boolean | undefined;
+  showToast: any;
+  onSuccess: () => void;
 }) {
   const labels = i18n?.forgotten_password;
   const [email, setEmail] = useState("");
@@ -86,9 +92,9 @@ function ForgottenPassword({
             />
           </div>
 
-          <button type="submit" color="primary" loading={loading}>
+          <Button type="submit" loading={loading}>
             {loading ? labels?.loading_button_label : labels?.button_label}
-          </button>
+          </Button>
 
           {showLinks && (
             <a
@@ -115,12 +121,10 @@ function EmailAuth({
   setDefaultEmail = (email) => {},
   setDefaultPassword = (password) => {},
   supabaseClient,
-  showLinks = true,
-  redirectTo,
-  additionalData,
+  redirectTo = "",
+  additionalData = {},
   magicLink = true,
   i18n,
-  appearance,
   passwordLimit = false,
   showToast,
   onBackClick,
@@ -297,7 +301,7 @@ function EmailAuth({
 }
 
 export const Login = ({ authToken, modalState, setModalState, showToast }) => {
-  const [view, setView] = useState();
+  const [view, setView] = useState<string>();
   if (authToken) {
     return <>Vous êtes déjà connecté.</>;
   }

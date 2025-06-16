@@ -10,14 +10,27 @@ export enum ENoteOrder {
 //   ID: EOrder.ID,
 //   PAGE: EOrder.PAGE,
 // };
+export type Comment = {
+  id: string;
+  html: string;
+  comment_email: string;
+  created_at: string;
+};
+export type NoteT = Note & {
+  isEditing?: boolean;
+  isNew?: boolean;
+  index?: number;
+};
 export type Note = {
   id: string;
   desc: string;
   desc_en?: string;
-  isEditing?: boolean;
   page?: number;
   book_id: string;
+  note_email?: string;
+  comments?: Comment[];
 };
+export type BookT = Omit<Book, "notes"> & { notes?: NoteT[] };
 export type Book = {
   id: string;
   title?: string;
@@ -30,15 +43,21 @@ export type Lib = {
   id: string;
   name: string;
   author: string;
-  author_url: string;
+  author_url?: string;
   books?: Book[];
 };
 
-type SeedNote = Omit<Note, "id"> & { id?: string };
+type SeedNote = Omit<Note, "id" | "book_id"> & { id?: string };
 type SeedBook = Omit<Book, "notes" | "id"> & {
   notes?: SeedNote[];
 };
 export type Seed = Omit<Lib, "id" | "books"> & {
   id?: string;
   books: SeedBook[];
+};
+
+export type RootData = {
+  libs: Lib[];
+  lib: Lib;
+  is404: boolean;
 };

@@ -1,13 +1,20 @@
 import { useStorage } from "@charlietango/hooks/use-storage";
+import { ArrowUpIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { Theme } from "@radix-ui/themes";
 import React, { useEffect, useState } from "react";
-import { FullScreen, Header, ToastsContainer } from "~/components";
+import {
+  FullScreen,
+  Header,
+  ToastsContainer,
+  type ToastProps,
+} from "~/components";
 import { Login } from "~/components/Login";
+import { Toggle } from "~/components/ui/toggle";
 import { client, tokenKey } from "~/utils";
 import type { Lib, User } from "~/utils/types";
 
 export const Page = ({ ...props }) => {
-  const { element, loaderData } = props;
+  const { element, loaderData, simple } = props;
 
   //#region auth
   const [authToken, setAuthToken] = useStorage(tokenKey, {
@@ -28,7 +35,7 @@ export const Page = ({ ...props }) => {
   }, [accessToken, refreshToken]);
   //#endregion
   //#region toast
-  const [toasts, setToasts] = useState([]);
+  const [toasts, setToasts] = useState<any[]>([]);
   const showToast = (message: string, isError = false) => {
     const toast = {
       id: toasts.length,
@@ -46,7 +53,7 @@ export const Page = ({ ...props }) => {
   const [modalState, setModalState] = useState({ isOpen: false });
   //#endregion
 
-  const [appearance, setAppearance] = useState("dark");
+  const [appearance, setAppearance] = useState<any>("dark");
   const [lib, _setLib] = useState<Lib>();
   const setLib = (libName: string) => {
     const l = loaderData.libs?.find((li) => li.name === libName);
@@ -73,6 +80,29 @@ export const Page = ({ ...props }) => {
     },
   };
 
+  if (simple)
+    return (
+      <Theme appearance={appearance}>
+        <Toggle
+          style={{ position: "fixed", right: 0 }}
+          onPressedChange={(pressed) =>
+            setAppearance(pressed ? "dark" : "light")
+          }
+        >
+          {appearance === "dark" ? <SunIcon /> : <MoonIcon />}
+        </Toggle>
+        <Toggle
+          style={{ position: "fixed", bottom: 0, right: 0 }}
+          onPressedChange={(pressed) =>
+            window.scrollTo({ top: 0, behavior: "smooth" })
+          }
+        >
+          <ArrowUpIcon />
+        </Toggle>
+        {React.createElement(element, childProps)}
+      </Theme>
+    );
+
   return (
     <>
       <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
@@ -82,7 +112,6 @@ export const Page = ({ ...props }) => {
           <FullScreen direction="column">
             <Login
               authToken={authToken}
-              setAuthToken={setAuthToken}
               modalState={modalState}
               setModalState={setModalState}
               showToast={showToast}

@@ -1,11 +1,7 @@
-//@import "tailwindcss";
-@import "tailwindcss/base";
 @import "@radix-ui/themes/styles.css";
-@tailwind components;
-@tailwind utilities;
-
 .radix-themes {
   --cursor-button: pointer;
+  --default-font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 .radix-themes.light {
   background: rgba(211, 211, 211, 0.9);
@@ -14,8 +10,11 @@
   background: rgba(0, 0, 0, 0.9);
 }
 
+@import "tailwindcss/base";
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  //font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.87);
@@ -34,7 +33,6 @@ body,
 }
 
 body {
-  font-family: var(--default-font-family);
   background-image: url("/bg.jpg");
   background-repeat: repeat;
 }

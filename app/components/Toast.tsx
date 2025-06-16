@@ -2,13 +2,20 @@ import { useState, useEffect } from "react";
 import "./Toast.scss";
 import { css } from "@emotion/react";
 
-const Toast = ({ id, delay = 5500, message, onHide, isError }) => {
+export interface ToastProps {
+  id: number;
+  message: string;
+  delay: number;
+  isError: boolean;
+  onHide?: (id: number) => void;
+}
+const Toast = ({ id, delay = 5500, message, onHide, isError }: ToastProps) => {
   const [className, setClassname] = useState("toast-container show-toast");
 
   // console.log("🚀 ~ render toast");
   useEffect(() => {
     // console.log("🚀 ~ toast set timeout");
-    let hideTimeout = null;
+    let hideTimeout: NodeJS.Timeout;
     const timeout = setTimeout(() => {
       // console.log("🚀 ~ toast timeout");
       setClassname("toast-container hide-toast");

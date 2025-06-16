@@ -6,8 +6,8 @@ import {
   client,
   toCss,
   type Lib,
-  type Book,
-  type Note as NoteT,
+  type BookT,
+  type NoteT,
   ENoteOrder,
 } from "~/utils";
 import { css } from "@emotion/react";
@@ -27,7 +27,7 @@ export const Livre = ({ ...props }) => {
   }, []);
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   const [locale, setLocale] = useState("fr");
-  const [book, setBook] = useState<null | Book>(props.loaderData.book);
+  const [book, setBook] = useState<BookT>(props.loaderData.book);
   useEffect(() => {
     if (props.loaderData.book) {
       if (book) setBook(props.loaderData.book);
@@ -36,7 +36,7 @@ export const Livre = ({ ...props }) => {
   }, [props.loaderData]);
   const hasEditing = useMemo(() => {
     if (!book || !book.notes) return false;
-    return book?.notes?.filter((n) => n.isEditing).length > 0;
+    return book.notes?.filter((n) => n.isEditing).length > 0;
   }, [book]);
   const [order, setOrder] = useState<ENoteOrder>();
   const notesGrid = useMemo(() => {
@@ -76,7 +76,7 @@ export const Livre = ({ ...props }) => {
 
     setBook({
       ...book,
-      notes: book?.notes?.map((note) => {
+      notes: book.notes?.map((note) => {
         if (note.id === n.id) return n;
         return note;
       }),
@@ -145,7 +145,7 @@ export const Livre = ({ ...props }) => {
                     <AddNoteButton book={book} setBook={setBook} />
 
                     {/* order */}
-                    {book.notes?.length > 0 && (
+                    {book.notes && book.notes.length > 0 && (
                       <select
                         onChange={(e) =>
                           setOrder(e.target.value as unknown as ENoteOrder)
@@ -192,7 +192,7 @@ export const Livre = ({ ...props }) => {
                                     onClick={() => {
                                       setBook({
                                         ...book,
-                                        notes: book?.notes
+                                        notes: book.notes
                                           ?.filter((n) => {
                                             if (!note.isNew) return true;
                                             return n.id !== note.id;
@@ -262,7 +262,7 @@ export const Livre = ({ ...props }) => {
 
                                     setBook({
                                       ...book,
-                                      notes: book?.notes?.map((n) => {
+                                      notes: book.notes?.map((n) => {
                                         if (n.id === note.id)
                                           return {
                                             ...note,
@@ -312,7 +312,6 @@ export const Livre = ({ ...props }) => {
                               user={user}
                               isLoading={isLoading[note.id]}
                               toggleModal={toggleModal}
-                              showToast={showToast}
                               locale={locale}
                               setLocale={setLocale}
                               onOpenClick={() => {
@@ -326,7 +325,7 @@ export const Livre = ({ ...props }) => {
                                 });
                                 setBook({
                                   ...book,
-                                  notes: book?.notes?.map((n) => {
+                                  notes: book.notes?.map((n) => {
                                     if (n.id === note.id)
                                       return { ...n, isEditing: true };
                                     return n;
@@ -362,7 +361,7 @@ export const Livre = ({ ...props }) => {
                                   }
                                   setBook({
                                     ...book,
-                                    notes: book?.notes?.filter(
+                                    notes: book.notes?.filter(
                                       (n) => n.id !== note.id,
                                     ),
                                   });
@@ -387,11 +386,13 @@ export const Livre = ({ ...props }) => {
 
                                 setBook({
                                   ...book,
-                                  notes: book?.notes?.map((n) => {
+                                  notes: book.notes?.map((n) => {
                                     if (n.id === note.id) {
                                       return {
                                         ...n,
-                                        comments: n.comments.concat([data]),
+                                        comments: (n.comments || []).concat([
+                                          data,
+                                        ]),
                                       };
                                     }
                                     return n;
@@ -414,11 +415,11 @@ export const Livre = ({ ...props }) => {
 
                                   setBook({
                                     ...book,
-                                    notes: book?.notes?.map((n) => {
+                                    notes: book.notes?.map((n) => {
                                       if (n.id === note.id) {
                                         return {
                                           ...n,
-                                          comments: n.comments.filter(
+                                          comments: (n.comments || []).filter(
                                             (c) => c.id !== comment.id,
                                           ),
                                         };
@@ -487,7 +488,9 @@ export const Livre = ({ ...props }) => {
                   Partager la citation{" "}
                   {modalState.note.page ? "p." + modalState.note.page : ""}
                 </h1>
+
                 <MailTo
+                  to=""
                   subject={`Citation ${
                     modalState.note.page ? "p." + modalState.note.page : ""
                   } du ${
@@ -495,7 +498,9 @@ export const Livre = ({ ...props }) => {
                       ? ""
                       : modalState.note.index === 0
                       ? "premier"
-                      : Number(modalState.note.index + 1) + "ème"
+                      : typeof modalState.note.index === "number"
+                      ? Number(modalState.note.index + 1) + "ème"
+                      : ""
                   }${
                     book.title
                       ? " livre : " + book.title

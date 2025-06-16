@@ -1,7 +1,6 @@
-import { Flex as RFlex } from "@radix-ui/themes";
-import type React from "react";
+import { Flex as RFlex, type FlexProps } from "@radix-ui/themes";
 
-export const Flex = ({ children, ...props }: React.PropsWithChildren<{}>) => {
+export const Flex = ({ children, ...props }: FlexProps) => {
   return (
     <RFlex align="center" gap="1" {...props}>
       {children}

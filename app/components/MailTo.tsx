@@ -57,11 +57,13 @@ const extractBodyContent = (
 ): string => {
   let bodyContent = "";
 
-  const traverse = (node: React.ReactNode, currentLevel: number) => {
+  const traverse = (node: any, currentLevel: number) => {
     const indent = " ".repeat(currentLevel * MAIL_TO_INDENT_SPACING_DEFAULT);
     if (typeof node === "string") {
       bodyContent += node;
-    } else if (React.isValidElement(node)) {
+    } else if (
+      React.isValidElement<React.PropsWithChildren<{ spacing?: number }>>(node)
+    ) {
       switch (node.type) {
         case "br":
           bodyContent += "\n";
@@ -72,12 +74,12 @@ const extractBodyContent = (
           );
           break;
         case MailToIndent:
-          React.Children.forEach(
-            [
-              " ".repeat(node.props.spacing ?? MAIL_TO_INDENT_SPACING_DEFAULT),
-              ...node.props.children,
-            ],
-            (child) => traverse(child, currentLevel),
+          const arr = [
+            " ".repeat(node.props.spacing ?? MAIL_TO_INDENT_SPACING_DEFAULT),
+          ];
+          const arr2 = [node.props.children];
+          React.Children.forEach([...arr, ...arr2], (child) =>
+            traverse(child, currentLevel),
           );
           break;
         case "ul":
@@ -118,7 +120,9 @@ const extractBodyContent = (
     }
   };
 
-  React.Children.forEach(children, (child) => traverse(child, level));
+  React.Children.forEach<React.ReactNode>(children, (child) =>
+    traverse(child, level),
+  );
   return bodyContent.trim();
 };
 

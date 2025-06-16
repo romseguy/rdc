@@ -15,7 +15,7 @@ import {
   fullDateString,
   toCss,
   useScroll,
-  type Note as NoteT,
+  type NoteT,
   type User,
 } from "~/utils";
 
@@ -30,7 +30,6 @@ export const Note = ({
   onDeleteCommentClick,
   isEditing = false,
   isLoading = false,
-  showToast,
   toggleModal,
   locale,
   setLocale,
@@ -44,8 +43,10 @@ export const Note = ({
   onSubmitCommentClick?: any;
   onDeleteCommentClick?: any;
   isLoading?: boolean;
-  isEditing: boolean;
-  showToast: any;
+  isEditing?: boolean;
+  toggleModal?: (note: NoteT) => void;
+  locale: string;
+  setLocale: (string) => void;
 }) => {
   const desc =
     locale === "en"
@@ -57,18 +58,17 @@ export const Note = ({
       : note.desc;
 
   const [isPageEdit, setIsPageEdit] = useState(false);
-  const [page, setPage] = useState<number>(note.page);
+  const [page, setPage] = useState<number | undefined>(note.page);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [comment, setComment] = useState();
+  const [comment, setComment] = useState<{ html: string }>();
   const [isShowComments, setIsShowComments] = useState(false);
   const [executeScroll, elementToScrollRef] = useScroll<HTMLDivElement>();
   const [isAddComment, setIsAddComment] = useState(false);
 
-  const editor = () => {
+  const editor = (locale: string) => {
     return (
       <RTEditor
         defaultValue={desc}
-        placeholder="Saisissez le texte de la citation"
         onChange={({ html }) => {
           note[`desc${locale === "en" ? "_en" : ""}`] = html;
         }}
@@ -117,7 +117,7 @@ export const Note = ({
           <ShareIcon
             {...iconProps({
               title: "Partager la citation",
-              onClick: () => toggleModal(note),
+              onClick: () => toggleModal && toggleModal(note),
             })}
           />
           <EditIcon

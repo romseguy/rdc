@@ -62,7 +62,7 @@ export const client = {
       return { data: { error, message: error.message } };
     }
   },
-  async post(endpoint: string, body: Record<string, string>) {
+  async post(endpoint: string, body: any) {
     const url = endpoint === "/" ? baseUrl : baseUrl + endpoint;
     const prefix = `🚀 ~ POST ${url} ~ `;
     console.log(prefix);
@@ -90,7 +90,7 @@ export const client = {
       return { data: { error, message: error.message } };
     }
   },
-  async put(endpoint: string, body: Record<string, string>) {
+  async put(endpoint: string, body: any) {
     const url = endpoint === "/" ? baseUrl : baseUrl + endpoint;
     const prefix = `🚀 ~ PUT ${url} ~ `;
     console.log(prefix);
