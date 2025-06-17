@@ -1,17 +1,6 @@
 @import "@radix-ui/themes/styles.css";
 @config "../tailwind.config.mjs";
-@tailwind base;
 @tailwind utilities;
-
-:root {
-  // line-height: 1;
-  // font-weight: 400;
-  // color: rgba(255, 255, 255, 0.87);
-  // font-synthesis: none;
-  // text-rendering: optimizeLegibility;
-  // -webkit-font-smoothing: antialiased;
-  // -moz-osx-font-smoothing: grayscale;
-}
 
 .radix-themes {
   --cursor-button: pointer;
@@ -22,26 +11,44 @@
   &.light {
     --color-background: rgba(211, 211, 211, 0.3);
     #modal {
-      background: rgba(211, 211, 211, 0.9);
+      background: var(--color-background);
     }
-    #page > main {
-      background: rgba(211, 211, 211, 0.4);
+    #home-page {
+      background: var(--color-background);
+    }
+    #book-page {
+      background: var(--color-background);
+      section > main {
+        background: rgba(211, 211, 211, 0.9);
+      }
+    }
+    #note-page > main {
+      background: rgba(211, 211, 211, 0.9);
     }
   }
   &.dark {
     --color-background: rgba(0, 0, 0, 0.5);
     #modal {
+      background: var(--color-background);
+    }
+    #home-page {
       background: rgba(0, 0, 0, 0.7);
     }
-    #page > main {
+    #book-page {
+      background: var(--color-background);
+      section > main {
+        background: rgba(0, 0, 0, 0.7);
+      }
+    }
+    #note-page > main {
       background: rgba(0, 0, 0, 0.7);
     }
   }
 }
 
 #auth-sign-in {
+  background: var(--color-background);
   font-family: var(--secondary-font-family);
-  background: black;
   padding: 24px;
 
   a {
@@ -55,121 +62,40 @@
   padding: 24px;
 }
 
-main {
-  padding: 12px;
-  & > header {
-    margin-bottom: 12px;
+button {
+  &.back-btn,
+  &.cancel-btn {
+    background: var(--red-9);
+    &:hover {
+      background: var(--red-10);
+    }
+  }
+  &.with-icon {
+    & > svg {
+      stroke: currentColor;
+    }
   }
 }
 
-/* #region icons */
-.icon,
-.icon-fill {
-}
-.icon {
-  stroke: currentColor;
-}
-.icon:hover {
-  stroke: green;
-}
-.icon-fill {
-  fill: currentColor;
-}
-.icon-fill:hover {
-  fill: green;
+.delete-icon {
+  fill: white;
+  stroke: red;
 }
 .edit-icon {
-  stroke: var(--green-a11);
+  stroke: var(--green-9);
   fill: none;
-  &:hover {
-    //stroke: white;
-    fill: #81e6d9;
-  }
+}
+.share-icon {
+  fill: white;
+}
+
+/* #region editor */
+.tox-tinymce {
+  border-radius: 0 !important;
 }
 /* #endregion */
 
-/* #region controls */
-// button {
-//   // border: 1px solid transparent;
-//   // padding: 0.6em 1.2em;
-//   // font-size: 1em;
-//   // font-weight: 500;
-//   // font-family: inherit;
-//   // background-color: rgba(255, 255, 255, 0.2);
-//   //transition: border-color 0.25s;
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-//   border: 0;
-//   border-radius: 4px;
-//   cursor: pointer;
-//   padding: 8px;
-//   background: var(--green-9);
-// }
-// button:hover {
-//   background: var(--green-8);
-// }
-// button:focus,
-// button:focus-visible {
-//   outline: 4px auto -webkit-focus-ring-color;
-// }
-
-// /* back button */
-.back-btn,
-.cancel-btn {
-  background: red !important;
-  font-weight: bold !important;
-  &:hover {
-    background: crimson !important;
-  }
-}
-// button.with-icon {
-//   gap: 6px;
-//   & svg {
-//     stroke: black;
-//   }
-// }
-// button.with-icon:hover {
-//   background: var(--green-10);
-//   &:hover {
-//     svg {
-//       stroke: white;
-//     }
-//   }
-// }
-
-// /* edit button */
-// button .edit-icon {
-//   stroke: black;
-//   fill: none;
-// }
-
-// /* specific input */
-// input[type="file"] {
-//   height: 0;
-//   width: 0;
-//   overflow: hidden;
-// }
-// input[type="file"] + label {
-//   border-radius: 8px;
-//   border: 1px solid transparent;
-//   padding: 0.6em 1.2em;
-//   //font-size: 1em;
-//   font-weight: 500;
-//   font-family: inherit;
-//   background-color: rgba(255, 255, 255, 0.2);
-//   cursor: pointer;
-// }
-input[type="number"] {
-  width: 45px;
-}
-
-// textarea {
-//   padding: 6px;
-// }
-/* #endregion */
-
-/* #region utils */
+/* #region spinner */
 @keyframes rotator {
   0% {
     transform: rotate(0);
@@ -203,17 +129,72 @@ input[type="number"] {
 }
 /* #endregion */
 
-/* #region editor */
-.tox-tinymce {
-  border-radius: 0 !important;
+/* #region toast */
+.toasts-container {
+  position: fixed;
+  z-index: 65535;
+  right: 0;
+  max-width: 250px;
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.toasts-container > .toast-container {
+  margin-bottom: 10px;
+}
+
+.toasts-container:last-child {
+  margin-bottom: 0;
+}
+
+.toast-container {
+  visibility: hidden;
+  position: relative;
+  z-index: 65535;
+  right: -1000px;
+
+  border: 2px solid black;
+  border-radius: 10px;
+  padding: 10px;
+
+  max-width: 250px;
+}
+
+.toast-container.show-toast {
+  visibility: visible;
+  right: 24px;
+  animation: slidein 0.5s;
+}
+
+.toast-container.hide-toast {
+  visibility: visible;
+  animation: slideout 0.5s;
+}
+
+@keyframes slidein {
+  from {
+    right: -1000px;
+    opacity: 0;
+  }
+  to {
+    right: 24px;
+    opacity: 1;
+  }
+}
+
+@keyframes slideout {
+  from {
+    right: 24px;
+    opacity: 1;
+  }
+  to {
+    right: -1000px;
+    opacity: 0;
+  }
 }
 /* #endregion */
 
-/* reset */
-button {
-  all: unset;
-}
-
+/* #region toggle */
 .Toggle {
   background-color: white;
   color: var(--mauve-11);
@@ -237,3 +218,4 @@ button {
 .Toggle:focus {
   box-shadow: 0 0 0 2px black;
 }
+/* #endregion */

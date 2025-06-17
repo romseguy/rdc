@@ -94,6 +94,7 @@ export const Header = ({ ...props }) => {
               justify-content: center;
               text-align: center;
               height: 225px;
+              min-width: 140px;
               width: 140px;
               cursor: pointer;
               border: ${b.id === book?.id

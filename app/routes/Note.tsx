@@ -11,7 +11,6 @@ import { toCss } from "~/utils";
 //const Slider = lazy(() => import("rc-slider"));
 
 export const Note = (props) => {
-  // console.log("🚀 ~ Note ~ props:", props);
   const {
     loaderData: { lib, book, note },
   } = props;
@@ -28,7 +27,7 @@ export const Note = (props) => {
   }, []);
 
   return (
-    <>
+    <div id="note-page">
       {note === undefined && <>La citation n'a pas été trouvée.</>}
       {note && (
         <>
@@ -161,6 +160,6 @@ export const Note = (props) => {
           </main>
         </>
       )}
-    </>
+    </div>
   );
 };

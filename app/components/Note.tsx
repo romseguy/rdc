@@ -1,3 +1,4 @@
+import { css } from "@emotion/react";
 import { Button } from "@radix-ui/themes";
 import { useState } from "react";
 import { isMobile } from "react-device-detect";
@@ -38,6 +39,7 @@ export const Note = (props: {
   appearance: string;
 }) => {
   const {
+    notes,
     note,
     user,
     onOpenClick,
@@ -138,16 +140,9 @@ export const Note = (props: {
   );
 
   return (
-    <div
-      css={toCss({
-        //fontSize: "smaller",
-        //paddingBottom: "12px",
-        //display: "flex",
-        //flexDirection: "column",
-      })}
-    >
+    <section>
       {/* note header */}
-      <div
+      <header
         css={toCss({
           padding: isMobile ? "0 0 6px 0" : "6px",
           background: "purple",
@@ -203,13 +198,7 @@ export const Note = (props: {
             )}
 
             {!isMobile && (
-              <div
-                css={toCss({
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                })}
-              >
+              <Flex justify="between">
                 <div
                   css={toCss({
                     display: "flex",
@@ -231,35 +220,33 @@ export const Note = (props: {
                   <div>Cité par {toUsername(note.note_email)}</div>
                 </div>
 
+                <div>
+                  {note.index !== 0 && "< Note précédente"}
+                  {note.index !== notes.length - 1 && "Note suivante >"}
+                </div>
+
                 <NoteHeaderRight
                   css={toCss({
                     display: "flex",
                     gap: "12px",
                   })}
                 />
-              </div>
+              </Flex>
             )}
           </>
         )}
-      </div>
+      </header>
 
       {/* note desc */}
-      <div
+      <main
         key={"note-" + note.id}
-        css={toCss({
-          padding: isMobile ? "0px" : "6px",
-          background:
-            appearance === "dark" ? "transparent" : "rgba(255,255,255,0.8)",
-          maxHeight: "250px",
-          lineHeight: "2",
-          //maxHeight: window.innerHeight - 250 + "px",
-          //height: "100%",
-          //height: "100px",
-          overflowY: isEditing ? "hidden" : "scroll",
-          //overflowX: "hidden",
-          //width: "200px",
-          //textOverflow: "ellipsis",
-        })}
+        css={css`
+          max-height: 250px;
+          line-height: 2;
+          padding: ${isMobile ? "0px" : "6px"};
+          ${isEditing ? "min-height: 250px;" : ""}
+          ${!isEditing ? "overflow-y: scroll" : ""}
+        `}
       >
         {isEditing && editor(locale)}
         {!isEditing && (
@@ -269,7 +256,7 @@ export const Note = (props: {
             }}
           />
         )}
-      </div>
+      </main>
 
       {/* comments */}
       {!note.isNew && (
@@ -411,6 +398,6 @@ export const Note = (props: {
           <div ref={elementToScrollRef} />
         </div>
       )}
-    </div>
+    </section>
   );
 };

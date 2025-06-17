@@ -39,18 +39,19 @@ export const AddNoteButton = ({ book, setBook, ...props }) => {
   return (
     <Button
       disabled={!!book?.notes?.find(({ isNew }) => isNew)}
-      onClick={() => {
-        const id = book?.notes?.length + 1;
-        setBook({
+      onClick={(e) => {
+        const id = (book?.notes || []).length + 1;
+        const b = {
           ...book,
-          notes: book.notes?.concat([
+          notes: (book.notes || []).concat([
             {
               id: id.toString(),
               isEditing: true,
               isNew: true,
             },
           ]),
-        });
+        };
+        setBook(b);
       }}
       {...props}
     >
@@ -59,7 +60,7 @@ export const AddNoteButton = ({ book, setBook, ...props }) => {
   );
 };
 
-export const LocaleSwitch = ({ locale, setLocale }) => {
+export const LocaleSwitch = ({ locale, setLocale, ...props }) => {
   return (
     <>
       {locale === "en" && (
@@ -70,9 +71,11 @@ export const LocaleSwitch = ({ locale, setLocale }) => {
           viewBox="0 0 30 30.000001"
           preserveAspectRatio="xMidYMid meet"
           zoomAndPan="magnify"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setLocale("fr");
           }}
+          {...props}
         >
           <defs>
             <clipPath id="id1">
@@ -119,9 +122,11 @@ export const LocaleSwitch = ({ locale, setLocale }) => {
           viewBox="0 0 30 30.000001"
           preserveAspectRatio="xMidYMid meet"
           zoomAndPan="magnify"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setLocale("en");
           }}
+          {...props}
         >
           <defs>
             <clipPath id="id1">
@@ -238,25 +243,14 @@ export const ExternalIcon = ({ ...props }) => (
   </svg>
 );
 export const ShareIcon = ({ ...props }) => (
-  <svg className="icon-fill" viewBox="0 0 512 512" {...props}>
+  <svg className="share-icon" viewBox="0 0 512 512" {...props}>
     <g stroke="currentColor">
       <path d="M503.691 189.836L327.687 37.851C312.281 24.546 288 35.347 288 56.015v80.053C127.371 137.907 0 170.1 0 322.326c0 61.441 39.581 122.309 83.333 154.132 13.653 9.931 33.111-2.533 28.077-18.631C66.066 312.814 132.917 274.316 288 272.085V360c0 20.7 24.3 31.453 39.687 18.164l176.004-152c11.071-9.562 11.086-26.753 0-36.328z"></path>
     </g>
   </svg>
 );
 export const DeleteIcon = ({ ...props }) => (
-  <svg
-    className="icon-fill"
-    css={css`
-      fill: white;
-      stroke: red;
-      &:hover {
-        fill: red;
-      }
-    `}
-    viewBox="0 0 24 24"
-    {...props}
-  >
+  <svg className="delete-icon" viewBox="0 0 24 24" {...props}>
     <path d="M19.452 7.5H4.547a.5.5 0 00-.5.545l1.287 14.136A2 2 0 007.326 24h9.347a2 2 0 001.992-1.819L19.95 8.045a.5.5 0 00-.129-.382.5.5 0 00-.369-.163zm-9.2 13a.75.75 0 01-1.5 0v-9a.75.75 0 011.5 0zm5 0a.75.75 0 01-1.5 0v-9a.75.75 0 011.5 0zM22 4h-4.75a.25.25 0 01-.25-.25V2.5A2.5 2.5 0 0014.5 0h-5A2.5 2.5 0 007 2.5v1.25a.25.25 0 01-.25.25H2a1 1 0 000 2h20a1 1 0 000-2zM9 3.75V2.5a.5.5 0 01.5-.5h5a.5.5 0 01.5.5v1.25a.25.25 0 01-.25.25h-5.5A.25.25 0 019 3.75z"></path>
   </svg>
 );

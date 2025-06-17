@@ -23,7 +23,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function Root({ ...props }) {
+export default function Root() {
   useEffect(() => {
     if (process.env.NODE_ENV === "production")
       (async () => {

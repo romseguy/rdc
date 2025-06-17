@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import "./Toast.scss";
 import { css } from "@emotion/react";
 
 export interface ToastProps {

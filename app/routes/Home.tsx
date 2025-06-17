@@ -1,8 +1,10 @@
-export function Home({ ...props }) {
+export function Home(props) {
+  const {
+    loaderData: { libs },
+  } = props;
   const lib = props.lib || props.loaderData.lib;
-
   return (
-    <>
+    <div id="home-page">
       <h1>
         Bibliothèque : <i>{lib?.name}</i>
       </h1>
@@ -14,6 +16,6 @@ export function Home({ ...props }) {
           </a>
         </li>
       </ul>
-    </>
+    </div>
   );
 }

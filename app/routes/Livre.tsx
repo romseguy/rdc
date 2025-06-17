@@ -1,37 +1,20 @@
-import { decode } from "html-entities";
-import locale from "date-fns/locale/af";
-import { useEffect, useMemo, useState } from "react";
-import { MailTo, MailToBody, MailToTrigger } from "@slalombuild/react-mailto";
-import {
-  client,
-  toCss,
-  type Lib,
-  type BookT,
-  type NoteT,
-  ENoteOrder,
-} from "~/utils";
 import { css } from "@emotion/react";
-import { AddNoteButton, BackButton, Note, Header } from "~/components";
+import { Button } from "@radix-ui/themes";
+import { MailTo, MailToBody, MailToTrigger } from "@slalombuild/react-mailto";
+import { decode } from "html-entities";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { AddNoteButton, BackButton, Note, Header } from "~/components";
+import { client, toCss, type BookT, type NoteT, ENoteOrder } from "~/utils";
 
 export const Livre = ({ ...props }) => {
-  // console.log("🚀 ~ Livre ~ props:", props);
-
-  const { user, showToast, appearance } = props;
-
+  const { user, showToast, appearance, locale, setLocale } = props;
   const navigate = useNavigate();
-
-  const [isLoaded, setIsLoaded] = useState(false);
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
-  const [locale, setLocale] = useState("fr");
   const [book, setBook] = useState<BookT>(props.loaderData.book);
   useEffect(() => {
     if (props.loaderData.book) {
       if (book) setBook(props.loaderData.book);
-      else showToast("Le livre n'a pas été trouvé.");
     }
   }, [props.loaderData]);
   const hasEditing = useMemo(() => {
@@ -95,12 +78,13 @@ export const Livre = ({ ...props }) => {
   //#endregion
 
   return (
-    <>
+    <div id="book-page">
       {book === undefined && <>Le livre n'a pas été trouvé.</>}
       {book && (
         <>
           {!modalState.isOpen && (
             <>
+              {/* book header */}
               {!hasEditing && (
                 <header
                   style={{
@@ -132,7 +116,8 @@ export const Livre = ({ ...props }) => {
                 </header>
               )}
 
-              <section>
+              <main>
+                {/* add note button */}
                 {!hasEditing && (
                   <div
                     style={{
@@ -149,8 +134,12 @@ export const Livre = ({ ...props }) => {
                           setOrder(e.target.value as unknown as ENoteOrder)
                         }
                       >
-                        <option value={ENoteOrder.ID}>Plus récent</option>
-                        <option value={ENoteOrder.PAGE}>Page</option>
+                        <option value={ENoteOrder.ID}>
+                          Citations plus récentes en premier
+                        </option>
+                        <option value={ENoteOrder.PAGE}>
+                          De la première à la dernière page
+                        </option>
                       </select>
                     )}
 
@@ -170,6 +159,7 @@ export const Livre = ({ ...props }) => {
                           return (
                             <div key={"note-" + note.id}>
                               <Note
+                                notes={book.notes}
                                 note={note}
                                 user={user}
                                 isEditing
@@ -292,122 +282,95 @@ export const Livre = ({ ...props }) => {
                 })}
 
                 {/* readonly notes */}
-                {notesGrid.map((row, index) => {
-                  return (
-                    <div
-                      key={"note-" + index}
-                      style={
-                        {
-                          //display: "flex"
+                {!hasEditing &&
+                  notesGrid.map((row, index) => {
+                    return (
+                      <div
+                        key={"note-" + index}
+                        style={
+                          {
+                            //display: "flex"
+                          }
                         }
-                      }
-                    >
-                      {row
-                        .filter((note) => !note.isEditing)
-                        .map((note, index) => {
-                          return (
-                            <Note
-                              key={"note-" + note.id}
-                              note={{ ...note, index }}
-                              user={user}
-                              isLoading={isLoading[note.id]}
-                              toggleModal={toggleModal}
-                              locale={locale}
-                              setLocale={setLocale}
-                              appearance={appearance}
-                              onOpenClick={() => {
-                                navigate("/note/" + note.id);
-                                //setNote(note);
-                              }}
-                              onEditClick={() => {
-                                setIsLoading({
-                                  ...isLoading,
-                                  [note.id]: true,
-                                });
-                                setBook({
-                                  ...book,
-                                  notes: book.notes?.map((n) => {
-                                    if (n.id === note.id)
-                                      return { ...n, isEditing: true };
-                                    return n;
-                                  }),
-                                });
-                                setIsLoading({
-                                  ...isLoading,
-                                  [note.id]: false,
-                                });
-                              }}
-                              onEditPageClick={(page) =>
-                                onEditPageClick({ ...note, page })
-                              }
-                              onDeleteClick={async () => {
-                                const ok = confirm(
-                                  "Êtes-vous sûr de vouloir supprimer cette citation ?",
-                                );
-                                if (ok) {
+                      >
+                        {row
+                          .filter((note) => !note.isEditing)
+                          .map((note, index) => {
+                            return (
+                              <Note
+                                key={"note-" + note.id}
+                                notes={book.notes}
+                                note={{ ...note, index }}
+                                user={user}
+                                isLoading={isLoading[note.id]}
+                                toggleModal={toggleModal}
+                                locale={locale}
+                                setLocale={setLocale}
+                                appearance={appearance}
+                                onOpenClick={() => {
+                                  navigate("/note/" + note.id);
+                                  //setNote(note);
+                                }}
+                                onEditClick={() => {
                                   setIsLoading({
                                     ...isLoading,
                                     [note.id]: true,
                                   });
-                                  const { data } = await client.delete(
-                                    "/note?id=" + note.id,
-                                  );
-                                  if (data.error) {
-                                    setIsLoading({
-                                      ...isLoading,
-                                      [note.id]: false,
-                                    });
-                                    showToast(data.message, true);
-                                    return;
-                                  }
                                   setBook({
                                     ...book,
-                                    notes: book.notes?.filter(
-                                      (n) => n.id !== note.id,
-                                    ),
+                                    notes: book.notes?.map((n) => {
+                                      if (n.id === note.id)
+                                        return { ...n, isEditing: true };
+                                      return n;
+                                    }),
                                   });
                                   setIsLoading({
                                     ...isLoading,
                                     [note.id]: false,
                                   });
+                                }}
+                                onEditPageClick={(page) =>
+                                  onEditPageClick({ ...note, page })
                                 }
-                              }}
-                              onSubmitCommentClick={async (comment) => {
-                                const { data } = await client.post(
-                                  "/comments",
-                                  {
-                                    ...comment,
-                                    note_id: note.id,
-                                  },
-                                );
-                                if (data.error) {
-                                  showToast(data.message);
-                                  return;
-                                }
-
-                                setBook({
-                                  ...book,
-                                  notes: book.notes?.map((n) => {
-                                    if (n.id === note.id) {
-                                      return {
-                                        ...n,
-                                        comments: (n.comments || []).concat([
-                                          data,
-                                        ]),
-                                      };
+                                onDeleteClick={async () => {
+                                  const ok = confirm(
+                                    "Êtes-vous sûr de vouloir supprimer cette citation ?",
+                                  );
+                                  if (ok) {
+                                    setIsLoading({
+                                      ...isLoading,
+                                      [note.id]: true,
+                                    });
+                                    const { data } = await client.delete(
+                                      "/note?id=" + note.id,
+                                    );
+                                    if (data.error) {
+                                      setIsLoading({
+                                        ...isLoading,
+                                        [note.id]: false,
+                                      });
+                                      showToast(data.message, true);
+                                      return;
                                     }
-                                    return n;
-                                  }),
-                                });
-                              }}
-                              onDeleteCommentClick={async (comment) => {
-                                const ok = confirm(
-                                  "Êtes-vous sûr de vouloir supprimer ce commentaire ?",
-                                );
-
-                                if (ok) {
-                                  const { data } = await client.delete(
-                                    "/comment?id=" + comment.id,
+                                    setBook({
+                                      ...book,
+                                      notes: book.notes?.filter(
+                                        (n) => n.id !== note.id,
+                                      ),
+                                    });
+                                    setIsLoading({
+                                      ...isLoading,
+                                      [note.id]: false,
+                                    });
+                                  }
+                                }}
+                                onSubmitCommentClick={async (comment) => {
+                                  const { data } = await client.post(
+                                    "/comments",
+                                    {
+                                      ...comment,
+                                      note_id: note.id,
+                                    },
                                   );
                                   if (data.error) {
                                     showToast(data.message);
@@ -420,22 +383,52 @@ export const Livre = ({ ...props }) => {
                                       if (n.id === note.id) {
                                         return {
                                           ...n,
-                                          comments: (n.comments || []).filter(
-                                            (c) => c.id !== comment.id,
-                                          ),
+                                          comments: (n.comments || []).concat([
+                                            data,
+                                          ]),
                                         };
                                       }
+                                      return n;
                                     }),
                                   });
-                                }
-                              }}
-                            />
-                          );
-                        })}
-                    </div>
-                  );
-                })}
+                                }}
+                                onDeleteCommentClick={async (comment) => {
+                                  const ok = confirm(
+                                    "Êtes-vous sûr de vouloir supprimer ce commentaire ?",
+                                  );
 
+                                  if (ok) {
+                                    const { data } = await client.delete(
+                                      "/comment?id=" + comment.id,
+                                    );
+                                    if (data.error) {
+                                      showToast(data.message);
+                                      return;
+                                    }
+
+                                    setBook({
+                                      ...book,
+                                      notes: book.notes?.map((n) => {
+                                        if (n.id === note.id) {
+                                          return {
+                                            ...n,
+                                            comments: (n.comments || []).filter(
+                                              (c) => c.id !== comment.id,
+                                            ),
+                                          };
+                                        }
+                                      }),
+                                    });
+                                  }
+                                }}
+                              />
+                            );
+                          })}
+                      </div>
+                    );
+                  })}
+
+                {/* add note button */}
                 {!hasEditing &&
                   Array.isArray(book.notes) &&
                   book.notes.length > 1 && (
@@ -443,7 +436,7 @@ export const Livre = ({ ...props }) => {
                       <AddNoteButton book={book} setBook={setBook} />
                     </div>
                   )}
-              </section>
+              </main>
             </>
           )}
 
@@ -542,6 +535,6 @@ export const Livre = ({ ...props }) => {
           )}
         </>
       )}
-    </>
+    </div>
   );
 };

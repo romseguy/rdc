@@ -1,4 +1,5 @@
 import { useStorage } from "@charlietango/hooks/use-storage";
+import { css } from "@emotion/react";
 import {
   ArrowUpIcon,
   BookmarkIcon,
@@ -10,7 +11,13 @@ import { Root as ToggleRoot, Toggle } from "@radix-ui/react-toggle";
 import { Button, Separator, Theme } from "@radix-ui/themes";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { Flex, FullScreen, Header, ToastsContainer } from "~/components";
+import {
+  Flex,
+  FullScreen,
+  Header,
+  LocaleSwitch,
+  ToastsContainer,
+} from "~/components";
 import { Login } from "~/components/Login";
 import { client, tokenKey } from "~/utils";
 import type { Lib, User } from "~/utils/types";
@@ -60,6 +67,7 @@ export const Page = ({ ...props }) => {
     type: "local",
     defaultValue: "dark",
   });
+  const [locale, setLocale] = useState("fr");
 
   const [lib, _setLib] = useState<Lib>();
   const setLib = (libName: string) => {
@@ -73,6 +81,8 @@ export const Page = ({ ...props }) => {
       setLib,
       appearance,
       setAppearance,
+      locale,
+      setLocale,
       // auth
       accessToken,
       refreshToken,
@@ -93,8 +103,7 @@ export const Page = ({ ...props }) => {
         <Toggle
           className="Toggle"
           onPressedChange={(pressed) => {
-            console.log("🚀 ~ Page ~ pressed:", pressed);
-            setAppearance(pressed ? "light" : "dark");
+            setAppearance(appearance === "dark" ? "light" : "dark");
           }}
         >
           {appearance === "dark" ? <SunIcon /> : <MoonIcon />}
@@ -112,10 +121,16 @@ export const Page = ({ ...props }) => {
   );
 
   const pageTitle = (
-    <Flex justify="between">
+    <Flex justify="between" pt="1">
       <Separator style={{ visibility: "hidden" }} />
       <h1
         style={{
+          letterSpacing: 2,
+          borderRadius: 9999,
+          paddingLeft: "24px",
+          paddingRight: "24px",
+          color: "white",
+          background: "purple",
           fontSize: "36px",
           fontFamily: "Griffy",
           fontWeight: "normal",
@@ -124,7 +139,15 @@ export const Page = ({ ...props }) => {
         }}
         onClick={() => navigate("/")}
       >
-        Recueil de citations
+        <Flex>
+          Recueil de citations
+          <LocaleSwitch
+            locale={locale}
+            setLocale={setLocale}
+            width="1em"
+            height="1em"
+          />
+        </Flex>
       </h1>
       <Button
         className="with-icon"
@@ -199,7 +222,7 @@ export const Page = ({ ...props }) => {
               <Header {...childProps} />
             </header>
 
-            <main>{React.createElement(element, childProps)}</main>
+            {React.createElement(element, childProps)}
           </div>
         )}
       </Theme>

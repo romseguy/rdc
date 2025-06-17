@@ -6,8 +6,8 @@ import Sitemap from "~/components/Sitemap";
 
 export const loader = async () => {
   let data: RootData = {
-    libs: seed as Lib[],
-    lib: seed[0] as Lib,
+    libs: seed,
+    lib: seed[0],
     is404: true,
   };
 
@@ -15,25 +15,29 @@ export const loader = async () => {
     const { data: collections } = await client.get();
 
     if (collections.error) {
-      data.libs = data.libs.map((lib, i) => ({
-        ...lib,
-        id: Number(i + 1).toString(),
-        books: lib.books?.map((book, j) => ({
-          ...book,
-          id: Number(j + 1).toString(),
-          src: undefined,
-          notes: book.notes?.map((note, k) => ({
-            ...note,
-            id: Number(k + 1).toString(),
-            book_id: book.id,
-          })),
-        })),
-      }));
-    } else {
-      data.libs = collections.libraries.map((lib, i) => {
+      data.libs = data.libs.map((lib, i) => {
         return {
           ...lib,
-          id: lib.id || i,
+          id: Number(i + 1).toString(),
+          books: lib.books?.map((book, j) => {
+            const bookId = `${i}${j}`;
+            return {
+              ...book,
+              id: bookId,
+              src: undefined,
+              notes: book.notes?.map((note, k) => ({
+                ...note,
+                id: Number(k + 1).toString(),
+                book_id: bookId,
+              })),
+            };
+          }),
+        };
+      });
+    } else {
+      data.libs = collections.libraries.map((lib) => {
+        return {
+          ...lib,
           books: collections.books
             .filter((book) => book.library_id === lib.id)
             .map((book) => {
@@ -59,7 +63,6 @@ export const loader = async () => {
 
     return data;
   } catch (error: any) {
-    console.log("🚀 ~ loader ~ error:", error);
     return data;
   }
 };

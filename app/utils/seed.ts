@@ -51,11 +51,47 @@ export const seed: Seed[] = [
     ],
   },
   {
-    name: "BDM",
+    name: "Psychologie évolutionnaire",
     author: "Bernard de Montréal",
     books: [
       {
-        title: "Psychologie évolutionnaire",
+        title: "A",
+      },
+      {
+        title: "A",
+      },
+      {
+        title: "A",
+      },
+      {
+        title: "A",
+      },
+      {
+        title: "A",
+      },
+      {
+        title: "A",
+      },
+      {
+        title: "A",
+      },
+      {
+        title: "A",
+      },
+      {
+        title: "A",
+      },
+      {
+        title: "A",
+      },
+      {
+        title: "A",
+      },
+      {
+        title: "A",
+      },
+      {
+        title: "A",
       },
     ],
   },

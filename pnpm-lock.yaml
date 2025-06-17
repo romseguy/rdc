@@ -53,9 +53,6 @@ dependencies:
   '@tailwindcss/postcss':
     specifier: ^4.1.10
     version: 4.1.10
-  '@tailwindcss/vite':
-    specifier: ^4.1.10
-    version: 4.1.10(vite@6.3.5)
   '@tinymce/tinymce-react':
     specifier: 4.3.0
     version: 4.3.0(react-dom@19.1.0)(react@19.1.0)
@@ -86,9 +83,6 @@ dependencies:
   lucide-react:
     specifier: ^0.515.0
     version: 0.515.0(react@19.1.0)
-  postcss-import:
-    specifier: ^16.1.0
-    version: 16.1.0(postcss@8.5.5)
   react:
     specifier: ^19.1.0
     version: 19.1.0
@@ -2925,17 +2919,6 @@ packages:
       tailwindcss: 4.1.10
     dev: false
 
-  /@tailwindcss/vite@4.1.10(vite@6.3.5):
-    resolution: {integrity: sha512-QWnD5HDY2IADv+vYR82lOhqOlS1jSCUUAmfem52cXAhRTKxpDh3ARX8TTXJTCCO7Rv7cD2Nlekabv02bwP3a2A==}
-    peerDependencies:
-      vite: ^5.2.0 || ^6
-    dependencies:
-      '@tailwindcss/node': 4.1.10
-      '@tailwindcss/oxide': 4.1.10
-      tailwindcss: 4.1.10
-      vite: 6.3.5(@types/node@20.19.0)(sass-embedded@1.89.2)
-    dev: false
-
   /@tinymce/tinymce-react@4.3.0(react-dom@19.1.0)(react@19.1.0):
     resolution: {integrity: sha512-iB4cUsYfcJL4NGuKhqCGYuTmFTje3nPxyPv1HxprTsp/YMGuuiiSNWrv3zwI31QX5Cn8qeq9MrMDnbxuRugHyg==}
     peerDependencies:
@@ -5404,18 +5387,6 @@ packages:
   /postcss-import@15.1.0(postcss@8.5.5):
     resolution: {integrity: sha512-hpr+J05B2FVYUAXHeK1YyI267J/dDDhMU6B6civm8hSY1jYJnBXxzKDKDswzJmtLHryrjhnDjqqp/49t8FALew==}
     engines: {node: '>=14.0.0'}
-    peerDependencies:
-      postcss: ^8.0.0
-    dependencies:
-      postcss: 8.5.5
-      postcss-value-parser: 4.2.0
-      read-cache: 1.0.0
-      resolve: 1.22.10
-    dev: false
-
-  /postcss-import@16.1.0(postcss@8.5.5):
-    resolution: {integrity: sha512-7hsAZ4xGXl4MW+OKEWCnF6T5jqBw80/EE9aXg1r2yyn1RsVEU8EtKXbijEODa+rg7iih4bKf7vlvTGYR4CnPNg==}
-    engines: {node: '>=18.0.0'}
     peerDependencies:
       postcss: ^8.0.0
     dependencies:

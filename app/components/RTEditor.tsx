@@ -24,8 +24,8 @@ export const RTEditor = ({
 }: {
   defaultValue?: string | null;
   height?: number;
-  minHeight?: number;
-  maxHeight?: number;
+  //minHeight?: number;
+  //maxHeight?: number;
   readOnly?: boolean;
   setIsLoading?: (bool: boolean) => void;
   value?: string;
@@ -38,8 +38,9 @@ export const RTEditor = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isTouched, setIsTouched] = useState(false);
   const [shortId, setShortId] = useState<string | undefined>();
-  const [maxHeight, setMaxHeight] = useState(0);
-  useEffect(() => setMaxHeight(window.innerHeight - 250), []);
+  const [minHeight, setMinHeight] = useState(250);
+  const [maxHeight, setMaxHeight] = useState(250);
+  //useEffect(() => setMaxHeight(window.innerHeight - 250), []);
 
   //#region tinymce
   const editorRef = useRef<any | null>(null);
@@ -151,15 +152,15 @@ export const RTEditor = ({
       "Spectral;Andale Mono=andale mono,times;Arial=arial,helvetica,sans-serif;Arial Black=arial black,avant garde;Book Antiqua=book antiqua,palatino;Comic Sans MS=comic sans ms,sans-serif;Courier New=courier new,courier;Georgia=georgia,palatino;Helvetica=helvetica;Impact=impact,chicago;Symbol=symbol;Tahoma=tahoma,arial,helvetica,sans-serif;Terminal=terminal,monaco;Times New Roman=times new roman,times;Trebuchet MS=trebuchet ms,geneva;Verdana=verdana,geneva;",
     // https://www.tiny.cloud/docs/tinymce/6/content-behavior-options/#newline_behavior
     forced_root_block_attrs: { style: "text-align: justify;" },
-    height: props.height,
+    //height: props.height || 250,
     language: "fr_FR",
     language_url: "/tinymce/langs/fr_FR.js",
     link_default_target: "_blank",
     paste_postprocess: (editor, args) => {
       args.node.setAttribute("target", "_blank");
     },
-    min_height: props.minHeight,
-    max_height: props.maxHeight || maxHeight,
+    min_height: minHeight,
+    max_height: maxHeight,
     skin: isDark ? "oxide-dark" : undefined,
     text_patterns: [
       { start: "*", end: "*", format: "italic" },
@@ -358,12 +359,6 @@ export const RTEditor = ({
 
   return (
     <>
-      {isLoading && (
-        <div className="spinner">
-          <span>Veuillez patienter...</span>
-        </div>
-      )}
-
       {shortId && (
         <Editor
           disabled={readOnly}

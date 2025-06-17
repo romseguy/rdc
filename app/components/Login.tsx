@@ -112,11 +112,9 @@ function ForgottenPassword({
 
 function EmailAuth({
   authView = "sign_in",
+  setAuthView = (string) => {},
   defaultEmail = "",
   defaultPassword = "",
-  setAuthView = (string) => {},
-  setDefaultEmail = (email) => {},
-  setDefaultPassword = (password) => {},
   supabaseClient,
   redirectTo = "",
   additionalData = {},
@@ -127,7 +125,6 @@ function EmailAuth({
   onBackClick,
   onSuccess,
 }) {
-  const isMounted = useRef<boolean>(true);
   const labels = i18n?.[authView];
   const [email, setEmail] = useState(defaultEmail);
   const [password, setPassword] = useState(defaultPassword);
@@ -141,13 +138,8 @@ function EmailAuth({
     if (message) showToast(message);
   }, [message]);
   useEffect(() => {
-    isMounted.current = true;
     setEmail(defaultEmail);
     setPassword(defaultPassword);
-
-    return () => {
-      isMounted.current = false;
-    };
   }, [authView]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -160,12 +152,14 @@ function EmailAuth({
             email,
             password,
           });
-        if (signInError) setError(signInError.message);
+        if (signInError) setError("Identifiants incorrects");
         else onSuccess();
         break;
       case "sign_up":
         if (passwordLimit && password.length > 72) {
-          setError("Password exceeds maxmium length of 72 characters");
+          setError(
+            "Le mot de passe ne doit pas comporter plus de 72 caractères",
+          );
           return;
         }
         let options: { emailRedirectTo: string; data?: object } = {
@@ -187,19 +181,10 @@ function EmailAuth({
         else if (signUpUser && !signUpSession)
           setMessage(i18n?.sign_up?.confirmation_text as string);
         break;
+      case "magic_link":
+        break;
     }
-
-    /*
-     * it is possible the auth component may have been unmounted at this point
-     * check if component is mounted before setting a useState
-     */
-    if (isMounted.current) setLoading(false);
-  };
-
-  const handleViewChange = (newView) => {
-    setDefaultEmail(email);
-    setDefaultPassword(password);
-    setAuthView(newView);
+    setLoading(false);
   };
 
   return (
@@ -215,7 +200,7 @@ function EmailAuth({
               e.preventDefault();
               if (authView === "sign_in") onBackClick();
               else {
-                handleViewChange("sign_in");
+                setAuthView("sign_in");
               }
             }}
           />
@@ -223,7 +208,7 @@ function EmailAuth({
             <Button
               onClick={(e) => {
                 e.preventDefault();
-                handleViewChange("sign_up");
+                setAuthView("sign_up");
               }}
             >
               {i18n?.sign_up?.link_text} {">"}
@@ -234,11 +219,12 @@ function EmailAuth({
         <Flex direction="column" gap="3">
           {/* email */}
           <Input
+            autoFocus
             id="email"
             type="email"
             name="email"
+            value={email}
             placeholder={labels?.email_input_placeholder}
-            defaultValue={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
           />
@@ -271,7 +257,7 @@ function EmailAuth({
           </a>
         )}
 
-        <Button>
+        <Button type="submit">
           {loading ? labels?.loading_button_label : labels?.button_label}
         </Button>
 
@@ -319,18 +305,16 @@ export const Login = ({ authToken, modalState, setModalState, showToast }) => {
     );
 
   return (
-    <>
-      <EmailAuth
-        authView={view}
-        setAuthView={(viewName) => setView(viewName)}
-        supabaseClient={supabase()}
-        i18n={i18n}
-        showToast={showToast}
-        onBackClick={() => setModalState({ ...modalState, isOpen: false })}
-        onSuccess={() => {
-          setModalState({ ...modalState, isOpen: false });
-        }}
-      />
-    </>
+    <EmailAuth
+      authView={view}
+      setAuthView={(viewName) => setView(viewName)}
+      supabaseClient={supabase()}
+      i18n={i18n}
+      showToast={showToast}
+      onBackClick={() => setModalState({ ...modalState, isOpen: false })}
+      onSuccess={() => {
+        setModalState({ ...modalState, isOpen: false });
+      }}
+    />
   );
 };
