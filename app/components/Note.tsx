@@ -1,3 +1,4 @@
+import { Button } from "@radix-ui/themes";
 import { useState } from "react";
 import { isMobile } from "react-device-detect";
 import {
@@ -9,6 +10,7 @@ import {
   LocaleSwitch,
   PageSwitch,
   iconProps,
+  Flex,
 } from "~/components";
 import {
   toUsername,
@@ -19,21 +21,7 @@ import {
   type User,
 } from "~/utils";
 
-export const Note = ({
-  note,
-  user,
-  onOpenClick,
-  onEditClick,
-  onEditPageClick,
-  onDeleteClick,
-  onSubmitCommentClick,
-  onDeleteCommentClick,
-  isEditing = false,
-  isLoading = false,
-  toggleModal,
-  locale,
-  setLocale,
-}: {
+export const Note = (props: {
   note: NoteT;
   user?: User | null;
   onOpenClick?: any;
@@ -47,7 +35,24 @@ export const Note = ({
   toggleModal?: (note: NoteT) => void;
   locale: string;
   setLocale: (string) => void;
+  appearance: string;
 }) => {
+  const {
+    note,
+    user,
+    onOpenClick,
+    onEditClick,
+    onEditPageClick,
+    onDeleteClick,
+    onSubmitCommentClick,
+    onDeleteCommentClick,
+    isEditing = false,
+    isLoading = false,
+    toggleModal,
+    locale,
+    setLocale,
+    appearance,
+  } = props;
   const desc =
     locale === "en"
       ? note.desc_en
@@ -84,15 +89,9 @@ export const Note = ({
         </div>
       )}
       {!isLoading && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
+        <Flex gap="3">
           {!isMobile && (
-            <button
+            <Button
               className="with-icon"
               style={{ padding: "3px 3px 3px 6px" }}
               onClick={onOpenClick}
@@ -103,7 +102,7 @@ export const Note = ({
                   title: "Ouvrir le lecteur",
                 })}
               />
-            </button>
+            </Button>
           )}
 
           {isMobile && (
@@ -133,7 +132,7 @@ export const Note = ({
               onClick: onDeleteClick,
             })}
           />
-        </div>
+        </Flex>
       )}
     </div>
   );
@@ -141,7 +140,7 @@ export const Note = ({
   return (
     <div
       css={toCss({
-        fontSize: "smaller",
+        //fontSize: "smaller",
         //paddingBottom: "12px",
         //display: "flex",
         //flexDirection: "column",
@@ -249,7 +248,8 @@ export const Note = ({
         key={"note-" + note.id}
         css={toCss({
           padding: isMobile ? "0px" : "6px",
-          background: "rgba(255,255,255,0.1)",
+          background:
+            appearance === "dark" ? "transparent" : "rgba(255,255,255,0.8)",
           maxHeight: "250px",
           lineHeight: "2",
           //maxHeight: window.innerHeight - 250 + "px",
@@ -307,7 +307,7 @@ export const Note = ({
               </div>
 
               <div>
-                <button
+                <Button
                   onClick={(e) => {
                     e.stopPropagation();
                     if (!isAddComment) {
@@ -320,7 +320,7 @@ export const Note = ({
                   }}
                 >
                   Ajouter un commentaire
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -341,16 +341,16 @@ export const Note = ({
                   padding: "6px",
                 })}
               >
-                <button
+                <Button
                   className="cancel-btn"
                   onClick={() => {
                     setIsAddComment(false);
                   }}
                 >
                   Annuler
-                </button>
+                </Button>
 
-                <button
+                <Button
                   onClick={() => {
                     setIsAddComment(false);
                     setIsShowComments(true);
@@ -358,7 +358,7 @@ export const Note = ({
                   }}
                 >
                   Valider
-                </button>
+                </Button>
               </div>
             </div>
           )}

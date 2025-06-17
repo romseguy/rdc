@@ -1,5 +1,5 @@
 import { SunIcon, InfoCircledIcon, MoonIcon } from "@radix-ui/react-icons";
-import { Slider } from "@radix-ui/themes";
+import { Button, Slider, useThemeContext } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { BackButton, Flex } from "~/components";
@@ -10,17 +10,18 @@ import { toCss } from "~/utils";
 //import "rc-slider/assets/index.css";
 //const Slider = lazy(() => import("rc-slider"));
 
-export const Note = ({ ...props }) => {
+export const Note = (props) => {
   // console.log("🚀 ~ Note ~ props:", props);
   const {
     loaderData: { lib, book, note },
   } = props;
+  const isDark = props.appearance === "dark";
   const navigate = useNavigate();
 
-  const [isDark, setIsDark] = useState(true);
+  //const [isDark, setIsDark] = useState(true);
   const [lineHeight, setLineHeight] = useState(2);
   const [size, setSize] = useState(16);
-  const [width, setWidth] = useState(50);
+  const [width, setWidth] = useState(1000);
   const [isLoaded, setIsLoaded] = useState(false);
   useEffect(() => {
     setIsLoaded(true);
@@ -31,61 +32,57 @@ export const Note = ({ ...props }) => {
       {note === undefined && <>La citation n'a pas été trouvée.</>}
       {note && (
         <>
-          <div
-            css={toCss({
-              display: "flex",
-              alignItems: "center",
-              padding: "12px",
-            })}
-          >
-            <BackButton
-              style={{ marginRight: "6px" }}
-              onClick={() => {
-                navigate(-1);
+          <header>
+            <Flex>
+              <BackButton
+                style={{ marginRight: "6px" }}
+                onClick={() => {
+                  navigate(-1);
+                }}
+              />
+
+              <h2>
+                Citation {note.page && `p.${note.page} `}
+                {book?.title ? (
+                  <>
+                    {book.is_conf && (
+                      <>
+                        de la conférence :{" "}
+                        <i>
+                          {book.title} ({lib.name})
+                        </i>
+                      </>
+                    )}
+                    {!book.is_conf && (
+                      <>
+                        du livre :{" "}
+                        <i>
+                          {book?.title} ({lib.name})
+                        </i>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    du {book?.id === 1 ? "premier" : book?.id + "ème"} livre de
+                    la bibliothèque : <i>{lib?.name}</i>
+                  </>
+                )}
+              </h2>
+            </Flex>
+
+            <Flex
+              direction="column"
+              align="start"
+              gap="3"
+              style={{
+                // borderBottom: "1px solid white",
+                // borderTop: "1px solid white",
+                padding: "12px",
+                paddingTop: "0",
               }}
-            />
-
-            <h2>
-              Citation {note.page && `p.${note.page} `}
-              {book?.title ? (
-                <>
-                  {book.is_conf && (
-                    <>
-                      de la conférence :{" "}
-                      <i>
-                        {book.title} ({lib.name})
-                      </i>
-                    </>
-                  )}
-                  {!book.is_conf && (
-                    <>
-                      du livre :{" "}
-                      <i>
-                        {book?.title} ({lib.name})
-                      </i>
-                    </>
-                  )}
-                </>
-              ) : (
-                <>
-                  du {book?.id === 1 ? "premier" : book?.id + "ème"} livre de la
-                  bibliothèque : <i>{lib?.name}</i>
-                </>
-              )}
-            </h2>
-          </div>
-
-          <Flex
-            direction="column"
-            align="start"
-            gap="3"
-            style={{
-              // borderBottom: "1px solid white",
-              // borderTop: "1px solid white",
-              padding: "12px",
-            }}
-          >
-            <button className="with-icon" onClick={() => setIsDark(!isDark)}>
+            >
+              {/* <Button className="with-icon" onClick={() => setIsDark(!isDark)}>
               {isDark ? (
                 <>
                   <SunIcon />
@@ -97,66 +94,65 @@ export const Note = ({ ...props }) => {
                   Utiliser le thème sombre
                 </>
               )}
-            </button>
+            </Button> */}
 
-            <Flex>
-              <InfoCircledIcon stroke="lightblue" />
-              Taille du texte
-            </Flex>
-            {isLoaded && (
-              <Slider
-                defaultValue={[16]}
-                min={1}
-                max={72}
-                step={1}
-                onValueChange={(v) => {
-                  setSize(v[0]);
-                }}
-              />
-            )}
+              <Flex>
+                <InfoCircledIcon stroke="lightblue" />
+                Taille du texte
+              </Flex>
+              {isLoaded && (
+                <Slider
+                  defaultValue={[16]}
+                  min={6}
+                  max={72}
+                  step={1}
+                  onValueChange={(v) => {
+                    setSize(v[0]);
+                  }}
+                />
+              )}
 
-            <Flex>
-              <InfoCircledIcon stroke="lightblue" />
-              Largeur du texte
-            </Flex>
-            {isLoaded && (
-              <Slider
-                defaultValue={[50]}
-                min={20}
-                max={95}
-                step={1}
-                onValueChange={(v) => {
-                  setWidth(v[0]);
-                }}
-              />
-            )}
+              <Flex>
+                <InfoCircledIcon stroke="lightblue" />
+                Largeur du texte
+              </Flex>
+              {isLoaded && (
+                <Slider
+                  defaultValue={[1000]}
+                  min={300}
+                  max={1000}
+                  step={1}
+                  onValueChange={(v) => {
+                    setWidth(v[0]);
+                  }}
+                />
+              )}
 
-            <Flex>
-              <InfoCircledIcon stroke="lightblue" />
-              Espace entre les lignes
+              <Flex>
+                <InfoCircledIcon stroke="lightblue" />
+                Espace entre les lignes
+              </Flex>
+              {isLoaded && (
+                <Slider
+                  defaultValue={[2]}
+                  min={0.1}
+                  max={10}
+                  step={0.1}
+                  onValueChange={(v) => {
+                    setLineHeight(v[0]);
+                  }}
+                />
+              )}
             </Flex>
-            {isLoaded && (
-              <Slider
-                defaultValue={[2]}
-                min={0.1}
-                max={10}
-                step={0.1}
-                onValueChange={(v) => {
-                  setLineHeight(v[0]);
-                }}
-              />
-            )}
-          </Flex>
+          </header>
 
           <main
             style={{
-              ...(isDark
-                ? { color: "white", background: "rgba(0,0,0,0.6)" }
-                : { color: "black", background: "rgba(255,255,255,0.8)" }),
+              ...(isDark ? {} : {}),
               ...{
                 fontSize: size + "px",
                 lineHeight: lineHeight,
-                maxWidth: width + "em",
+                width: width + "px",
                 margin: "0 auto",
               },
             }}

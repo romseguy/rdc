@@ -17,7 +17,7 @@ import { useNavigate } from "react-router";
 export const Livre = ({ ...props }) => {
   // console.log("🚀 ~ Livre ~ props:", props);
 
-  const { user, showToast } = props;
+  const { user, showToast, appearance } = props;
 
   const navigate = useNavigate();
 
@@ -109,12 +109,12 @@ export const Livre = ({ ...props }) => {
                     //justifyContent: "center",
                   }}
                 >
-                  <BackButton
+                  {/* <BackButton
                     onClick={() => {
                       navigate("/");
                       //setBook(null);
                     }}
-                  />
+                  /> */}
 
                   {book.title && (
                     <h1>
@@ -142,8 +142,6 @@ export const Livre = ({ ...props }) => {
                       marginBottom: "12px",
                     }}
                   >
-                    <AddNoteButton book={book} setBook={setBook} />
-
                     {/* order */}
                     {book.notes && book.notes.length > 0 && (
                       <select
@@ -155,6 +153,8 @@ export const Livre = ({ ...props }) => {
                         <option value={ENoteOrder.PAGE}>Page</option>
                       </select>
                     )}
+
+                    <AddNoteButton book={book} setBook={setBook} />
                   </div>
                 )}
 
@@ -187,7 +187,7 @@ export const Livre = ({ ...props }) => {
                                 })}
                               >
                                 {!isLoading[note.id] && (
-                                  <button
+                                  <Button
                                     className="cancel-btn"
                                     onClick={() => {
                                       setBook({
@@ -205,10 +205,10 @@ export const Livre = ({ ...props }) => {
                                     }}
                                   >
                                     Annuler
-                                  </button>
+                                  </Button>
                                 )}
 
-                                <button
+                                <Button
                                   onClick={async function onEditSubmit() {
                                     let id;
                                     setIsLoading({
@@ -282,7 +282,7 @@ export const Livre = ({ ...props }) => {
                                   {isLoading[note.id]
                                     ? "Veuillez patienter..."
                                     : "Valider"}
-                                </button>
+                                </Button>
                               </div>
                             </div>
                           );
@@ -314,6 +314,7 @@ export const Livre = ({ ...props }) => {
                               toggleModal={toggleModal}
                               locale={locale}
                               setLocale={setLocale}
+                              appearance={appearance}
                               onOpenClick={() => {
                                 navigate("/note/" + note.id);
                                 //setNote(note);
@@ -437,7 +438,7 @@ export const Livre = ({ ...props }) => {
 
                 {!hasEditing &&
                   Array.isArray(book.notes) &&
-                  book.notes.length > 0 && (
+                  book.notes.length > 1 && (
                     <div style={{ textAlign: "center", marginTop: "12px" }}>
                       <AddNoteButton book={book} setBook={setBook} />
                     </div>
@@ -520,7 +521,7 @@ export const Livre = ({ ...props }) => {
                   </MailToBody>
                 </MailTo>
 
-                <button
+                <Button
                   onClick={() => {
                     navigator.clipboard.writeText(
                       import.meta.env.VITE_PUBLIC_URL +
@@ -531,11 +532,11 @@ export const Livre = ({ ...props }) => {
                   }}
                 >
                   Copier le lien
-                </button>
+                </Button>
 
-                <button className="cancel-btn" onClick={toggleModal}>
+                <Button className="cancel-btn" onClick={toggleModal}>
                   Annuler
-                </button>
+                </Button>
               </div>
             </div>
           )}

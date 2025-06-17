@@ -1,4 +1,5 @@
 import { css } from "@emotion/react";
+import { Button } from "@radix-ui/themes";
 import { isMobile } from "react-device-detect";
 
 export const iconProps = ({ title, ...props }: Record<string, any>) => {
@@ -29,14 +30,14 @@ export const iconProps = ({ title, ...props }: Record<string, any>) => {
 };
 
 export const BackButton = ({ onClick, label = "Retour", ...props }) => (
-  <button className="back-btn stroke-current" onClick={onClick} {...props}>
+  <Button className="back-btn stroke-current" onClick={onClick} {...props}>
     {"<"} {label}
-  </button>
+  </Button>
 );
 
 export const AddNoteButton = ({ book, setBook, ...props }) => {
   return (
-    <button
+    <Button
       disabled={!!book?.notes?.find(({ isNew }) => isNew)}
       onClick={() => {
         const id = book?.notes?.length + 1;
@@ -54,7 +55,7 @@ export const AddNoteButton = ({ book, setBook, ...props }) => {
       {...props}
     >
       Ajouter une citation
-    </button>
+    </Button>
   );
 };
 
@@ -183,7 +184,7 @@ export const PageSwitch = ({
   return (
     <div>
       {!isPageEdit ? (
-        <button className="with-icon" onClick={() => setIsPageEdit(true)}>
+        <Button className="with-icon" onClick={() => setIsPageEdit(true)}>
           p.{note.page}
           <EditIcon
             {...iconProps({
@@ -195,7 +196,7 @@ export const PageSwitch = ({
               },
             })}
           />
-        </button>
+        </Button>
       ) : (
         <div
           style={{
@@ -213,14 +214,14 @@ export const PageSwitch = ({
               if (p < 10000) setPage(p);
             }}
           />
-          <button
+          <Button
             onClick={() => {
               setIsPageEdit(false);
               onClick(page);
             }}
           >
             ok
-          </button>
+          </Button>
         </div>
       )}
     </div>

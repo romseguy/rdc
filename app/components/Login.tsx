@@ -79,18 +79,15 @@ function ForgottenPassword({
     <form id="auth-forgot-password" onSubmit={handlePasswordReset}>
       <Flex direction="column" gap="3">
         <Flex direction="column" gap="3">
-          <div>
-            <label htmlFor="email">{labels?.email_label}</label>
-            <Input
-              id="email"
-              type="email"
-              name="email"
-              placeholder={labels?.email_input_placeholder}
-              defaultValue={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-            />
-          </div>
+          <Input
+            id="email"
+            type="email"
+            name="email"
+            placeholder={labels?.email_input_placeholder}
+            defaultValue={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
 
           <Button type="submit" loading={loading}>
             {loading ? labels?.loading_button_label : labels?.button_label}
@@ -236,35 +233,29 @@ function EmailAuth({
 
         <Flex direction="column" gap="3">
           {/* email */}
-          <div>
-            <label htmlFor="email">{labels?.email_label}</label>
-            <Input
-              id="email"
-              type="email"
-              name="email"
-              placeholder={labels?.email_input_placeholder}
-              defaultValue={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-            />
-          </div>
+          <Input
+            id="email"
+            type="email"
+            name="email"
+            placeholder={labels?.email_input_placeholder}
+            defaultValue={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
 
           {/* password */}
           {["sign_in", "sign_up"].includes(authView) && (
-            <div>
-              <label htmlFor="password">{labels?.password_label}</label>
-              <Input
-                id="password"
-                type="password"
-                name="password"
-                placeholder={labels?.password_input_placeholder}
-                defaultValue={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete={
-                  authView === "sign_in" ? "current-password" : "new-password"
-                }
-              />
-            </div>
+            <Input
+              id="password"
+              type="password"
+              name="password"
+              placeholder={labels?.password_input_placeholder}
+              defaultValue={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete={
+                authView === "sign_in" ? "current-password" : "new-password"
+              }
+            />
           )}
         </Flex>
 
@@ -280,9 +271,9 @@ function EmailAuth({
           </a>
         )}
 
-        <button>
+        <Button>
           {loading ? labels?.loading_button_label : labels?.button_label}
-        </button>
+        </Button>
 
         {authView === "sign_in" && magicLink && (
           <a
