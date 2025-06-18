@@ -29,7 +29,7 @@ const i18n = {
   },
   forgotten_password: {
     ...variables,
-    button_label: "Envoyer un mail de connexion",
+    button_label: "Envoyer un mail de récupération de mot de passe",
     link_text: "Mot de passe oublié ?",
   },
 };
@@ -78,6 +78,14 @@ function ForgottenPassword({
   return (
     <form id="auth-forgot-password" onSubmit={handlePasswordReset}>
       <Flex direction="column" gap="3">
+        <Flex>
+          <BackButton
+            onClick={() => {
+              setAuthView("sign_in");
+            }}
+          />
+        </Flex>
+
         <Flex direction="column" gap="3">
           <Input
             id="email"
@@ -277,44 +285,38 @@ function EmailAuth({
   );
 }
 
-export const Login = ({ authToken, modalState, setModalState, showToast }) => {
+export const Login = (props) => {
+  const { close, showToast } = props;
   const [view, setView] = useState<string>();
-  if (authToken) {
-    return <>Vous êtes déjà connecté.</>;
-  }
 
   if (view === "forgotten_password")
     return (
-      <>
-        <BackButton
-          onClick={(e) => {
-            e.preventDefault();
-            setView("sign_in");
-          }}
-        />
+      <div id="login-page">
         <ForgottenPassword
           supabaseClient={supabase()}
           i18n={i18n}
           setAuthView={(viewName) => setView(viewName)}
           showToast={showToast}
           onSuccess={() => {
-            setModalState({ ...modalState, isOpen: false });
+            close();
           }}
         />
-      </>
+      </div>
     );
 
   return (
-    <EmailAuth
-      authView={view}
-      setAuthView={(viewName) => setView(viewName)}
-      supabaseClient={supabase()}
-      i18n={i18n}
-      showToast={showToast}
-      onBackClick={() => setModalState({ ...modalState, isOpen: false })}
-      onSuccess={() => {
-        setModalState({ ...modalState, isOpen: false });
-      }}
-    />
+    <div id="login-page">
+      <EmailAuth
+        authView={view}
+        setAuthView={(viewName) => setView(viewName)}
+        supabaseClient={supabase()}
+        i18n={i18n}
+        showToast={showToast}
+        onBackClick={() => close()}
+        onSuccess={() => {
+          close();
+        }}
+      />
+    </div>
   );
 };

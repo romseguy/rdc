@@ -46,28 +46,52 @@
   }
 }
 
-#auth-sign-in {
-  background: var(--color-background);
-  font-family: var(--secondary-font-family);
-  padding: 24px;
+html,
+body,
+.radix-themes,
+#modal,
+#page,
+//#home-page,
+#error-page {
+  height: 100%;
+}
 
+#modal {
+  * {
+    font-family: var(--secondary-font-family);
+  }
+}
+#login-modal {
+  background: var(--color-background);
+  padding: 24px;
   a {
     font-size: smaller;
   }
 }
-
-#error-page > div {
-  font-family: var(--secondary-font-family);
-  background-color: rgba(0, 0, 0, 0.9);
+#share-modal {
+  background: var(--color-background);
   padding: 24px;
+}
+
+#error-page {
+  height: 100%;
+  // font-family: var(--secondary-font-family);
+  // background-color: rgba(0, 0, 0, 0.9);
+  // padding: 24px;
+}
+#home-page {
+}
+#book-page {
+}
+#note-page {
 }
 
 button {
   &.back-btn,
   &.cancel-btn {
-    background: var(--red-9);
+    background: var(--red-7);
     &:hover {
-      background: var(--red-10);
+      background: var(--red-8);
     }
   }
   &.with-icon {
@@ -84,6 +108,9 @@ button {
 .edit-icon {
   stroke: var(--green-9);
   fill: none;
+}
+.external-icon {
+  stroke: white;
 }
 .share-icon {
   fill: white;

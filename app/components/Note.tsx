@@ -1,7 +1,6 @@
 import { css } from "@emotion/react";
 import { Button } from "@radix-ui/themes";
 import { useState } from "react";
-import { isMobile } from "react-device-detect";
 import {
   RTEditor,
   EditIcon,
@@ -22,38 +21,41 @@ import {
   type User,
 } from "~/utils";
 
-export const Note = (props: {
+interface NoteP {
+  notes: NoteT[];
   note: NoteT;
   user?: User | null;
+  isLoading?: boolean;
+  isEditing?: boolean;
+  locale: string;
+  setLocale: (string) => void;
+  isMobile: boolean;
   onOpenClick?: any;
   onEditClick?: any;
   onEditPageClick?: any;
   onDeleteClick?: any;
+  onShareClick?: any;
   onSubmitCommentClick?: any;
   onDeleteCommentClick?: any;
-  isLoading?: boolean;
-  isEditing?: boolean;
-  toggleModal?: (note: NoteT) => void;
-  locale: string;
-  setLocale: (string) => void;
-  appearance: string;
-}) => {
+}
+
+export const Note = (props: NoteP) => {
   const {
     notes,
     note,
     user,
+    isEditing = false,
+    isLoading = false,
+    locale,
+    setLocale,
+    isMobile,
     onOpenClick,
     onEditClick,
     onEditPageClick,
+    onShareClick,
     onDeleteClick,
     onSubmitCommentClick,
     onDeleteCommentClick,
-    isEditing = false,
-    isLoading = false,
-    toggleModal,
-    locale,
-    setLocale,
-    appearance,
   } = props;
   const desc =
     locale === "en"
@@ -76,6 +78,7 @@ export const Note = (props: {
     return (
       <RTEditor
         defaultValue={desc}
+        isMobile={isMobile}
         onChange={({ html }) => {
           note[`desc${locale === "en" ? "_en" : ""}`] = html;
         }}
@@ -111,6 +114,7 @@ export const Note = (props: {
             <ExternalIcon
               {...iconProps({
                 title: "Ouvrir le lecteur",
+                isMobile,
                 onClick: onOpenClick,
               })}
             />
@@ -118,19 +122,22 @@ export const Note = (props: {
           <ShareIcon
             {...iconProps({
               title: "Partager la citation",
-              onClick: () => toggleModal && toggleModal(note),
+              isMobile,
+              onClick: onShareClick,
             })}
           />
           <EditIcon
             onClick={() => onEditClick()}
             {...iconProps({
               title: "Modifier la citation",
+              isMobile,
               onClick: onEditClick,
             })}
           />
           <DeleteIcon
             {...iconProps({
               title: "Supprimer la citation",
+              isMobile,
               onClick: onDeleteClick,
             })}
           />
@@ -142,72 +149,37 @@ export const Note = (props: {
   return (
     <section>
       {/* note header */}
-      <header
-        css={toCss({
-          padding: isMobile ? "0 0 6px 0" : "6px",
-          background: "purple",
-        })}
-      >
-        {isEditing && (
-          <div
-            css={toCss({
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            })}
-          >
-            {note.isNew ? "Nouvelle citation" : "Modifiez cette citation"}
-            <LocaleSwitch locale={locale} setLocale={setLocale} />
-          </div>
-        )}
+      <header>
+        <div
+          css={toCss({
+            padding: isMobile ? "0 0 6px 0" : "6px",
+            background: "purple",
+          })}
+        >
+          {isEditing && (
+            <div
+              css={toCss({
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              })}
+            >
+              {note.isNew ? "Nouvelle citation" : "Modifiez cette citation"}
+              <LocaleSwitch locale={locale} setLocale={setLocale} />
+            </div>
+          )}
 
-        {!isEditing && (
-          <>
-            {/* note header */}
-            {isMobile && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <PageSwitch
-                  isPageEdit={isPageEdit}
-                  setIsPageEdit={setIsPageEdit}
-                  page={page}
-                  setPage={setPage}
-                  note={note}
-                  onClick={onEditPageClick}
-                />
-
+          {!isEditing && (
+            <>
+              {/* note header */}
+              {isMobile && (
                 <div
                   style={{
                     display: "flex",
-                    flexDirection: "row",
+                    flexDirection: "column",
                     alignItems: "center",
-                    gap: "6px",
                   }}
                 >
-                  <LocaleSwitch locale={locale} setLocale={setLocale} />
-                  <div>Cité par {toUsername(note.note_email)}</div>
-                </div>
-
-                <NoteHeaderRight />
-              </div>
-            )}
-
-            {!isMobile && (
-              <Flex justify="between">
-                <div
-                  css={toCss({
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  })}
-                >
-                  <LocaleSwitch locale={locale} setLocale={setLocale} />
-
                   <PageSwitch
                     isPageEdit={isPageEdit}
                     setIsPageEdit={setIsPageEdit}
@@ -217,24 +189,61 @@ export const Note = (props: {
                     onClick={onEditPageClick}
                   />
 
-                  <div>Cité par {toUsername(note.note_email)}</div>
-                </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                  >
+                    <LocaleSwitch locale={locale} setLocale={setLocale} />
+                    <div>Cité par {toUsername(note.note_email)}</div>
+                  </div>
 
-                <div>
-                  {note.index !== 0 && "< Note précédente"}
-                  {note.index !== notes.length - 1 && "Note suivante >"}
+                  <NoteHeaderRight />
                 </div>
+              )}
 
-                <NoteHeaderRight
-                  css={toCss({
-                    display: "flex",
-                    gap: "12px",
-                  })}
-                />
-              </Flex>
-            )}
-          </>
-        )}
+              {!isMobile && (
+                <Flex justify="between">
+                  <div
+                    css={toCss({
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    })}
+                  >
+                    <LocaleSwitch locale={locale} setLocale={setLocale} />
+
+                    <PageSwitch
+                      isPageEdit={isPageEdit}
+                      setIsPageEdit={setIsPageEdit}
+                      page={page}
+                      setPage={setPage}
+                      note={note}
+                      onClick={onEditPageClick}
+                    />
+
+                    <div>Cité par {toUsername(note.note_email)}</div>
+                  </div>
+
+                  <div>
+                    {note.index !== 0 && "< Note précédente"}
+                    {note.index !== notes.length - 1 && "Note suivante >"}
+                  </div>
+
+                  <NoteHeaderRight
+                    css={toCss({
+                      display: "flex",
+                      gap: "12px",
+                    })}
+                  />
+                </Flex>
+              )}
+            </>
+          )}
+        </div>
       </header>
 
       {/* note desc */}

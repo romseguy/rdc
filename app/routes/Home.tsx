@@ -1,10 +1,11 @@
 export function Home(props) {
   const {
     loaderData: { libs },
+    isMobile,
   } = props;
   const lib = props.lib || props.loaderData.lib;
   return (
-    <div id="home-page">
+    <div id="home-page" css={isMobile ? {} : { padding: "48px" }}>
       <h1>
         Bibliothèque : <i>{lib?.name}</i>
       </h1>

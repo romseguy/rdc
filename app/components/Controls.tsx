@@ -1,8 +1,11 @@
-import { css } from "@emotion/react";
 import { Button } from "@radix-ui/themes";
-import { isMobile } from "react-device-detect";
+import { useNavigate } from "react-router";
 
-export const iconProps = ({ title, ...props }: Record<string, any>) => {
+export const iconProps = ({
+  title,
+  isMobile,
+  ...props
+}: Record<string, any>) => {
   const out: Record<string, any> = {
     "aria-label": title,
     style: {
@@ -29,11 +32,19 @@ export const iconProps = ({ title, ...props }: Record<string, any>) => {
   return out;
 };
 
-export const BackButton = ({ onClick, label = "Retour", ...props }) => (
-  <Button className="back-btn stroke-current" onClick={onClick} {...props}>
-    {"<"} {label}
-  </Button>
-);
+export const BackButton = (props) => {
+  const navigate = useNavigate();
+  console.log("🚀 ~ BackButton ~ history:", history);
+  const {
+    onClick = () => navigate(!!history && history.length > 1 ? -1 : "/"),
+    label = "Retour",
+  } = props;
+  return (
+    <Button className="back-btn stroke-current" onClick={onClick} {...props}>
+      {"<"} {label}
+    </Button>
+  );
+};
 
 export const AddNoteButton = ({ book, setBook, ...props }) => {
   return (
@@ -234,7 +245,7 @@ export const PageSwitch = ({
 };
 
 export const ExternalIcon = ({ ...props }) => (
-  <svg className="icon" viewBox="0 0 24 24" {...props}>
+  <svg className="external-icon" viewBox="0 0 24 24" {...props}>
     <g fill="none" strokeLinecap="round" strokeWidth={2}>
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
       <path d="M15 3h6v6"></path>

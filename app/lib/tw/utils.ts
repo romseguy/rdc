@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
   accentColors,
   grayColors,
@@ -6,7 +7,7 @@ import {
 const useTailwindColorNames = true;
 const mapMissingTailwindColors = true;
 
-export const grayColorNames: string[] = [];
+const grayColorNames: string[] = [];
 grayColors.map((color) => {
   if (color !== "auto") {
     grayColorNames.push(color);
@@ -169,37 +170,6 @@ export function getMappings() {
 }
 
 export function allRadixColors() {
-  const accentColorNames: string[] = [];
-  [
-    {
-      label: "Regulars",
-      values: [
-        "tomato",
-        "red",
-        "ruby",
-        "crimson",
-        "pink",
-        "plum",
-        "purple",
-        "violet",
-        "iris",
-        "indigo",
-        "blue",
-        "cyan",
-        "teal",
-        "jade",
-        "green",
-        "grass",
-        "brown",
-        "orange",
-      ],
-    },
-    { label: "Brights", values: ["sky", "mint", "lime", "yellow", "amber"] },
-    { label: "Metals", values: ["gold", "bronze"] },
-    { label: "Gray", values: ["gray"] as const },
-  ].map((group) => {
-    accentColorNames.push(...group.values.filter((color) => color !== "gray"));
-  });
   return [...accentColorNames, ...grayColorNames].reduce<
     Record<string, Record<string, string>>
   >((acc, colorName) => {

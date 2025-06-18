@@ -14,7 +14,7 @@ export const seed: Seed[] = [
         ],
       },
       {
-        title: "L'onde 2",
+        //title: "L'onde 2",
         src: "https://image.jimcdn.com/app/cms/image/transf/dimension=144x10000:format=png/path/sd7739c2374e37db5/image/i8178498c4ef29a55/version/1456401004/image.png",
         notes: [{ desc: "Bonjour" }],
       },
@@ -46,7 +46,11 @@ export const seed: Seed[] = [
       {
         title: "L'onde 8",
         src: "https://image.jimcdn.com/app/cms/image/transf/dimension=152x10000:format=png/path/sd7739c2374e37db5/image/id1247c1da4dfbf55/version/1456401115/image.png",
-        notes: [{ desc: "Bonjour" }],
+        notes: [
+          {
+            desc: "Bonjour Bonjour Bonjour Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjou Bonjourrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",
+          },
+        ],
       },
     ],
   },

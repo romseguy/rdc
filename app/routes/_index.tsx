@@ -4,11 +4,11 @@ import { seed, type Lib, client, type RootData } from "~/utils";
 import { isbot } from "isbot";
 import Sitemap from "~/components/Sitemap";
 
-export const loader = async () => {
+export const loader = async (props) => {
   let data: RootData = {
-    libs: seed,
-    lib: seed[0],
-    is404: true,
+    libs: seed as Lib[],
+    lib: seed[0] as Lib,
+    userAgent: props.request.headers.get("user-agent"),
   };
 
   try {
@@ -24,6 +24,7 @@ export const loader = async () => {
             return {
               ...book,
               id: bookId,
+              index: j,
               src: undefined,
               notes: book.notes?.map((note, k) => ({
                 ...note,

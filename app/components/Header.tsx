@@ -1,22 +1,13 @@
 import { css } from "@emotion/react";
-import { ArrowRightIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons";
-import { Button, Select } from "@radix-ui/themes";
+import { Select } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
-import { isMobile } from "react-device-detect";
 import { useNavigate, useNavigation } from "react-router";
 import { Flex } from "~/components";
-import { toCss } from "~/utils";
 
 export const Header = ({ ...props }) => {
   const lib = props.lib || props.loaderData.lib;
   const {
     loaderData: { libs, book },
-    user,
-    setUser,
-    setAuthToken,
-    showToast,
-    appearance,
-    setAppearance,
   } = props;
 
   const navigation = useNavigation();

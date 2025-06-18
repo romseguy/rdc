@@ -30,7 +30,7 @@ export type Note = {
   note_email?: string;
   comments?: Comment[];
 };
-export type BookT = Omit<Book, "notes"> & { notes?: NoteT[] };
+export type BookT = Omit<Book, "notes"> & { index: number; notes?: NoteT[] };
 export type Book = {
   id: string;
   title?: string;
@@ -59,5 +59,13 @@ export type Seed = Omit<Lib, "id" | "books"> & {
 export type RootData = {
   libs: Lib[];
   lib: Lib;
-  is404: boolean;
+  userAgent: string;
 };
+
+export type ModalT = {
+  isOpen: boolean;
+  book: Book | null;
+  note: Note | null;
+};
+
+export type SetState<T> = React.Dispatch<React.SetStateAction<T>>;

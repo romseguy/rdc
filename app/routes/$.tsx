@@ -8,10 +8,11 @@ import { Note } from "~/routes/Note";
 import { loader as rootLoader } from "./_index";
 import type { Route } from "./+types/$";
 import type { Book, Note as NoteT, RootData } from "~/utils";
-import { Theme } from "@radix-ui/themes";
 
 export const loader = async (props: Route.LoaderArgs) => {
-  const data: RootData & { book?: Book; note?: NoteT } = await rootLoader();
+  const data: RootData & { book?: Book; note?: NoteT } = await rootLoader(
+    props,
+  );
   const id = props.params["*"] || "";
 
   if (id.includes("livre")) {
@@ -23,7 +24,11 @@ export const loader = async (props: Route.LoaderArgs) => {
         }
       }
     }
-    if (data.book) data.is404 = false;
+    if (!data.book)
+      throw new Response("", {
+        status: 404,
+        statusText: "Le livre n'a pas été trouvé",
+      });
   } else if (id.includes("note")) {
     const noteId = id.substring(5);
     for (const lib of data.libs) {
@@ -36,7 +41,11 @@ export const loader = async (props: Route.LoaderArgs) => {
         }
       }
     }
-    if (data.book && data.note) data.is404 = false;
+    if (!data.note)
+      throw new Response("", {
+        status: 404,
+        statusText: "La citation n'a pas été trouvée",
+      });
   }
 
   if (data.book) {
@@ -48,16 +57,12 @@ export const loader = async (props: Route.LoaderArgs) => {
 };
 
 export default function CatchAllRoute(props) {
-  const loaderData = props.loaderData || {};
-  const { is404 } = loaderData;
-  const location = useLocation();
-  if (is404 && location.pathname !== "/login") return "404";
   if (isbot()) return <Sitemap {...props} />;
 
   return useRoutes([
     {
       path: "livre/:id",
-      element: <Page element={Livre} loaderData={loaderData} {...props} />,
+      element: <Page element={Livre} {...props} />,
     },
     {
       path: "note/:id",

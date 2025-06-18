@@ -349,3 +349,9 @@ export const useScroll = <T extends HTMLElement>(
     };
   */
 }
+
+{
+  /* {React.Children.map(children, (child) =>
+        React.cloneElement(child, { showToast }),
+      )} */
+}

@@ -1,29 +1,21 @@
 import { useStorage } from "@charlietango/hooks/use-storage";
-import { css } from "@emotion/react";
-import {
-  ArrowUpIcon,
-  BookmarkIcon,
-  MoonIcon,
-  RowSpacingIcon,
-  SunIcon,
-} from "@radix-ui/react-icons";
-import { Root as ToggleRoot, Toggle } from "@radix-ui/react-toggle";
+import { ArrowUpIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import { Toggle } from "@radix-ui/react-toggle";
 import { Button, Separator, Theme } from "@radix-ui/themes";
 import React, { useEffect, useState } from "react";
+import { useDeviceSelectors } from "react-device-detect";
 import { useNavigate } from "react-router";
-import {
-  Flex,
-  FullScreen,
-  Header,
-  LocaleSwitch,
-  ToastsContainer,
-} from "~/components";
-import { Login } from "~/components/Login";
+import { Flex, Header, LocaleSwitch, ToastsContainer } from "~/components";
 import { client, tokenKey } from "~/utils";
-import type { Lib, User } from "~/utils/types";
+import type { Lib, ModalT, User } from "~/utils/types";
+import { Modal } from "./Modal";
+
+const controller = new AbortController();
+const signal = controller.signal;
 
 export const Page = ({ ...props }) => {
   const { element, loaderData, noTheme, simple } = props;
+  const [{ isMobile }] = useDeviceSelectors(loaderData.userAgent);
   const navigate = useNavigate();
 
   //#region auth
@@ -60,14 +52,40 @@ export const Page = ({ ...props }) => {
   };
   //#endregion
   //#region modal
-  const [modalState, setModalState] = useState({ isOpen: false });
+  const [modalState, setModalState] = useState<ModalT>({
+    isOpen: false,
+    book: null,
+    note: null,
+  });
+  const toggleModal = () =>
+    setModalState({ ...modalState, isOpen: !modalState.isOpen });
   //#endregion
-
+  //#region ui
   const [appearance, setAppearance] = useStorage("color-mode", {
     type: "local",
     defaultValue: "dark",
   });
   const [locale, setLocale] = useState("fr");
+  const [screenWidth, setScreenWidth] = useState(1000);
+  useEffect(() => {
+    const updateScreenWidth = () => {
+      const newScreenWidth = window.innerWidth - 16;
+      if (newScreenWidth !== screenWidth) setScreenWidth(newScreenWidth);
+    };
+
+    updateScreenWidth();
+    if (!isMobile) {
+      window.addEventListener("resize", updateScreenWidth);
+      signal.addEventListener("abort", () => {
+        window.removeEventListener("resize", updateScreenWidth);
+      });
+    }
+
+    return () => {
+      if (!isMobile) controller.abort();
+    };
+  }, []);
+  //#endregion
 
   const [lib, _setLib] = useState<Lib>();
   const setLib = (libName: string) => {
@@ -75,14 +93,12 @@ export const Page = ({ ...props }) => {
     if (l) _setLib(l);
   };
   const childProps = {
+    ...props,
     ...{ loaderData },
     ...{
+      isMobile,
       lib,
       setLib,
-      appearance,
-      setAppearance,
-      locale,
-      setLocale,
       // auth
       accessToken,
       refreshToken,
@@ -94,6 +110,13 @@ export const Page = ({ ...props }) => {
       // modal
       modalState,
       setModalState,
+      toggleModal,
+      // ui
+      appearance,
+      setAppearance,
+      locale,
+      setLocale,
+      screenWidth,
     },
   };
 
@@ -122,20 +145,26 @@ export const Page = ({ ...props }) => {
 
   const pageTitle = (
     <Flex justify="between" pt="1">
-      <Separator style={{ visibility: "hidden" }} />
+      {!isMobile && (
+        <Separator style={{ width: "120px", visibility: "hidden" }} />
+      )}
       <h1
         style={{
-          letterSpacing: 2,
-          borderRadius: 9999,
-          paddingLeft: "24px",
-          paddingRight: "24px",
           color: "white",
-          background: "purple",
-          fontSize: "36px",
           fontFamily: "Griffy",
-          fontWeight: "normal",
-          textAlign: "center",
+          //fontWeight: "normal",
           cursor: "pointer",
+          ...(!isMobile
+            ? {
+                background: "purple",
+                borderRadius: 9999,
+                fontSize: "36px",
+                letterSpacing: 2,
+                paddingLeft: "24px",
+                paddingRight: "24px",
+                textAlign: "center",
+              }
+            : { paddingLeft: "3px" }),
         }}
         onClick={() => navigate("/")}
       >
@@ -161,10 +190,7 @@ export const Page = ({ ...props }) => {
               setUser(undefined);
             }
           } else {
-            setModalState({
-              ...modalState,
-              isOpen: true,
-            });
+            toggleModal();
           }
         }}
       >
@@ -199,18 +225,7 @@ export const Page = ({ ...props }) => {
       <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
 
       <Theme appearance={appearance}>
-        {modalState.isOpen && (
-          <div id="modal">
-            <FullScreen direction="column">
-              <Login
-                authToken={authToken}
-                modalState={modalState}
-                setModalState={setModalState}
-                showToast={showToast}
-              />
-            </FullScreen>
-          </div>
-        )}
+        <Modal {...childProps} />
 
         {!modalState.isOpen && (
           <div id="page">
@@ -229,9 +244,3 @@ export const Page = ({ ...props }) => {
     </>
   );
 };
-
-{
-  /* {React.Children.map(children, (child) =>
-        React.cloneElement(child, { showToast }),
-      )} */
-}
