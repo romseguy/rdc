@@ -2,11 +2,11 @@ import { css } from "@emotion/react";
 import { Button } from "@radix-ui/themes";
 import { MailTo, MailToBody, MailToTrigger } from "@slalombuild/react-mailto";
 import { decode } from "html-entities";
-import { Flex } from "~/components";
+import { BackButton, Flex } from "~/components";
 import { Login } from "~/components/Login";
 
 export const Modal = (props) => {
-  const { modalState, setModalState, showToast } = props;
+  const { modalState, setModalState, showToast, i18n, localize } = props;
   const close = () => setModalState({ isOpen: false });
   const { isOpen, book, note } = modalState;
 
@@ -37,7 +37,10 @@ export const Modal = (props) => {
               }
             `}
           >
-            <h1>Partager la citation {note.page ? "p." + note.page : ""}</h1>
+            <h1>
+              {localize("Partager la citation", "Share the quote")}{" "}
+              {note.page ? "p." + note.page : ""}
+            </h1>
 
             <MailTo
               to=""
@@ -58,7 +61,9 @@ export const Modal = (props) => {
               //bcc={["bcc@example.com"]}
               //obfuscate
             >
-              <MailToTrigger>Envoyer un mail</MailToTrigger>
+              <MailToTrigger>
+                {localize("Envoyer par mail", "Send by email")}
+              </MailToTrigger>
               <MailToBody>
                 - Citation du livre {""} :
                 <br />
@@ -73,15 +78,18 @@ export const Modal = (props) => {
                 navigator.clipboard.writeText(
                   import.meta.env.VITE_PUBLIC_URL + "/note/" + note!.id,
                 );
-                showToast("Le lien a été copié dans votre presse-papiers");
+                showToast(
+                  localize(
+                    "Le lien a été copié dans votre presse-papiers",
+                    "The link has been copied to your clipboard",
+                  ),
+                );
               }}
             >
-              Copier le lien
+              {localize("Copier le lien", "Copy link to clipboard")}
             </Button>
 
-            <Button size="4" className="cancel-btn" onClick={close}>
-              Retour
-            </Button>
+            <BackButton size="4" className="cancel-btn" onClick={close} />
           </Flex>
         </div>
       </div>
@@ -91,7 +99,7 @@ export const Modal = (props) => {
     return (
       <div id="modal">
         <div id="login-modal">
-          <Login showToast={showToast} close={close} />
+          <Login showToast={showToast} close={close} i18n={i18n} />
         </div>
       </div>
     );

@@ -57,7 +57,7 @@ export const links: Route.LinksFunction = () => [
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Pour une nouvelle conscience | recueildecitations.fr" },
+    { title: import.meta.env.VITE_PUBLIC_TITLE },
     {
       name: "description",
       content:

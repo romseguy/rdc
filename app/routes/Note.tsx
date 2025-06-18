@@ -8,6 +8,7 @@ export const Note = (props) => {
   const {
     loaderData: { lib, book, note },
     screenWidth,
+    localize,
   } = props;
   const navigate = useNavigate();
 
@@ -28,7 +29,7 @@ export const Note = (props) => {
           <BackButton style={{ marginRight: "6px" }} />
 
           <h2>
-            Citation {note.page && `p.${note.page} `}
+            {localize("Citation", "Quote")} {note.page && `p.${note.page} `}
             {book?.title ? (
               <>
                 {book.is_conf && (
@@ -41,7 +42,7 @@ export const Note = (props) => {
                 )}
                 {!book.is_conf && (
                   <>
-                    du livre :{" "}
+                    {localize("du livre", "from book")} :{" "}
                     <i>
                       {book?.title} ({lib.name})
                     </i>
@@ -85,7 +86,7 @@ export const Note = (props) => {
 
           <Flex>
             <InfoCircledIcon stroke="lightblue" />
-            Taille du texte
+            {localize("Taille du texte", "Font size")}
           </Flex>
           {isLoaded && (
             <Slider
@@ -101,7 +102,7 @@ export const Note = (props) => {
 
           <Flex>
             <InfoCircledIcon stroke="lightblue" />
-            Largeur du texte
+            {localize("Largeur du texte", "Text width")}
           </Flex>
           {isLoaded && (
             <Slider
@@ -117,7 +118,7 @@ export const Note = (props) => {
 
           <Flex>
             <InfoCircledIcon stroke="lightblue" />
-            Espace entre les lignes
+            {localize("Espace entre les lignes", "Space between lines")}
           </Flex>
           {isLoaded && (
             <Slider

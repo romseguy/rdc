@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useNavigate, useNavigation } from "react-router";
 import { Flex } from "~/components";
 
-export const Header = ({ ...props }) => {
+export const Header = (props) => {
   const lib = props.lib || props.loaderData.lib;
   const {
     loaderData: { libs, book },
+    localize,
   } = props;
 
   const navigation = useNavigation();
@@ -43,15 +44,22 @@ export const Header = ({ ...props }) => {
             //setItem(value);
             if (value === "1") {
               alert(
-                "Si vous êtes intéressé par cette fonctionnalité, vous pouvez envoyer un mail à contact@romseguy.com pour me le faire savoir.",
+                localize(
+                  "Si vous voulez accéder à des citations classées par thématiques, merci d'envoyer un mail à {import.meta.env.VITE_PUBLIC_EMAIL} pour me le faire savoir.",
+                  "If you are interested in having quotes grouped by topics, please send send an email to {import.meta.env.VITE_PUBLIC_EMAIL} to make me know.",
+                ),
               );
             }
           }}
         >
           <Select.Trigger variant="classic" />
           <Select.Content>
-            <Select.Item value="0">Bibliothèques</Select.Item>
-            <Select.Item value="1">Thématiques</Select.Item>
+            <Select.Item value="0">
+              {localize("Bibliothèques", "Libraries")}
+            </Select.Item>
+            <Select.Item value="1">
+              {localize("Thématiques", "Topics")}
+            </Select.Item>
           </Select.Content>
         </Select.Root>
 

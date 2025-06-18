@@ -14,6 +14,10 @@ export const bindEvent = (
   }
 };
 
+export const localize = (fr, en) => {
+  return import.meta.env.VITE_PUBLIC_LOCALE === "en" ? en : fr;
+};
+
 export const toCss = (
   styleMap: Record<string, string>,
   isImportant?: boolean,

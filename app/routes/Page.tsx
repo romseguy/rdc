@@ -5,12 +5,20 @@ import { Button, Separator, Theme } from "@radix-ui/themes";
 import React, { useEffect, useState } from "react";
 import { useDeviceSelectors } from "react-device-detect";
 import { useNavigate } from "react-router";
-import { Flex, Header, LocaleSwitch, ToastsContainer } from "~/components";
+import {
+  EnIcon,
+  Flex,
+  FrIcon,
+  Header,
+  LocaleSwitch,
+  ToastsContainer,
+} from "~/components";
 import { pageTitleStyle, toggleCss } from "~/lib/css";
 import { client, tokenKey } from "~/utils";
 import type { Lib, ModalT, User } from "~/utils/types";
 import { Modal } from "./Modal";
 import { css } from "@emotion/react";
+import { redirect } from "react-router";
 
 const controller = new AbortController();
 const signal = controller.signal;
@@ -70,7 +78,49 @@ export const Page = (props) => {
     type: "local",
     defaultValue: "dark",
   });
-  const [locale, setLocale] = useState("fr");
+  const [locale, setLocale] = useState(import.meta.env.VITE_PUBLIC_LOCALE);
+  const localize = (fr, en) => {
+    if (locale === "en") return en;
+    return fr;
+  };
+  const variables = {
+    email_label: localize("Adresse e-mail", "Email address"),
+    password_label: localize("Mot de passe", "Password"),
+    email_input_placeholder: localize(
+      "Votre adresse e-mail",
+      "Your email address",
+    ),
+    password_input_placeholder: localize("Votre mot de passe", "Your password"),
+    button_label: localize("Connexion", "Login"),
+    loading_button_label: localize("Chargement...", "Loading..."),
+    //social_provider_text: localize("", ""),
+    link_text: localize("link_text", ""),
+  };
+  const i18n = {
+    sign_in: variables,
+    sign_up: {
+      ...variables,
+      button_label: localize("Créer le compte", "Create account"),
+      link_text: localize("Créer un compte", "Create a new account"),
+      confirmation_text: localize("Confirmer", "Confirm"),
+    },
+    magic_link: {
+      ...variables,
+      link_text: localize("Envoyer un mail de connexion", "Send a login email"),
+      button_label: localize(
+        "Envoyer un mail de connexion",
+        "Send a login email",
+      ),
+    },
+    forgotten_password: {
+      ...variables,
+      button_label: localize(
+        "Envoyer un mail de récupération de mot de passe",
+        "Send a password recovery email",
+      ),
+      link_text: localize("Mot de passe oublié ?", "Forgotten password?"),
+    },
+  };
   const [screenWidth, setScreenWidth] = useState(1000);
   useEffect(() => {
     const updateScreenWidth = () => {
@@ -91,7 +141,26 @@ export const Page = (props) => {
     };
   }, []);
 
-  const toggleButtons = (
+  const toggleButtonsLeft = null;
+  // (
+  //   <div style={{ position: "fixed", bottom: 0, left: 0 }}>
+  //     <Flex p="3" gap="2">
+  //       <Toggle
+  //         onPressedChange={(pressed) => {
+  //           console.log("🚀 ~ Page ~ pressed:", pressed);
+  //           window.location.replace(
+  //             locale === "en"
+  //               ? "https://recueildecitations.fr"
+  //               : "https://knowmyquotes.com",
+  //           );
+  //         }}
+  //       >
+  //         {locale === "en" ? <FrIcon /> : <EnIcon />}
+  //       </Toggle>
+  //     </Flex>
+  //   </div>
+  // );
+  const toggleButtonsRight = (
     <div style={{ position: "fixed", bottom: 0, right: 0 }}>
       <Flex p="3" gap="2">
         <Toggle
@@ -121,12 +190,18 @@ export const Page = (props) => {
       )}
       <h1 style={pageTitleStyle(isMobile)} onClick={() => navigate("/")}>
         <Flex>
-          Recueil de citations
+          {localize("Recueil de citations", "Know my quotes")}
           <LocaleSwitch
             locale={locale}
-            setLocale={setLocale}
             width="1em"
             height="1em"
+            onClick={(e) => {
+              window.location.replace(
+                locale === "en"
+                  ? "https://recueildecitations.fr"
+                  : "https://knowmyquotes.com",
+              );
+            }}
           />
         </Flex>
       </h1>
@@ -156,7 +231,7 @@ export const Page = (props) => {
         >
           <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"></path>
         </svg>
-        {user ? <div>{user.email}</div> : "Connexion"}
+        {user ? <div>{user.email}</div> : localize("Connexion", "Login")}
       </Button>
     </Flex>
   );
@@ -192,6 +267,8 @@ export const Page = (props) => {
       setAppearance,
       locale,
       setLocale,
+      localize,
+      i18n,
       screenWidth,
     },
   };
@@ -203,7 +280,8 @@ export const Page = (props) => {
   if (simple)
     return (
       <Theme appearance={appearance}>
-        {toggleButtons}
+        {toggleButtonsLeft}
+        {toggleButtonsRight}
         <div id="page">{React.createElement(element, childProps)}</div>
       </Theme>
     );
@@ -217,7 +295,8 @@ export const Page = (props) => {
 
         {!modalState.isOpen && (
           <div id="page">
-            {toggleButtons}
+            {toggleButtonsLeft}
+            {toggleButtonsRight}
 
             <header>
               {pageTitle}

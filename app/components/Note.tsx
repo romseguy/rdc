@@ -11,6 +11,7 @@ import {
   PageSwitch,
   iconProps,
   Flex,
+  EnIcon,
 } from "~/components";
 import {
   toUsername,
@@ -29,6 +30,7 @@ interface NoteP {
   isEditing?: boolean;
   locale: string;
   setLocale: (string) => void;
+  localize: (fr: string, en: string) => string;
   isMobile: boolean;
   onOpenClick?: any;
   onEditClick?: any;
@@ -46,8 +48,7 @@ export const Note = (props: NoteP) => {
     user,
     isEditing = false,
     isLoading = false,
-    locale,
-    setLocale,
+    localize,
     isMobile,
     onOpenClick,
     onEditClick,
@@ -57,14 +58,15 @@ export const Note = (props: NoteP) => {
     onSubmitCommentClick,
     onDeleteCommentClick,
   } = props;
-  const desc =
-    locale === "en"
-      ? note.desc_en
-        ? note.desc_en
-        : note.desc
-        ? "<p>You can translate the text below :</p><p>&nbsp;</p>" + note.desc
-        : "No english translation"
-      : note.desc;
+  const [locale, setLocale] = useState(props.locale);
+  const desc = note[`desc_${locale}`] || "<i>Empty quote</i>";
+  // locale === "en"
+  //   ? note.desc_en
+  //     ? note.desc_en
+  //     : note.desc
+  //     ? "<p>You can translate the text below :</p><p>&nbsp;</p>" + note.desc
+  //     : "No english translation"
+  //   : note.desc;
 
   const [isPageEdit, setIsPageEdit] = useState(false);
   const [page, setPage] = useState<number | undefined>(note.page);
@@ -86,65 +88,68 @@ export const Note = (props: NoteP) => {
     );
   };
 
-  const NoteHeaderRight = (props) => (
-    <div {...props}>
-      {isLoading && (
-        <div className="spinner">
-          <span>Chargement...</span>
-        </div>
-      )}
-      {!isLoading && (
-        <Flex gap="3">
-          {!isMobile && (
-            <Button
-              className="with-icon"
-              style={{ padding: "3px 3px 3px 6px" }}
-              onClick={onOpenClick}
-            >
-              Ouvrir le lecteur
+  const NoteHeaderRight = (props) => {
+    const str = localize("Ouvrir le lecteur", "Open the reader");
+    return (
+      <div {...props}>
+        {isLoading && (
+          <div className="spinner">
+            <span>Chargement...</span>
+          </div>
+        )}
+        {!isLoading && (
+          <Flex gap="3">
+            {!isMobile && (
+              <Button
+                className="with-icon"
+                style={{ padding: "3px 3px 3px 6px" }}
+                onClick={onOpenClick}
+              >
+                {str}
+                <ExternalIcon
+                  {...iconProps({
+                    title: str,
+                  })}
+                />
+              </Button>
+            )}
+
+            {isMobile && (
               <ExternalIcon
                 {...iconProps({
-                  title: "Ouvrir le lecteur",
+                  title: str,
+                  isMobile,
+                  onClick: onOpenClick,
                 })}
               />
-            </Button>
-          )}
-
-          {isMobile && (
-            <ExternalIcon
+            )}
+            <ShareIcon
               {...iconProps({
-                title: "Ouvrir le lecteur",
+                title: localize("Partager la citation", "Share the quote"),
                 isMobile,
-                onClick: onOpenClick,
+                onClick: onShareClick,
               })}
             />
-          )}
-          <ShareIcon
-            {...iconProps({
-              title: "Partager la citation",
-              isMobile,
-              onClick: onShareClick,
-            })}
-          />
-          <EditIcon
-            onClick={() => onEditClick()}
-            {...iconProps({
-              title: "Modifier la citation",
-              isMobile,
-              onClick: onEditClick,
-            })}
-          />
-          <DeleteIcon
-            {...iconProps({
-              title: "Supprimer la citation",
-              isMobile,
-              onClick: onDeleteClick,
-            })}
-          />
-        </Flex>
-      )}
-    </div>
-  );
+            <EditIcon
+              onClick={() => onEditClick()}
+              {...iconProps({
+                title: localize("Modifier la citation", "Edit the quote"),
+                isMobile,
+                onClick: onEditClick,
+              })}
+            />
+            <DeleteIcon
+              {...iconProps({
+                title: localize("Supprimer la citation", "Delete the quote"),
+                isMobile,
+                onClick: onDeleteClick,
+              })}
+            />
+          </Flex>
+        )}
+      </div>
+    );
+  };
 
   return (
     <section>
@@ -164,7 +169,9 @@ export const Note = (props: NoteP) => {
                 gap: "6px",
               })}
             >
-              {note.isNew ? "Nouvelle citation" : "Modifiez cette citation"}
+              {note.isNew
+                ? localize("Nouvelle citation", "New quote")
+                : localize("Modifiez cette citation", "Edit this quote")}
               <LocaleSwitch locale={locale} setLocale={setLocale} />
             </div>
           )}
@@ -198,7 +205,10 @@ export const Note = (props: NoteP) => {
                     }}
                   >
                     <LocaleSwitch locale={locale} setLocale={setLocale} />
-                    <div>Cité par {toUsername(note.note_email)}</div>
+                    <div>
+                      {localize("Cité par", "Quoted by")}{" "}
+                      {toUsername(note.note_email)}
+                    </div>
                   </div>
 
                   <NoteHeaderRight />
@@ -214,8 +224,6 @@ export const Note = (props: NoteP) => {
                       gap: "6px",
                     })}
                   >
-                    <LocaleSwitch locale={locale} setLocale={setLocale} />
-
                     <PageSwitch
                       isPageEdit={isPageEdit}
                       setIsPageEdit={setIsPageEdit}
@@ -225,12 +233,17 @@ export const Note = (props: NoteP) => {
                       onClick={onEditPageClick}
                     />
 
-                    <div>Cité par {toUsername(note.note_email)}</div>
+                    <div>
+                      {localize("Cité par", "Quoted by")}{" "}
+                      {toUsername(note.note_email)}
+                    </div>
                   </div>
 
                   <div>
-                    {note.index !== 0 && "< Note précédente"}
-                    {note.index !== notes.length - 1 && "Note suivante >"}
+                    {note.index !== 0 &&
+                      localize("< Note précédente", "< Previous note")}
+                    {note.index !== notes.length - 1 &&
+                      localize("Note suivante >", "Next note >")}
                   </div>
 
                   <NoteHeaderRight
@@ -296,10 +309,12 @@ export const Note = (props: NoteP) => {
             >
               <div>
                 {Array.isArray(note.comments) && note.comments.length > 0
-                  ? `Lire les ${note.comments.length} commentaires ${
+                  ? `${localize("Lire les", "Read")} ${
+                      note.comments.length
+                    } ${localize("commentaires", "comments")} ${
                       isShowComments ? "V" : ">"
                     }`
-                  : "0 commentaires"}
+                  : `0 ${localize("commentaires", "comments")}`}
               </div>
 
               <div>
@@ -315,7 +330,7 @@ export const Note = (props: NoteP) => {
                     }
                   }}
                 >
-                  Ajouter un commentaire
+                  {localize("Ajouter un commentaire", "Add a comment")}
                 </Button>
               </div>
             </div>

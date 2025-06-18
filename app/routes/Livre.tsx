@@ -13,6 +13,7 @@ export const Livre = (props) => {
     isMobile,
     modalState,
     setModalState,
+    localize,
   } = props;
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
@@ -80,7 +81,10 @@ export const Livre = (props) => {
           <Flex pl="4">
             {book.title && (
               <h1>
-                {book.is_conf ? "Conférence" : "Livre"} : <i>{book.title}</i>
+                {book.is_conf
+                  ? localize("Conférence", "Talk show")
+                  : localize("Livre", "Book")}{" "}
+                : <i>{book.title}</i>
               </h1>
             )}
 
@@ -108,10 +112,13 @@ export const Livre = (props) => {
                 <Select.Trigger variant="classic" />
                 <Select.Content>
                   <Select.Item value={ENoteOrder.ID}>
-                    Citations plus récentes en premier
+                    {localize(
+                      "Citations plus récentes en premier",
+                      "Most recent quotes first",
+                    )}
                   </Select.Item>
                   <Select.Item value={ENoteOrder.PAGE}>
-                    De la première à la dernière page
+                    {localize("Dans l'ordre des pages", "By page order")}
                   </Select.Item>
                 </Select.Content>
               </Select.Root>
@@ -139,6 +146,7 @@ export const Livre = (props) => {
                         isEditing
                         locale={locale}
                         setLocale={setLocale}
+                        localize={localize}
                         isMobile={isMobile}
                       />
 
@@ -270,6 +278,7 @@ export const Livre = (props) => {
                         isLoading={isLoading[note.id]}
                         locale={locale}
                         setLocale={setLocale}
+                        localize={localize}
                         isMobile={isMobile}
                         onOpenClick={() => {
                           navigate("/note/" + note.id);

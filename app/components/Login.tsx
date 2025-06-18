@@ -4,36 +4,6 @@ import { Input } from "./ui/input";
 import { BackButton, Flex } from "~/components";
 import { supabase } from "~/utils";
 
-const variables = {
-  email_label: "Adresse e-mail",
-  password_label: "Mot de passe",
-  email_input_placeholder: "Votre adresse e-mail",
-  password_input_placeholder: "Votre mot de passe",
-  button_label: "Connexion",
-  loading_button_label: "Chargement",
-  //social_provider_text: "",
-  link_text: "link_text",
-};
-const i18n = {
-  sign_in: variables,
-  sign_up: {
-    ...variables,
-    button_label: "Créer le compte",
-    link_text: "Créer un compte",
-    confirmation_text: "Confirmer",
-  },
-  magic_link: {
-    ...variables,
-    link_text: "Envoyer un mail de connexion",
-    button_label: "Envoyer un mail de connexion",
-  },
-  forgotten_password: {
-    ...variables,
-    button_label: "Envoyer un mail de récupération de mot de passe",
-    link_text: "Mot de passe oublié ?",
-  },
-};
-
 function ForgottenPassword({
   i18n,
   redirectTo,
@@ -286,7 +256,7 @@ function EmailAuth({
 }
 
 export const Login = (props) => {
-  const { close, showToast } = props;
+  const { close, showToast, i18n } = props;
   const [view, setView] = useState<string>();
 
   if (view === "forgotten_password")
