@@ -6,15 +6,17 @@ import React, { useEffect, useState } from "react";
 import { useDeviceSelectors } from "react-device-detect";
 import { useNavigate } from "react-router";
 import { Flex, Header, LocaleSwitch, ToastsContainer } from "~/components";
+import { pageTitleStyle, toggleCss } from "~/lib/css";
 import { client, tokenKey } from "~/utils";
 import type { Lib, ModalT, User } from "~/utils/types";
 import { Modal } from "./Modal";
+import { css } from "@emotion/react";
 
 const controller = new AbortController();
 const signal = controller.signal;
 
-export const Page = ({ ...props }) => {
-  const { element, loaderData, noTheme, simple } = props;
+export const Page = (props) => {
+  const { element, loaderData = {}, noTheme, simple } = props;
   const [{ isMobile }] = useDeviceSelectors(loaderData.userAgent);
   const navigate = useNavigate();
 
@@ -36,6 +38,7 @@ export const Page = ({ ...props }) => {
     })();
   }, [accessToken, refreshToken]);
   //#endregion
+
   //#region toast
   const [toasts, setToasts] = useState<any[]>([]);
   const showToast = (message: string, isError = false) => {
@@ -51,6 +54,7 @@ export const Page = ({ ...props }) => {
     setToasts(toasts.filter((toast) => toast.id !== id));
   };
   //#endregion
+
   //#region modal
   const [modalState, setModalState] = useState<ModalT>({
     isOpen: false,
@@ -60,6 +64,7 @@ export const Page = ({ ...props }) => {
   const toggleModal = () =>
     setModalState({ ...modalState, isOpen: !modalState.isOpen });
   //#endregion
+
   //#region ui
   const [appearance, setAppearance] = useStorage("color-mode", {
     type: "local",
@@ -85,55 +90,21 @@ export const Page = ({ ...props }) => {
       if (!isMobile) controller.abort();
     };
   }, []);
-  //#endregion
-
-  const [lib, _setLib] = useState<Lib>();
-  const setLib = (libName: string) => {
-    const l = loaderData.libs?.find((li) => li.name === libName);
-    if (l) _setLib(l);
-  };
-  const childProps = {
-    ...props,
-    ...{ loaderData },
-    ...{
-      isMobile,
-      lib,
-      setLib,
-      // auth
-      accessToken,
-      refreshToken,
-      setAuthToken,
-      user,
-      setUser,
-      // toast
-      showToast,
-      // modal
-      modalState,
-      setModalState,
-      toggleModal,
-      // ui
-      appearance,
-      setAppearance,
-      locale,
-      setLocale,
-      screenWidth,
-    },
-  };
 
   const toggleButtons = (
     <div style={{ position: "fixed", bottom: 0, right: 0 }}>
-      <Flex p="3">
+      <Flex p="3" gap="2">
         <Toggle
-          className="Toggle"
-          onPressedChange={(pressed) => {
+          css={css(toggleCss(appearance))}
+          onPressedChange={() => {
             setAppearance(appearance === "dark" ? "light" : "dark");
           }}
         >
           {appearance === "dark" ? <SunIcon /> : <MoonIcon />}
         </Toggle>
         <Toggle
-          className="Toggle"
-          onPressedChange={(pressed) =>
+          css={css(toggleCss(appearance))}
+          onPressedChange={() =>
             window.scrollTo({ top: 0, behavior: "smooth" })
           }
         >
@@ -144,30 +115,11 @@ export const Page = ({ ...props }) => {
   );
 
   const pageTitle = (
-    <Flex justify="between" pt="1">
+    <Flex justify="between" pb="3" pr="1" pt="3">
       {!isMobile && (
         <Separator style={{ width: "120px", visibility: "hidden" }} />
       )}
-      <h1
-        style={{
-          color: "white",
-          fontFamily: "Griffy",
-          //fontWeight: "normal",
-          cursor: "pointer",
-          ...(!isMobile
-            ? {
-                background: "purple",
-                borderRadius: 9999,
-                fontSize: "36px",
-                letterSpacing: 2,
-                paddingLeft: "24px",
-                paddingRight: "24px",
-                textAlign: "center",
-              }
-            : { paddingLeft: "3px" }),
-        }}
-        onClick={() => navigate("/")}
-      >
+      <h1 style={pageTitleStyle(isMobile)} onClick={() => navigate("/")}>
         <Flex>
           Recueil de citations
           <LocaleSwitch
@@ -208,6 +160,42 @@ export const Page = ({ ...props }) => {
       </Button>
     </Flex>
   );
+  //#endregion
+
+  //#region child
+  const [lib, _setLib] = useState<Lib>();
+  const setLib = (libName: string) => {
+    const l = loaderData.libs?.find((li) => li.name === libName);
+    if (l) _setLib(l);
+  };
+  const childProps = {
+    ...props,
+    ...{ loaderData },
+    ...{
+      isMobile,
+      lib,
+      setLib,
+      // auth
+      accessToken,
+      refreshToken,
+      setAuthToken,
+      user,
+      setUser,
+      // toast
+      showToast,
+      // modal
+      modalState,
+      setModalState,
+      toggleModal,
+      // ui
+      appearance,
+      setAppearance,
+      locale,
+      setLocale,
+      screenWidth,
+    },
+  };
+  //#endregion
 
   if (noTheme)
     return <div id="page">{React.createElement(element, childProps)}</div>;

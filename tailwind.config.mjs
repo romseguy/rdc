@@ -1,5 +1,5 @@
 import { twMerge } from "tailwind-merge";
-import { radixThemePlugin } from "./app/lib/plugins";
+import { radixThemePlugin } from "./app/lib/tw/plugins";
 
 // no fast-refresh
 const base = (theme) => ({

@@ -24,13 +24,8 @@ export const Note = (props) => {
   return (
     <div id="note-page">
       <header>
-        <Flex>
-          <BackButton
-            style={{ marginRight: "6px" }}
-            onClick={() => {
-              navigate(-1);
-            }}
-          />
+        <Flex p="3">
+          <BackButton style={{ marginRight: "6px" }} />
 
           <h2>
             Citation {note.page && `p.${note.page} `}
@@ -62,6 +57,7 @@ export const Note = (props) => {
           </h2>
         </Flex>
 
+        {/* sliders */}
         <Flex
           direction="column"
           align="start"

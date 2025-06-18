@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { withOptions } from "tailwindcss/plugin";
-import { theme as rt } from "./rt/theme";
+import { theme as rt } from "../rt/theme";
 
 export const radixThemePlugin = withOptions(
   (base) => {

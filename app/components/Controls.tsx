@@ -34,7 +34,6 @@ export const iconProps = ({
 
 export const BackButton = (props) => {
   const navigate = useNavigate();
-  console.log("🚀 ~ BackButton ~ history:", history);
   const {
     onClick = () => navigate(!!history && history.length > 1 ? -1 : "/"),
     label = "Retour",

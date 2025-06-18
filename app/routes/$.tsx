@@ -51,7 +51,11 @@ export const loader = async (props: Route.LoaderArgs) => {
   if (data.book) {
     const lib = data.libs.find((lib) => lib.id === data.book!.library_id);
     if (lib) data.lib = lib;
-  }
+  } else if (!data.note)
+    throw new Response("", {
+      status: 404,
+      statusText: "La page n'a pas été trouvée",
+    });
 
   return data;
 };

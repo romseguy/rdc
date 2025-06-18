@@ -4,9 +4,42 @@
 
 .radix-themes {
   --cursor-button: pointer;
-  --default-font-family: Spectral, Georgia, ui-serif, serif;
-  --secondary-font-family: Inter, system-ui, Avenir, Helvetica, Arial,
-    sans-serif;
+  --default-font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --secondary-font-family: Spectral, Georgia, ui-serif, serif;
+
+  #modal {
+  }
+  #login-modal {
+    background: var(--color-background);
+    padding: 24px;
+    a {
+      font-size: smaller;
+    }
+  }
+  #share-modal {
+    background: var(--color-background);
+    padding: 24px;
+  }
+
+  #page  {
+  }
+  #error-page {
+    background: var(--color-background);
+    height: 100%;
+    padding: 24px;
+  }
+  #home-page {
+  }
+  #book-page {
+    section p {
+      font-family: var(--secondary-font-family);
+    }
+  }
+  #note-page {
+    main p {
+      font-family: var(--secondary-font-family);
+    }
+  }
 
   &.light {
     --color-background: rgba(211, 211, 211, 0.3);
@@ -44,46 +77,6 @@
       background: rgba(0, 0, 0, 0.7);
     }
   }
-}
-
-html,
-body,
-.radix-themes,
-#modal,
-#page,
-//#home-page,
-#error-page {
-  height: 100%;
-}
-
-#modal {
-  * {
-    font-family: var(--secondary-font-family);
-  }
-}
-#login-modal {
-  background: var(--color-background);
-  padding: 24px;
-  a {
-    font-size: smaller;
-  }
-}
-#share-modal {
-  background: var(--color-background);
-  padding: 24px;
-}
-
-#error-page {
-  height: 100%;
-  // font-family: var(--secondary-font-family);
-  // background-color: rgba(0, 0, 0, 0.9);
-  // padding: 24px;
-}
-#home-page {
-}
-#book-page {
-}
-#note-page {
 }
 
 button {
