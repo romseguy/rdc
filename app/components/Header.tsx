@@ -3,12 +3,12 @@ import { Select } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { useNavigate, useNavigation } from "react-router";
 import { Flex } from "~/components";
+import { localize } from "~/utils";
 
 export const Header = (props) => {
   const lib = props.lib || props.loaderData.lib;
   const {
     loaderData: { libs, book },
-    localize,
   } = props;
 
   const navigation = useNavigation();
@@ -25,7 +25,7 @@ export const Header = (props) => {
   }, [navigation.state]);
   const onBookClick = async (b) => {
     setIsLoading({ ...isLoading, [b.id]: true });
-    await navigate("/livre/" + b.id);
+    await navigate("/" + localize("livre", "book") + "/" + b.id);
   };
   const [item, setItem] = useState("0");
 
@@ -39,14 +39,42 @@ export const Header = (props) => {
       >
         <Select.Root
           defaultValue={item}
+          onOpenChange={(open) => {
+            if (open)
+              alert(
+                localize(
+                  `Si vous voulez accéder à des citations classées par catégories, merci d'envoyer un mail à ${
+                    import.meta.env.VITE_PUBLIC_EMAIL
+                  } pour me le faire savoir.`,
+                  `If you are interested in having quotes grouped by categories, please send an email to ${
+                    import.meta.env.VITE_PUBLIC_EMAIL
+                  } to make me know.`,
+                ),
+              );
+          }}
+        >
+          <Select.Trigger variant="classic" />
+          <Select.Content>
+            <Select.Item value="0">
+              {localize("Catégories", "Categories")}
+            </Select.Item>
+          </Select.Content>
+        </Select.Root>
+
+        <Select.Root
+          defaultValue={item}
           value={item}
           onValueChange={(value) => {
             //setItem(value);
             if (value === "1") {
               alert(
                 localize(
-                  "Si vous voulez accéder à des citations classées par thématiques, merci d'envoyer un mail à {import.meta.env.VITE_PUBLIC_EMAIL} pour me le faire savoir.",
-                  "If you are interested in having quotes grouped by topics, please send send an email to {import.meta.env.VITE_PUBLIC_EMAIL} to make me know.",
+                  `Si vous voulez accéder à des citations classées par thématiques, merci d'envoyer un mail à ${
+                    import.meta.env.VITE_PUBLIC_EMAIL
+                  } pour me le faire savoir.`,
+                  `If you are interested in having quotes grouped by topics, please send an email to ${
+                    import.meta.env.VITE_PUBLIC_EMAIL
+                  } to make me know.`,
                 ),
               );
             }
@@ -74,7 +102,7 @@ export const Header = (props) => {
             <Select.Content>
               {libs?.map((l) => (
                 <Select.Item key={"lib-" + l.id} value={l.name}>
-                  {l.name}
+                  {l[localize("name")]}
                 </Select.Item>
               ))}
             </Select.Content>
@@ -107,7 +135,7 @@ export const Header = (props) => {
             }
           >
             {isLoading[b.id] && <div className="spinner" />}
-            {!isLoading[b.id] && b.title}
+            {!isLoading[b.id] && b[localize("title")]}
           </div>
         ))}
       </Flex>

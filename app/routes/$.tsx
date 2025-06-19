@@ -7,7 +7,12 @@ import { Note } from "~/routes/Note";
 
 import { loader as rootLoader } from "./_index";
 import type { Route } from "./+types/$";
-import type { Book, Note as NoteT, RootData } from "~/utils";
+import {
+  localize,
+  type Book,
+  type Note as NoteT,
+  type RootData,
+} from "~/utils";
 
 export const loader = async (props: Route.LoaderArgs) => {
   const data: RootData & { book?: Book; note?: NoteT } = await rootLoader(
@@ -15,8 +20,8 @@ export const loader = async (props: Route.LoaderArgs) => {
   );
   const id = props.params["*"] || "";
 
-  if (id.includes("livre")) {
-    const bookId = id.substring(6);
+  if (id.includes(localize("livre", "book"))) {
+    const bookId = id.substring(Number(localize("6", "5")));
     for (const lib of data.libs) {
       for (const b of lib.books || []) {
         if (b.id === bookId) {
@@ -29,8 +34,8 @@ export const loader = async (props: Route.LoaderArgs) => {
         status: 404,
         statusText: "Le livre n'a pas été trouvé",
       });
-  } else if (id.includes("note")) {
-    const noteId = id.substring(5);
+  } else if (id.includes("q")) {
+    const noteId = id.substring(2);
     for (const lib of data.libs) {
       for (const b of lib.books || []) {
         for (const n of b.notes || []) {
@@ -65,11 +70,11 @@ export default function CatchAllRoute(props) {
 
   return useRoutes([
     {
-      path: "livre/:id",
+      path: localize("livre", "book") + "/:id",
       element: <Page element={Livre} {...props} />,
     },
     {
-      path: "note/:id",
+      path: "q/:id",
       element: <Page element={Note} simple {...props} />,
     },
   ]);

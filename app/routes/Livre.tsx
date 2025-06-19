@@ -2,7 +2,14 @@ import { Button, Select } from "@radix-ui/themes";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { AddNoteButton, Flex, Note } from "~/components";
-import { client, toCss, type BookT, type NoteT, ENoteOrder } from "~/utils";
+import {
+  client,
+  toCss,
+  type BookT,
+  type NoteT,
+  ENoteOrder,
+  localize,
+} from "~/utils";
 
 export const Livre = (props) => {
   const {
@@ -13,7 +20,6 @@ export const Livre = (props) => {
     isMobile,
     modalState,
     setModalState,
-    localize,
   } = props;
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
@@ -84,7 +90,7 @@ export const Livre = (props) => {
                 {book.is_conf
                   ? localize("Conférence", "Talk show")
                   : localize("Livre", "Book")}{" "}
-                : <i>{book.title}</i>
+                : <i>{book[localize("title")]}</i>
               </h1>
             )}
 
@@ -281,7 +287,7 @@ export const Livre = (props) => {
                         localize={localize}
                         isMobile={isMobile}
                         onOpenClick={() => {
-                          navigate("/note/" + note.id);
+                          navigate("/q/" + note.id);
                           //setNote(note);
                         }}
                         onEditClick={() => {

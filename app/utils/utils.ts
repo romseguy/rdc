@@ -14,7 +14,8 @@ export const bindEvent = (
   }
 };
 
-export const localize = (fr, en) => {
+export const localize: (fr: string, en?: string) => string = (fr, en) => {
+  if (!en) return import.meta.env.VITE_PUBLIC_LOCALE === "en" ? `${fr}_en` : fr;
   return import.meta.env.VITE_PUBLIC_LOCALE === "en" ? en : fr;
 };
 
@@ -342,7 +343,6 @@ export const useScroll = <T extends HTMLElement>(
     export const useScrollToBottomWhen = (condition: boolean) => {
       useEffect(() => {
         if (condition) {
-          console.log("🚀 ~ useEffect ~ condition:", condition);
           window.scrollTo({
             top: document.documentElement.scrollHeight - window.innerHeight,
             left: 0,

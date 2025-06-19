@@ -4,9 +4,10 @@ import {
   generateTailwindColors,
   getMappings,
   getRadiusTokenName,
-} from "../tw/utils";
+} from "./utils";
+import type { Config } from "tailwindcss/types/config";
 
-export const theme = {
+const theme: Config["theme"] = {
   fontSize: {
     xs: [
       "var(--font-size-1)",
@@ -196,3 +197,5 @@ export const theme = {
     gray: generateTailwindColors("gray"),
   },
 };
+
+export default theme;

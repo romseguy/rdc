@@ -76,7 +76,7 @@ export const Modal = (props) => {
               size="4"
               onClick={() => {
                 navigator.clipboard.writeText(
-                  import.meta.env.VITE_PUBLIC_URL + "/note/" + note!.id,
+                  import.meta.env.VITE_PUBLIC_URL + "/q/" + note!.id,
                 );
                 showToast(
                   localize(

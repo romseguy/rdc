@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams } from "react-router";
 import { Link, useLocation, useRoutes, type RouteObject } from "react-router";
+import { localize } from "~/utils";
 
 const Sitemap = (props) => {
   // console.log("🚀 ~ Sitemap ~ props:", props);
@@ -19,7 +20,7 @@ const Sitemap = (props) => {
           {libs.map((lib) =>
             lib.books.map((book, index) => (
               <li key={book.id}>
-                <Link to={"/livre/" + book.id}>
+                <Link to={"/" + localize("livre", "book") + "/" + book.id}>
                   {book.title ||
                     "Livre " +
                       Number(index + 1) +

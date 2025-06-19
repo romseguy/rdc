@@ -34,6 +34,7 @@ export type BookT = Omit<Book, "notes"> & { index: number; notes?: NoteT[] };
 export type Book = {
   id: string;
   title?: string;
+  title_en?: string;
   notes?: Note[];
   src?: string;
   library_id?: string;
@@ -42,6 +43,7 @@ export type Book = {
 export type Lib = {
   id: string;
   name: string;
+  name_en?: string;
   author: string;
   author_url?: string;
   books?: Book[];

@@ -1,17 +1,9 @@
-//@ts-nocheck
-import { withOptions } from "tailwindcss/plugin";
-import { theme as rt } from "../rt/theme";
+import rt from "./rt/plugin";
 
-export const radixThemePlugin = withOptions(
-  (base) => {
-    return ({ addBase, theme }) => {
-      addBase(base(theme));
-    };
-  },
-  () => {
-    return {
-      darkMode: "selector",
-      theme: rt,
-    };
-  },
-);
+const plugins = [
+  //require("@headlessui/tailwindcss")(),
+  //require("tailwindcss-radix")(),
+  rt({}),
+];
+
+export default plugins;

@@ -3,12 +3,12 @@ import { Slider } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { BackButton, Flex } from "~/components";
+import { localize } from "~/utils";
 
 export const Note = (props) => {
   const {
     loaderData: { lib, book, note },
     screenWidth,
-    localize,
   } = props;
   const navigate = useNavigate();
 
@@ -30,7 +30,7 @@ export const Note = (props) => {
 
           <h2>
             {localize("Citation", "Quote")} {note.page && `p.${note.page} `}
-            {book?.title ? (
+            {book.title ? (
               <>
                 {book.is_conf && (
                   <>
@@ -44,7 +44,7 @@ export const Note = (props) => {
                   <>
                     {localize("du livre", "from book")} :{" "}
                     <i>
-                      {book?.title} ({lib.name})
+                      {book[localize("title")]} ({lib[localize("name")]})
                     </i>
                   </>
                 )}
@@ -139,7 +139,8 @@ export const Note = (props) => {
           fontSize: size + "px",
           lineHeight,
           margin: "0 auto",
-          width: width + "px",
+          width: width > screenWidth ? screenWidth : width + "px",
+          maxWidth: screenWidth + "px",
           textAlign: "justify",
         }}
       >
