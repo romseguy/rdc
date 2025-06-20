@@ -21,7 +21,10 @@
     padding: 24px;
   }
 
-  #page  {
+  #page {
+    header {
+      color: white;
+    }
   }
   #error-page {
     background: var(--color-background);
@@ -38,6 +41,21 @@
   #note-page {
     main p {
       font-family: var(--secondary-font-family);
+    }
+  }
+
+  button {
+    &.back-btn {
+      background: var(--red-9);
+      &:hover {
+        background: var(--red-10);
+      }
+    }
+    &.with-icon {
+      padding: 3px 3px 3px 6px;
+      & > svg {
+        stroke: currentColor;
+      }
     }
   }
 
@@ -75,21 +93,6 @@
     }
     #note-page > main {
       background: rgba(0, 0, 0, 0.7);
-    }
-  }
-}
-
-button {
-  &.back-btn,
-  &.cancel-btn {
-    background: var(--red-7);
-    &:hover {
-      background: var(--red-8);
-    }
-  }
-  &.with-icon {
-    & > svg {
-      stroke: currentColor;
     }
   }
 }

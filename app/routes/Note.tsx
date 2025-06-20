@@ -26,7 +26,12 @@ export const Note = (props) => {
     <div id="note-page">
       <header>
         <Flex p="3">
-          <BackButton style={{ marginRight: "6px" }} />
+          <BackButton
+            style={{ marginRight: "6px" }}
+            onClick={() =>
+              navigate("/" + localize("livre", "book") + "/" + book.id)
+            }
+          />
 
           <h2>
             {localize("Citation", "Quote")} {note.page && `p.${note.page} `}

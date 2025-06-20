@@ -1,24 +1,23 @@
 import { useStorage } from "@charlietango/hooks/use-storage";
 import { ArrowUpIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { Toggle } from "@radix-ui/react-toggle";
-import { Button, Separator, Theme } from "@radix-ui/themes";
+import { Button, Separator, Spinner, Theme } from "@radix-ui/themes";
 import React, { useEffect, useState } from "react";
 import { useDeviceSelectors } from "react-device-detect";
-import { useNavigate } from "react-router";
+import { useNavigate, useNavigation } from "react-router";
 import {
-  EnIcon,
   Flex,
-  FrIcon,
   Header,
   LocaleSwitch,
   ToastsContainer,
+  UserIcon,
 } from "~/components";
 import { pageTitleStyle, toggleCss } from "~/lib/css";
 import { client, tokenKey } from "~/utils";
 import type { Lib, ModalT, User } from "~/utils/types";
 import { Modal } from "./Modal";
 import { css } from "@emotion/react";
-import { redirect } from "react-router";
+import type { ThemeOwnProps } from "@radix-ui/themes/components/theme.props";
 
 const controller = new AbortController();
 const signal = controller.signal;
@@ -27,7 +26,7 @@ export const Page = (props) => {
   const { element, loaderData = {}, noTheme, simple } = props;
   const [{ isMobile }] = useDeviceSelectors(loaderData.userAgent);
   const navigate = useNavigate();
-
+  const navigation = useNavigation();
   //#region auth
   const [authToken, setAuthToken] = useStorage(tokenKey, {
     type: "local",
@@ -147,7 +146,6 @@ export const Page = (props) => {
   //     <Flex p="3" gap="2">
   //       <Toggle
   //         onPressedChange={(pressed) => {
-  //           console.log("🚀 ~ Page ~ pressed:", pressed);
   //           window.location.replace(
   //             locale === "en"
   //               ? "https://recueildecitations.fr"
@@ -186,9 +184,15 @@ export const Page = (props) => {
   const pageTitle = (
     <Flex justify="between" pb="3" pr="1" pt="3">
       {!isMobile && (
-        <Separator style={{ width: "120px", visibility: "hidden" }} />
+        <Separator style={{ width: "80px", visibility: "hidden" }} />
       )}
-      <h1 style={pageTitleStyle(isMobile)} onClick={() => navigate("/")}>
+      <h1
+        style={pageTitleStyle(isMobile)}
+        onClick={() => {
+          console.log("navigating to /");
+          navigate("/");
+        }}
+      >
         <Flex>
           {localize("Recueil de citations", "Know my quotes")}
           <LocaleSwitch
@@ -221,16 +225,7 @@ export const Page = (props) => {
           }
         }}
       >
-        <svg
-          stroke="currentColor"
-          fill="currentColor"
-          strokeWidth="0"
-          viewBox="0 0 448 512"
-          height="1em"
-          width="1em"
-        >
-          <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"></path>
-        </svg>
+        <UserIcon />
         {user ? <div>{user.email}</div> : localize("Connexion", "Login")}
       </Button>
     </Flex>
@@ -279,7 +274,7 @@ export const Page = (props) => {
 
   if (simple)
     return (
-      <Theme appearance={appearance}>
+      <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
         {toggleButtonsLeft}
         {toggleButtonsRight}
         <div id="page">{React.createElement(element, childProps)}</div>
@@ -290,14 +285,11 @@ export const Page = (props) => {
     <>
       <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
 
-      <Theme appearance={appearance}>
+      <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
         <Modal {...childProps} />
 
         {!modalState.isOpen && (
           <div id="page">
-            {toggleButtonsLeft}
-            {toggleButtonsRight}
-
             <header>
               {pageTitle}
 
@@ -307,6 +299,37 @@ export const Page = (props) => {
             {React.createElement(element, childProps)}
           </div>
         )}
+
+        {navigation.state === "loading" && (
+          <Flex
+            justify="center"
+            width={screenWidth + "px"}
+            height="100%"
+            style={{
+              position: "fixed",
+              background: "rgba(0, 0, 0, 0.5)",
+              top: 0,
+              left: 0,
+              pointerEvents: "all",
+            }}
+          >
+            <Flex
+              p="3"
+              style={{
+                background: "rgba(255, 255, 255, 0.9)",
+                borderRadius: "var(--radius-3)",
+                color: "black",
+                pointerEvents: "none",
+                userSelect: "none",
+              }}
+            >
+              <Spinner size="3" /> {localize("Chargement", "Loading")}...
+            </Flex>
+          </Flex>
+        )}
+
+        {toggleButtonsLeft}
+        {toggleButtonsRight}
       </Theme>
     </>
   );

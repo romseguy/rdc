@@ -146,7 +146,7 @@ export const RTEditor = ({
       }
     `,
     convert_urls: false,
-    document_base_url: import.meta.VITE_PUBLIC_URL,
+    document_base_url: import.meta.env.VITE_PUBLIC_URL,
     font_css: "/fonts/spectral.css",
     //font_family_formats: "Spectral",
     font_family_formats:

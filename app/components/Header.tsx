@@ -1,4 +1,8 @@
 import { css } from "@emotion/react";
+import {
+  DoubleArrowRightIcon,
+  ThickArrowRightIcon,
+} from "@radix-ui/react-icons";
 import { Select } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { useNavigate, useNavigation } from "react-router";
@@ -9,6 +13,7 @@ export const Header = (props) => {
   const lib = props.lib || props.loaderData.lib;
   const {
     loaderData: { libs, book },
+    isMobile,
   } = props;
 
   const navigation = useNavigation();
@@ -30,12 +35,9 @@ export const Header = (props) => {
   const [item, setItem] = useState("0");
 
   return (
-    <Flex direction="column">
+    <Flex direction="column" gap="3" {...(isMobile ? { align: "start" } : {})}>
       <Flex
-        width="100%"
-        // {...(isMobile
-        //   ? { direction: "column" }
-        //   : { justify: "between", width: "100%", p: "1", pt: "0" })}
+        {...(isMobile ? { direction: "column", align: "start", gap: "3" } : {})}
       >
         <Select.Root
           defaultValue={item}
@@ -102,7 +104,7 @@ export const Header = (props) => {
             <Select.Content>
               {libs?.map((l) => (
                 <Select.Item key={"lib-" + l.id} value={l.name}>
-                  {l[localize("name")]}
+                  {l[localize("name")] || l.name}
                 </Select.Item>
               ))}
             </Select.Content>
@@ -110,34 +112,44 @@ export const Header = (props) => {
         )}
       </Flex>
 
+      <Flex width="100%" pl="1">
+        <DoubleArrowRightIcon />
+        <h3>
+          {localize("Bibliothèque", "Library")} : <i>{lib[localize("name")]}</i>
+        </h3>
+      </Flex>
+
+      {/* books list */}
       <Flex gap="0" width="100%" overflowX="scroll">
-        {lib?.books.map((b, index) => (
-          <div
-            key={"book-" + index}
-            css={css`
-              ${b.src && "background: url(" + b.src + ");"}
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              text-align: center;
-              height: 225px;
-              min-width: 140px;
-              width: 140px;
-              cursor: pointer;
-              border: ${b.id === book?.id
-                ? "1px solid yellow"
-                : "1px solid white"};
-            `}
-            onClick={() =>
-              !Object.keys(isLoading).find((key) => !!isLoading[key]) &&
-              !isLoading[b.id] &&
-              onBookClick(b)
-            }
-          >
-            {isLoading[b.id] && <div className="spinner" />}
-            {!isLoading[b.id] && b[localize("title")]}
-          </div>
-        ))}
+        {lib?.books.map((b, index) => {
+          return (
+            <div
+              key={"book-" + index}
+              css={css`
+                ${b.src && "background: url(" + b.src + ");"}
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                height: 225px;
+                min-width: 140px;
+                width: 140px;
+                cursor: pointer;
+                border: ${b.id === book?.id
+                  ? "1px solid yellow"
+                  : "1px solid white"};
+              `}
+              onClick={() =>
+                !Object.keys(isLoading).find((key) => !!isLoading[key]) &&
+                !isLoading[b.id] &&
+                onBookClick(b)
+              }
+            >
+              {isLoading[b.id] && <div className="spinner" />}
+              {!isLoading[b.id] && <>{b[localize("title")] || b.title}</>}
+            </div>
+          );
+        })}
       </Flex>
     </Flex>
   );

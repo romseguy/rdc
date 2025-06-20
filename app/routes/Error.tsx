@@ -6,8 +6,10 @@ import {
   BackButton,
   Flex,
 } from "~/components";
+import { localize } from "~/utils";
 
 export const Error = ({ message, details, stack, screenWidth }) => {
+  console.log("🚀 ~ Error ~ details:", details);
   const navigate = useNavigate();
 
   return (
@@ -31,29 +33,34 @@ export const Error = ({ message, details, stack, screenWidth }) => {
             obfuscate
           >
             <MailToTrigger>
-              Envoyer un message pour m'aider à améliorer le site
+              {localize(
+                "Envoyer un message pour m'aider à améliorer le site",
+                "Send a message to help me improve the website",
+              )}
             </MailToTrigger>
             <MailToBody>
-              - Décrivez ci-dessous ce qui vous a fait rencontrer une erreur :
+              -{" "}
+              {localize(
+                "Décrivez ci-dessous ce qui vous a fait rencontrer une erreur",
+                "Describe below how you reached an error",
+              )}{" "}
+              :
               <br />
               <br />
-              J'ai cliqué sur la couverture d'un livre
-              <br />
-              <br />
-              - Contenu de l'erreur :
-              <br />
-              <br />
-              {message}
-              {details && (
-                <>
-                  <br />
-                  <br />
-                  - Détails de l'erreur :
-                  <br />
-                  <br />
-                  {details}
-                </>
+              {localize(
+                "J'ai cliqué sur la couverture d'un livre",
+                "I clicked on a book cover",
               )}
+              <br />
+              <br />
+              <br />
+              <br />- {localize("Détails de l'erreur", "Error details")} :
+              <br />
+              <br />
+              {details}
+              <br />
+              <br />
+              {stack}
             </MailToBody>
           </MailTo>
         )}

@@ -36,11 +36,14 @@ export const iconProps = ({
 export const BackButton = (props) => {
   const navigate = useNavigate();
   const {
-    onClick = () => navigate(!!history && history.length > 1 ? -1 : "/"),
+    onClick = () => {
+      //@ts-expect-error
+      navigate(!!history && history.length > 1 ? -1 : "/");
+    },
     label = localize("Retour", "Back"),
   } = props;
   return (
-    <Button className="back-btn stroke-current" onClick={onClick} {...props}>
+    <Button className="back-btn" onClick={onClick} {...props}>
       {"<"} {label}
     </Button>
   );
@@ -72,7 +75,7 @@ export const AddNoteButton = ({ book, setBook, ...props }) => {
 };
 
 export const FrIcon = (props) => {
-  const { onClick } = props;
+  const { onClick, ...p } = props;
   return (
     <svg
       width="2em"
@@ -84,10 +87,10 @@ export const FrIcon = (props) => {
       onClick={(e) => {
         if (onClick) {
           e.stopPropagation();
-          onClick();
+          onClick(e);
         }
       }}
-      {...props}
+      {...p}
     >
       <defs>
         <clipPath id="id1">
@@ -137,14 +140,14 @@ export const FrIcon = (props) => {
   );
 };
 
-export const EnIcon = ({ ...props }) => (
+export const EnIcon = (props) => (
   <svg
     width="2em"
     height="2em"
     cursor="pointer"
     viewBox="0 0 30 30.000001"
-    preserveAspectRatio="xMidYMid meet"
-    zoomAndPan="magnify"
+    //preserveAspectRatio="xMidYMid meet"
+    //zoomAndPan="magnify"
     {...props}
   >
     <defs>
@@ -184,24 +187,26 @@ export const EnIcon = ({ ...props }) => (
   </svg>
 );
 
-export const LocaleSwitch = ({ locale, setLocale, onClick, ...props }) => {
+export const LocaleSwitch = (props) => {
+  const { locale, setLocale, onClick, ...p } = props;
+
   if (locale === "en")
     return (
       <FrIcon
         onClick={(e) => {
           if (setLocale) setLocale("fr");
-          else if (onClick) onClick(e);
+          if (onClick) onClick(e);
         }}
-        {...props}
+        {...p}
       />
     );
   return (
     <EnIcon
       onClick={(e) => {
         if (setLocale) setLocale("en");
-        else if (onClick) onClick(e);
+        if (onClick) onClick(e);
       }}
-      {...props}
+      {...p}
     />
   );
 };
@@ -288,5 +293,18 @@ export const EditIcon = ({ ...props }) => (
       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
     </g>
+  </svg>
+);
+export const UserIcon = (props) => (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    strokeWidth="0"
+    viewBox="0 0 448 512"
+    height="1em"
+    width="1em"
+    {...props}
+  >
+    <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"></path>
   </svg>
 );

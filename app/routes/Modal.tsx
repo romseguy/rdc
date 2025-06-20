@@ -89,7 +89,7 @@ export const Modal = (props) => {
               {localize("Copier le lien", "Copy link to clipboard")}
             </Button>
 
-            <BackButton size="4" className="cancel-btn" onClick={close} />
+            <BackButton size="4" onClick={close} />
           </Flex>
         </div>
       </div>

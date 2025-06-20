@@ -31,7 +31,6 @@ export const pageTitleStyle: (isMobile: boolean) => CSSProperties = (
   isMobile,
 ) => {
   return {
-    color: "white",
     fontFamily: "Griffy",
     fontWeight: "normal",
     cursor: "pointer",

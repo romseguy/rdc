@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Button } from "@radix-ui/themes";
+import { Badge, Box, Button } from "@radix-ui/themes";
 import { useState } from "react";
 import {
   RTEditor,
@@ -11,7 +11,8 @@ import {
   PageSwitch,
   iconProps,
   Flex,
-  EnIcon,
+  BackButton,
+  UserIcon,
 } from "~/components";
 import {
   toUsername,
@@ -20,6 +21,7 @@ import {
   useScroll,
   type NoteT,
   type User,
+  localize,
 } from "~/utils";
 
 interface NoteP {
@@ -48,7 +50,8 @@ export const Note = (props: NoteP) => {
     user,
     isEditing = false,
     isLoading = false,
-    localize,
+    locale,
+    setLocale,
     isMobile,
     onOpenClick,
     onEditClick,
@@ -58,8 +61,9 @@ export const Note = (props: NoteP) => {
     onSubmitCommentClick,
     onDeleteCommentClick,
   } = props;
-  const [locale, setLocale] = useState(props.locale);
-  const desc = note[`desc_${locale}`] || "<i>Empty quote</i>";
+  const desc =
+    (locale === "en" ? note.desc_en : note.desc) ||
+    `<i>${locale === "en" ? "Empty quote" : "Aucun texte"}</i>`;
   // locale === "en"
   //   ? note.desc_en
   //     ? note.desc_en
@@ -99,30 +103,19 @@ export const Note = (props: NoteP) => {
         )}
         {!isLoading && (
           <Flex gap="3">
-            {!isMobile && (
-              <Button
-                className="with-icon"
-                style={{ padding: "3px 3px 3px 6px" }}
-                onClick={onOpenClick}
-              >
-                {str}
-                <ExternalIcon
-                  {...iconProps({
-                    title: str,
-                  })}
-                />
-              </Button>
-            )}
-
-            {isMobile && (
+            <Button
+              className="with-icon"
+              variant="surface"
+              onClick={onOpenClick}
+            >
+              {str}
               <ExternalIcon
                 {...iconProps({
                   title: str,
-                  isMobile,
-                  onClick: onOpenClick,
                 })}
               />
-            )}
+            </Button>
+
             <ShareIcon
               {...iconProps({
                 title: localize("Partager la citation", "Share the quote"),
@@ -180,13 +173,9 @@ export const Note = (props: NoteP) => {
             <>
               {/* note header */}
               {isMobile && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                  }}
-                >
+                <Flex direction="column" gap="0">
+                  <LocaleSwitch locale={locale} setLocale={setLocale} />
+
                   <PageSwitch
                     isPageEdit={isPageEdit}
                     setIsPageEdit={setIsPageEdit}
@@ -196,23 +185,16 @@ export const Note = (props: NoteP) => {
                     onClick={onEditPageClick}
                   />
 
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
-                  >
-                    <LocaleSwitch locale={locale} setLocale={setLocale} />
-                    <div>
-                      {localize("Cité par", "Quoted by")}{" "}
-                      {toUsername(note.note_email)}
-                    </div>
-                  </div>
+                  <Box my="1">
+                    <Badge>
+                      <UserIcon />
+                      {toUsername(note.note_email) ||
+                        localize("Anonyme", "Anonymous")}
+                    </Badge>
+                  </Box>
 
                   <NoteHeaderRight />
-                </div>
+                </Flex>
               )}
 
               {!isMobile && (
@@ -224,6 +206,8 @@ export const Note = (props: NoteP) => {
                       gap: "6px",
                     })}
                   >
+                    <LocaleSwitch locale={locale} setLocale={setLocale} />
+
                     <PageSwitch
                       isPageEdit={isPageEdit}
                       setIsPageEdit={setIsPageEdit}
@@ -233,10 +217,11 @@ export const Note = (props: NoteP) => {
                       onClick={onEditPageClick}
                     />
 
-                    <div>
-                      {localize("Cité par", "Quoted by")}{" "}
-                      {toUsername(note.note_email)}
-                    </div>
+                    <Badge>
+                      <UserIcon />
+                      {toUsername(note.note_email) ||
+                        localize("Anonyme", "Anonymous")}
+                    </Badge>
                   </div>
 
                   <div>
@@ -246,12 +231,7 @@ export const Note = (props: NoteP) => {
                       localize("Note suivante >", "Next note >")}
                   </div>
 
-                  <NoteHeaderRight
-                    css={toCss({
-                      display: "flex",
-                      gap: "12px",
-                    })}
-                  />
+                  <NoteHeaderRight />
                 </Flex>
               )}
             </>
@@ -352,14 +332,14 @@ export const Note = (props: NoteP) => {
                   padding: "6px",
                 })}
               >
-                <Button
-                  className="cancel-btn"
+                <BackButton
+                  label="Annuler"
                   onClick={() => {
                     setIsAddComment(false);
                   }}
                 >
                   Annuler
-                </Button>
+                </BackButton>
 
                 <Button
                   onClick={() => {

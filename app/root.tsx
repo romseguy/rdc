@@ -1,11 +1,20 @@
 import "./root.scss";
 import type { Route } from "./+types/root";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import {
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useNavigation,
+} from "react-router";
 import { useEffect } from "react";
+import { css } from "@emotion/react";
 
 export { ErrorBoundary } from "~/components/ErrorBoundary";
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const navigation = useNavigation();
   return (
     <html lang="en">
       <head>
@@ -14,7 +23,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body
+        css={
+          navigation.state === "loading" &&
+          css`
+            overscroll-behavior: contain;
+            overflow: hidden !important;
+          `
+        }
+      >
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -65,3 +82,18 @@ export function meta({}: Route.MetaArgs) {
     },
   ];
 }
+
+// {navigation.state === "idle" && (
+//   <span
+//     data-radix-focus-guard
+//     tabIndex={0}
+//     aria-hidden="true"
+//     data-aria-hidden="true"
+//     style={{
+//       position: "fixed",
+//       opacity: 0,
+//       pointerEvents: "none",
+//       outline: "none",
+//     }}
+//   />
+// )}

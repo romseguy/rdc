@@ -1,7 +1,7 @@
 import { Button, Select } from "@radix-ui/themes";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { AddNoteButton, Flex, Note } from "~/components";
+import { AddNoteButton, BackButton, Flex, Note } from "~/components";
 import {
   client,
   toCss,
@@ -57,7 +57,7 @@ export const Livre = (props) => {
       ++i;
     }
     return els;
-  }, [book, order]);
+  }, [book, order, locale]);
 
   //#region callbacks
   const onEditPageClick = async (n: NoteT) => {
@@ -166,8 +166,7 @@ export const Livre = (props) => {
                         })}
                       >
                         {!isLoading[note.id] && (
-                          <Button
-                            className="cancel-btn"
+                          <BackButton
                             onClick={() => {
                               setBook({
                                 ...book,
@@ -184,7 +183,7 @@ export const Livre = (props) => {
                             }}
                           >
                             Annuler
-                          </Button>
+                          </BackButton>
                         )}
 
                         <Button
@@ -238,6 +237,7 @@ export const Livre = (props) => {
                                     id: id || note.id,
                                     isNew: false,
                                     isEditing: false,
+                                    note_email: user.email,
                                   };
                                 return n;
                               }),
@@ -264,20 +264,13 @@ export const Livre = (props) => {
         {!hasEditing &&
           notesGrid.map((row, index) => {
             return (
-              <div
-                key={"note-" + index}
-                style={
-                  {
-                    //display: "flex"
-                  }
-                }
-              >
+              <div key={"note-" + index}>
                 {row
                   .filter((note) => !note.isEditing)
                   .map((note, index) => {
                     return (
                       <Note
-                        key={"note-" + note.id}
+                        key={"note-" + index + note.id}
                         notes={book.notes || []}
                         note={{ ...note, index }}
                         user={user}
@@ -390,7 +383,7 @@ export const Livre = (props) => {
 
                             setBook({
                               ...book,
-                              notes: book.notes?.map((n) => {
+                              notes: (book.notes || []).map((n) => {
                                 if (n.id === note.id) {
                                   return {
                                     ...n,
@@ -399,6 +392,7 @@ export const Livre = (props) => {
                                     ),
                                   };
                                 }
+                                return n;
                               }),
                             });
                           }

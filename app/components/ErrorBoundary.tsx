@@ -3,13 +3,17 @@ import type { Route } from "../+types/root";
 import { Page } from "~/routes/Page";
 import { Error as ErrorPage } from "~/routes/Error";
 import { useEffect, useState } from "react";
+import { localize } from "~/utils";
 
 export const ErrorBoundary = (props: Route.ErrorBoundaryProps) => {
   const routeError = useRouteError();
   const error = routeError || props.error;
 
-  let message = "Erreur";
-  let details = "Une erreur est survenue.";
+  let message = localize("Erreur", "Error");
+  let details = localize(
+    "Une erreur inconnue est survenue",
+    "An unknown error occured",
+  );
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {

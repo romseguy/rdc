@@ -182,16 +182,6 @@ function EmailAuth({
               }
             }}
           />
-          {authView === "sign_in" && (
-            <Button
-              onClick={(e) => {
-                e.preventDefault();
-                setAuthView("sign_up");
-              }}
-            >
-              {i18n?.sign_up?.link_text} {">"}
-            </Button>
-          )}
         </Flex>
 
         <Flex direction="column" gap="3">
@@ -223,6 +213,20 @@ function EmailAuth({
           )}
         </Flex>
 
+        <Button type="submit">
+          {loading ? labels?.loading_button_label : labels?.button_label}
+        </Button>
+        {authView === "sign_in" && (
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              setAuthView("sign_up");
+            }}
+          >
+            {i18n?.sign_up?.link_text} {">"}
+          </Button>
+        )}
+
         {authView === "sign_in" && (
           <a
             href="#auth-forgot-password"
@@ -234,10 +238,6 @@ function EmailAuth({
             {i18n?.forgotten_password?.link_text}
           </a>
         )}
-
-        <Button type="submit">
-          {loading ? labels?.loading_button_label : labels?.button_label}
-        </Button>
 
         {authView === "sign_in" && magicLink && (
           <a
