@@ -275,17 +275,17 @@ export const Page = (props) => {
   if (simple)
     return (
       <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
+        <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
+        <div id="page">{React.createElement(element, childProps)}</div>
         {toggleButtonsLeft}
         {toggleButtonsRight}
-        <div id="page">{React.createElement(element, childProps)}</div>
       </Theme>
     );
 
   return (
     <>
-      <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
-
       <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
+        <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
         <Modal {...childProps} />
 
         {!modalState.isOpen && (

@@ -1,7 +1,8 @@
-import { Button, Select } from "@radix-ui/themes";
+import { ChatBubbleIcon, ReaderIcon } from "@radix-ui/react-icons";
+import { Box, Button, Select } from "@radix-ui/themes";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { AddNoteButton, BackButton, Flex, Note } from "~/components";
+import { AddNoteButton, BackButton, BookIcon, Flex, Note } from "~/components";
 import {
   client,
   toCss,
@@ -13,6 +14,7 @@ import {
 
 export const Livre = (props) => {
   const {
+    loaderData: { lib },
     user,
     showToast,
     locale,
@@ -26,7 +28,7 @@ export const Livre = (props) => {
   const [book, setBook] = useState<BookT>(props.loaderData.book);
   useEffect(() => {
     if (props.loaderData.book) {
-      if (book) setBook(props.loaderData.book);
+      if (book.id !== props.loaderData.book.id) setBook(props.loaderData.book);
     }
   }, [props.loaderData]);
   const hasEditing = useMemo(() => {
@@ -84,22 +86,51 @@ export const Livre = (props) => {
       {/* book header */}
       {!hasEditing && (
         <header>
-          <Flex pl="4">
-            {book.title && (
-              <h1>
-                {book.is_conf
-                  ? localize("Conférence", "Talk show")
-                  : localize("Livre", "Book")}{" "}
-                : <i>{book[localize("title")]}</i>
-              </h1>
-            )}
+          <Flex justify="center" pl="4">
+            <h1>
+              <Flex>
+                {book.title && (
+                  <>
+                    {book.is_conf ? (
+                      <>
+                        <ChatBubbleIcon />
+                        {localize("Conférence", "Talk show")}
+                      </>
+                    ) : (
+                      <>
+                        <BookIcon />
+                        {localize("Livre", "Book")}
+                      </>
+                    )}
+                    <span> : </span>
+                    {book.title && (
+                      <i>{book[localize("title")] || book.title}</i>
+                    )}
+                  </>
+                )}
 
-            {!book.title && (
-              <h1>
-                {book.index === 0 ? "Premier" : `${book.index + 1}ème livre`} de
-                la bibliothèque : <i>{props.loaderData.lib.name}</i>
-              </h1>
-            )}
+                {!book.title && (
+                  <>
+                    {book.is_conf ? <ChatBubbleIcon /> : <BookIcon />}
+                    {book.index === 0
+                      ? localize("Premier", "First")
+                      : book.index === 1
+                      ? `${book.index + 1}${localize("ème", "nd")}`
+                      : book.index === 2
+                      ? book.index + localize("ème", "rd")
+                      : book.index + localize("ème", "th")}
+                    <span> </span>
+                    {book.is_conf
+                      ? localize("conférence", "talk show")
+                      : localize("livre", "book")}
+                    <span> </span>
+                    {localize("de la bibliothèque", "from the library")} :
+                    <span> </span>
+                    <i>{lib[localize("name")] || lib.name}</i>
+                  </>
+                )}
+              </Flex>
+            </h1>
           </Flex>
         </header>
       )}
@@ -107,7 +138,7 @@ export const Livre = (props) => {
       <main>
         {/* order & add note button */}
         {!hasEditing && (
-          <Flex justify="between" pb="3" pl="3" pr="3">
+          <Flex justify="between" p="3">
             {book.notes && book.notes.length > 0 && (
               <Select.Root
                 defaultValue={ENoteOrder.ID}
@@ -134,7 +165,7 @@ export const Livre = (props) => {
           </Flex>
         )}
 
-        {!book.notes?.length && <>Aucune citations.</>}
+        {!book.notes?.length && <Box pl="3">Aucune citations.</Box>}
 
         {/* editable notes */}
         {notesGrid.map((row, index) => {
@@ -346,9 +377,12 @@ export const Livre = (props) => {
                         }}
                         onSubmitCommentClick={async (comment) => {
                           const { data } = await client.post("/comments", {
-                            ...comment,
-                            note_id: note.id,
+                            comment: {
+                              ...comment,
+                              note_id: note.id,
+                            },
                           });
+
                           if (data.error) {
                             showToast(data.message);
                             return;

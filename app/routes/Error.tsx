@@ -9,7 +9,6 @@ import {
 import { localize } from "~/utils";
 
 export const Error = ({ message, details, stack, screenWidth }) => {
-  console.log("🚀 ~ Error ~ details:", details);
   const navigate = useNavigate();
 
   return (

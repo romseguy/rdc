@@ -135,9 +135,11 @@ export const Header = (props) => {
                 min-width: 140px;
                 width: 140px;
                 cursor: pointer;
+                user-select: none;
                 border: ${b.id === book?.id
                   ? "1px solid yellow"
                   : "1px solid white"};
+                font-weight: bold;
               `}
               onClick={() =>
                 !Object.keys(isLoading).find((key) => !!isLoading[key]) &&

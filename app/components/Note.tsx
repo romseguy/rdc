@@ -1,11 +1,19 @@
 import { css } from "@emotion/react";
-import { Badge, Box, Button } from "@radix-ui/themes";
+import {
+  ArrowDownIcon,
+  ArrowRightIcon,
+  ArrowUpIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  Share1Icon,
+  ThickArrowUpIcon,
+} from "@radix-ui/react-icons";
+import { Badge, Box, Button, ChevronDownIcon } from "@radix-ui/themes";
 import { useState } from "react";
 import {
   RTEditor,
   EditIcon,
   ExternalIcon,
-  ShareIcon,
   DeleteIcon,
   LocaleSwitch,
   PageSwitch,
@@ -92,10 +100,56 @@ export const Note = (props: NoteP) => {
     );
   };
 
-  const NoteHeaderRight = (props) => {
-    const str = localize("Ouvrir le lecteur", "Open the reader");
+  const NoteHeaderLeft = (props) => {
+    const openLabel = localize("Ouvrir le lecteur", "Open the reader");
+
     return (
-      <div {...props}>
+      <Flex
+        direction={isMobile ? "column" : "row"}
+        gap={isMobile ? "1" : "3"}
+        mt={isMobile ? "2" : "0"}
+        {...props}
+      >
+        <Flex>
+          <PageSwitch
+            isPageEdit={isPageEdit}
+            setIsPageEdit={setIsPageEdit}
+            page={page}
+            setPage={setPage}
+            note={note}
+            onClick={onEditPageClick}
+          />
+
+          {note.index !== 0 && (
+            <Button>
+              <ChevronLeftIcon />
+              {localize("Précédente", "Previous")}
+            </Button>
+          )}
+
+          {note.index !== notes.length - 1 && (
+            <Button>
+              {localize("Suivant", "Next")}
+              <ChevronRightIcon />
+            </Button>
+          )}
+        </Flex>
+
+        <Button className="with-icon" variant="surface" onClick={onOpenClick}>
+          {openLabel}
+          <ExternalIcon
+            {...iconProps({
+              title: openLabel,
+            })}
+          />
+        </Button>
+      </Flex>
+    );
+  };
+
+  const NoteHeaderRight = (props) => {
+    return (
+      <Box {...props}>
         {isLoading && (
           <div className="spinner">
             <span>Chargement...</span>
@@ -103,20 +157,8 @@ export const Note = (props: NoteP) => {
         )}
         {!isLoading && (
           <Flex gap="3">
-            <Button
-              className="with-icon"
-              variant="surface"
-              onClick={onOpenClick}
-            >
-              {str}
-              <ExternalIcon
-                {...iconProps({
-                  title: str,
-                })}
-              />
-            </Button>
-
-            <ShareIcon
+            <Share1Icon
+              color="var(--accent-9)"
               {...iconProps({
                 title: localize("Partager la citation", "Share the quote"),
                 isMobile,
@@ -140,7 +182,7 @@ export const Note = (props: NoteP) => {
             />
           </Flex>
         )}
-      </div>
+      </Box>
     );
   };
 
@@ -174,62 +216,23 @@ export const Note = (props: NoteP) => {
               {/* note header */}
               {isMobile && (
                 <Flex direction="column" gap="0">
-                  <LocaleSwitch locale={locale} setLocale={setLocale} />
-
-                  <PageSwitch
-                    isPageEdit={isPageEdit}
-                    setIsPageEdit={setIsPageEdit}
-                    page={page}
-                    setPage={setPage}
-                    note={note}
-                    onClick={onEditPageClick}
-                  />
-
-                  <Box my="1">
-                    <Badge>
-                      <UserIcon />
-                      {toUsername(note.note_email) ||
-                        localize("Anonyme", "Anonymous")}
-                    </Badge>
-                  </Box>
-
-                  <NoteHeaderRight />
+                  <NoteHeaderLeft />
+                  <NoteHeaderRight mt="2" />
                 </Flex>
               )}
 
               {!isMobile && (
                 <Flex justify="between">
-                  <div
-                    css={toCss({
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    })}
-                  >
+                  <NoteHeaderLeft />
+
+                  <Flex>
                     <LocaleSwitch locale={locale} setLocale={setLocale} />
-
-                    <PageSwitch
-                      isPageEdit={isPageEdit}
-                      setIsPageEdit={setIsPageEdit}
-                      page={page}
-                      setPage={setPage}
-                      note={note}
-                      onClick={onEditPageClick}
-                    />
-
                     <Badge>
                       <UserIcon />
                       {toUsername(note.note_email) ||
                         localize("Anonyme", "Anonymous")}
                     </Badge>
-                  </div>
-
-                  <div>
-                    {note.index !== 0 &&
-                      localize("< Note précédente", "< Previous note")}
-                    {note.index !== notes.length - 1 &&
-                      localize("Note suivante >", "Next note >")}
-                  </div>
+                  </Flex>
 
                   <NoteHeaderRight />
                 </Flex>
@@ -288,22 +291,47 @@ export const Note = (props: NoteP) => {
               }}
             >
               <div>
-                {Array.isArray(note.comments) && note.comments.length > 0
-                  ? `${localize("Lire les", "Read")} ${
-                      note.comments.length
-                    } ${localize("commentaires", "comments")} ${
-                      isShowComments ? "V" : ">"
-                    }`
-                  : `0 ${localize("commentaires", "comments")}`}
+                {Array.isArray(note.comments) && note.comments.length > 0 ? (
+                  <Flex>
+                    <Button>
+                      {note.comments.length +
+                        " " +
+                        localize("commentaire", "comment")}
+                      {note.comments.length > 1 && "s"}
+
+                      {isShowComments ? (
+                        <ArrowUpIcon
+                          {...iconProps({
+                            title: localize(
+                              "Ouvrir la zone des commentaires",
+                              "Open comments area",
+                            ),
+                          })}
+                        />
+                      ) : (
+                        <ArrowRightIcon
+                          {...iconProps({
+                            title: localize(
+                              "Fermer la zone des commentaires",
+                              "Close comments area",
+                            ),
+                          })}
+                        />
+                      )}
+                    </Button>
+                  </Flex>
+                ) : (
+                  localize("Pas de commentaires", "No comments")
+                )}
               </div>
 
-              <div>
+              {!isAddComment && (
                 <Button
                   onClick={(e) => {
                     e.stopPropagation();
                     if (!isAddComment) {
                       setIsAddComment(true);
-                      setIsShowComments(false);
+                      //setIsShowComments(false);
                       setTimeout(() => {
                         executeScroll();
                       }, 200);
@@ -312,7 +340,7 @@ export const Note = (props: NoteP) => {
                 >
                   {localize("Ajouter un commentaire", "Add a comment")}
                 </Button>
-              </div>
+              )}
             </div>
           )}
 

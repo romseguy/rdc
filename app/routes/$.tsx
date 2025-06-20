@@ -8,6 +8,7 @@ import { Note } from "~/routes/Note";
 import { loader as rootLoader } from "./_index";
 import type { Route } from "./+types/$";
 import {
+  BookT,
   localize,
   type Book,
   type Note as NoteT,
@@ -15,7 +16,7 @@ import {
 } from "~/utils";
 
 export const loader = async (props: Route.LoaderArgs) => {
-  const data: RootData & { book?: Book; note?: NoteT } = await rootLoader(
+  const data: RootData & { book?: BookT; note?: NoteT } = await rootLoader(
     props,
   );
   const id = props.params["*"] || "";
@@ -23,10 +24,12 @@ export const loader = async (props: Route.LoaderArgs) => {
   if (id.includes(localize("livre", "book"))) {
     const bookId = id.substring(Number(localize("6", "5")));
     for (const lib of data.libs) {
+      let index = 0;
       for (const b of lib.books || []) {
         if (b.id === bookId) {
-          data.book = b;
+          data.book = { ...b, index };
         }
+        index++;
       }
     }
     if (!data.book)
@@ -37,13 +40,15 @@ export const loader = async (props: Route.LoaderArgs) => {
   } else if (id.includes("q")) {
     const noteId = id.substring(2);
     for (const lib of data.libs) {
+      let index = 0;
       for (const b of lib.books || []) {
         for (const n of b.notes || []) {
           if (n.id === noteId) {
             data.note = n;
-            data.book = lib.books?.find((book) => book.id === n.book_id);
+            data.book = { ...b, index };
           }
         }
+        index++;
       }
     }
     if (!data.note)
