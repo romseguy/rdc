@@ -54,12 +54,10 @@ export const AddNoteButton = ({ book, setBook, ...props }) => {
     <Button
       disabled={!!book?.notes?.find(({ isNew }) => isNew)}
       onClick={(e) => {
-        const id = (book?.notes || []).length + 1;
         const b = {
           ...book,
           notes: (book.notes || []).concat([
             {
-              id: id.toString(),
               isEditing: true,
               isNew: true,
             },

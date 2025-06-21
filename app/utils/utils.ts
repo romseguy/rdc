@@ -19,6 +19,8 @@ export const localize: (fr: string, en?: string) => string = (fr, en) => {
   return import.meta.env.VITE_PUBLIC_LOCALE === "en" ? en : fr;
 };
 
+export const rand = () => Math.round(Math.random() * 100);
+
 export const toCss = (
   styleMap: Record<string, string>,
   isImportant?: boolean,
@@ -228,42 +230,65 @@ export const fullDateString = (date: Date | string) => {
   );
 };
 
-export const timeAgo = (
-  date?: string | Date,
-  isShort?: boolean,
-  format?: string[],
-) => {
-  const end =
-    typeof date === "string"
-      ? parseISO(date)
-      : date !== undefined
-      ? date
-      : new Date();
-  const fullDate = fullDateString(end);
+export const timeAgo = (args: { date: Date | string }) => {
+  let { date } = args;
+  if (typeof date === "string") date = parseISO(date);
   const duration = intervalToDuration({
     start: new Date(),
-    end,
+    end: date,
   });
-  const format2 = isShort
-    ? (format || formatArray).filter((f) => {
-        if (typeof duration.years === "number" && duration.years > 0)
-          return f === "years";
-        if (typeof duration.months === "number" && duration.months > 0)
-          return f === "months";
-        if (typeof duration.days === "number" && duration.days > 0)
-          return f === "days";
-        if (typeof duration.hours === "number" && duration.hours > 0)
-          return f === "hours";
-        return f === "minutes";
-      })
-    : format || formatArray;
-
+  const format2 = formatArray.filter((f) => {
+    if (typeof duration.years === "number" && duration.years > 0)
+      return f === "years";
+    if (typeof duration.months === "number" && duration.months > 0)
+      return f === "months";
+    if (typeof duration.days === "number" && duration.days > 0)
+      return f === "days";
+    if (typeof duration.hours === "number" && duration.hours > 0)
+      return f === "hours";
+    return f === "minutes";
+  });
   const formatted = formatDuration(duration, {
     format: format2,
   });
-
-  return { timeAgo: formatted === "" ? "1m" : formatted, fullDate };
+  return formatted || localize("Il y a quelques secondes", "A few seconds ago");
 };
+// export const timeAgo = (
+//   date?: string | Date,
+//   isShort?: boolean,
+//   format?: string[],
+// ) => {
+//   const end =
+//     typeof date === "string"
+//       ? parseISO(date)
+//       : date !== undefined
+//       ? date
+//       : new Date();
+//   const fullDate = fullDateString(end);
+//   const duration = intervalToDuration({
+//     start: new Date(),
+//     end,
+//   });
+//   const format2 = isShort
+//     ? (format || formatArray).filter((f) => {
+//         if (typeof duration.years === "number" && duration.years > 0)
+//           return f === "years";
+//         if (typeof duration.months === "number" && duration.months > 0)
+//           return f === "months";
+//         if (typeof duration.days === "number" && duration.days > 0)
+//           return f === "days";
+//         if (typeof duration.hours === "number" && duration.hours > 0)
+//           return f === "hours";
+//         return f === "minutes";
+//       })
+//     : format || formatArray;
+
+//   const formatted = formatDuration(duration, {
+//     format: format2,
+//   });
+
+//   return { timeAgo: formatted === "" ? "1m" : formatted, fullDate };
+// };
 
 export const moveDateToCurrentWeek = (date: Date) => {
   const today = new Date();

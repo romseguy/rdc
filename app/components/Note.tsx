@@ -30,6 +30,7 @@ import {
   type NoteT,
   type User,
   localize,
+  timeAgo,
 } from "~/utils";
 
 interface NoteP {
@@ -396,21 +397,25 @@ export const Note = (props: NoteP) => {
                     })}
                   >
                     {/* comment */}
-                    <div>
-                      {toUsername(c.comment_email)} : {c.html}
-                    </div>
+                    <Flex>
+                      <Badge size="3">
+                        <UserIcon />
+                        {toUsername(c.comment_email)}
+                      </Badge>
+                      : {c.html}
+                    </Flex>
 
-                    <div
+                    <Flex
+                      gap="1"
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "3px",
                         cursor: "pointer",
                       }}
                     >
                       {/* comment date */}
                       <div css={toCss({ whiteSpace: "nowrap" })}>
-                        {fullDateString(c.created_at)}
+                        <Badge title={fullDateString(c.created_at)}>
+                          {timeAgo({ date: c.created_at })}
+                        </Badge>
                       </div>
 
                       {/* delete comment */}
@@ -421,7 +426,7 @@ export const Note = (props: NoteP) => {
                           }}
                         />
                       )}
-                    </div>
+                    </Flex>
                   </div>
                 );
               })}

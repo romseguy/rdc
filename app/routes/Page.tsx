@@ -39,8 +39,16 @@ export const Page = (props) => {
     (async () => {
       if (accessToken && refreshToken) {
         client.defaults.headers.common = { at: accessToken, rt: refreshToken };
-        const { data: user } = await client.get("/login");
-        setUser(user);
+
+        const { data } = await client.get("/login");
+        if (data.error) {
+          if (process.env.NODE_ENV === "development")
+            if (data.message.includes("Failed to fetch"))
+              setUser({ email: import.meta.env.VITE_PUBLIC_EMAIL2 });
+
+          return;
+        }
+        setUser(data);
       }
     })();
   }, [accessToken, refreshToken]);

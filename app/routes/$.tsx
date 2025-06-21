@@ -21,8 +21,8 @@ export const loader = async (props: Route.LoaderArgs) => {
   );
   const id = props.params["*"] || "";
 
-  if (id.includes(localize("livre", "book"))) {
-    const bookId = id.substring(Number(localize("6", "5")));
+  if (id.includes("livre") || id.includes("book")) {
+    const bookId = id.substring(Number(id.includes("livre") ? 6 : 5));
     for (const lib of data.libs) {
       let index = 0;
       for (const b of lib.books || []) {
@@ -74,8 +74,9 @@ export default function CatchAllRoute(props) {
   if (isbot()) return <Sitemap {...props} />;
 
   return useRoutes([
+    { path: "livre/:id", element: <Page element={Livre} {...props} /> },
     {
-      path: localize("livre", "book") + "/:id",
+      path: "book/:id",
       element: <Page element={Livre} {...props} />,
     },
     {

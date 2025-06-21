@@ -1,4 +1,4 @@
-import { ChatBubbleIcon, ReaderIcon } from "@radix-ui/react-icons";
+import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { Box, Button, Select } from "@radix-ui/themes";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
@@ -10,6 +10,7 @@ import {
   type NoteT,
   ENoteOrder,
   localize,
+  rand,
 } from "~/utils";
 
 export const Livre = (props) => {
@@ -24,7 +25,12 @@ export const Livre = (props) => {
     setModalState,
   } = props;
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
+  const [isCommentLoading, setIsCommentLoading] = useState<
+    Record<string, boolean>
+  >({});
+  const [isNoteLoading, setIsNoteLoading] = useState<Record<string, boolean>>(
+    {},
+  );
   const [book, setBook] = useState<BookT>(props.loaderData.book);
   useEffect(() => {
     if (props.loaderData.book) {
@@ -196,7 +202,7 @@ export const Livre = (props) => {
                           padding: "6px",
                         })}
                       >
-                        {!isLoading[note.id] && (
+                        {!isNoteLoading[note.id] && (
                           <BackButton
                             onClick={() => {
                               setBook({
@@ -220,21 +226,18 @@ export const Livre = (props) => {
                         <Button
                           onClick={async function onEditSubmit() {
                             let id;
-                            setIsLoading({
-                              ...isLoading,
+                            setIsNoteLoading({
+                              ...isNoteLoading,
                               [note.id]: true,
                             });
 
                             let data;
                             if (note.isNew) {
-                              let key = "desc";
-                              if (locale === "en") key += "_en";
                               const res = await client.post("/notes", {
                                 note: {
-                                  ...note,
-                                  [key]:
-                                    note[`desc${locale === "en" ? "_en" : ""}`],
                                   book_id: book.id,
+                                  [`desc${locale === "en" ? "_en" : ""}`]:
+                                    note[locale === "en" ? "desc_en" : "desc"],
                                 },
                               });
                               data = res.data;
@@ -242,9 +245,10 @@ export const Livre = (props) => {
                             } else {
                               const res = await client.put("/note", {
                                 note: {
-                                  ...note,
+                                  id: note.id,
+                                  book_id: book.id,
                                   [`desc${locale === "en" ? "_en" : ""}`]:
-                                    note[`desc${locale === "en" ? "_en" : ""}`],
+                                    note[locale === "en" ? "desc_en" : "desc"],
                                 },
                               });
                               data = res.data;
@@ -252,8 +256,8 @@ export const Livre = (props) => {
 
                             if (data.error) {
                               showToast(data.message, true);
-                              setIsLoading({
-                                ...isLoading,
+                              setIsNoteLoading({
+                                ...isNoteLoading,
                                 [note.id]: false,
                               });
                               return;
@@ -273,13 +277,13 @@ export const Livre = (props) => {
                                 return n;
                               }),
                             });
-                            setIsLoading({
-                              ...isLoading,
+                            setIsNoteLoading({
+                              ...isNoteLoading,
                               [note.id]: false,
                             });
                           }}
                         >
-                          {isLoading[note.id]
+                          {isNoteLoading[note.id]
                             ? "Veuillez patienter..."
                             : "Valider"}
                         </Button>
@@ -305,7 +309,7 @@ export const Livre = (props) => {
                         notes={book.notes || []}
                         note={{ ...note, index }}
                         user={user}
-                        isLoading={isLoading[note.id]}
+                        isLoading={isNoteLoading[note.id]}
                         locale={locale}
                         setLocale={setLocale}
                         localize={localize}
@@ -315,8 +319,8 @@ export const Livre = (props) => {
                           //setNote(note);
                         }}
                         onEditClick={() => {
-                          setIsLoading({
-                            ...isLoading,
+                          setIsNoteLoading({
+                            ...isNoteLoading,
                             [note.id]: true,
                           });
                           setBook({
@@ -327,8 +331,8 @@ export const Livre = (props) => {
                               return n;
                             }),
                           });
-                          setIsLoading({
-                            ...isLoading,
+                          setIsNoteLoading({
+                            ...isNoteLoading,
                             [note.id]: false,
                           });
                         }}
@@ -348,16 +352,16 @@ export const Livre = (props) => {
                             "Êtes-vous sûr de vouloir supprimer cette citation ?",
                           );
                           if (ok) {
-                            setIsLoading({
-                              ...isLoading,
+                            setIsNoteLoading({
+                              ...isNoteLoading,
                               [note.id]: true,
                             });
                             const { data } = await client.delete(
                               "/note?id=" + note.id,
                             );
                             if (data.error) {
-                              setIsLoading({
-                                ...isLoading,
+                              setIsNoteLoading({
+                                ...isNoteLoading,
                                 [note.id]: false,
                               });
                               showToast(data.message, true);
@@ -369,14 +373,14 @@ export const Livre = (props) => {
                                 (n) => n.id !== note.id,
                               ),
                             });
-                            setIsLoading({
-                              ...isLoading,
+                            setIsNoteLoading({
+                              ...isNoteLoading,
                               [note.id]: false,
                             });
                           }
                         }}
                         onSubmitCommentClick={async (comment) => {
-                          const { data } = await client.post("/comments", {
+                          let { data } = await client.post("/comments", {
                             comment: {
                               ...comment,
                               note_id: note.id,
@@ -384,8 +388,25 @@ export const Livre = (props) => {
                           });
 
                           if (data.error) {
-                            showToast(data.message);
-                            return;
+                            if (process.env.NODE_ENV === "development") {
+                              let r = rand();
+                              while (
+                                !!note.comments?.find(
+                                  ({ id }) => id === r.toString(),
+                                )
+                              ) {
+                                r = rand();
+                              }
+                              data = {
+                                ...comment,
+                                id: r.toString(),
+                                comment_email: user.email,
+                                created_at: new Date().toISOString(),
+                              };
+                            } else {
+                              showToast(data.message);
+                              return;
+                            }
                           }
 
                           setBook({
@@ -407,12 +428,24 @@ export const Livre = (props) => {
                           );
 
                           if (ok) {
-                            const { data } = await client.delete(
+                            setIsCommentLoading({
+                              ...isCommentLoading,
+                              [comment.id]: true,
+                            });
+                            let { data } = await client.delete(
                               "/comment?id=" + comment.id,
                             );
                             if (data.error) {
-                              showToast(data.message);
-                              return;
+                              setIsCommentLoading({
+                                ...isCommentLoading,
+                                [comment.id]: false,
+                              });
+
+                              if (process.env.NODE_ENV === "development") {
+                              } else {
+                                showToast(data.message);
+                                return;
+                              }
                             }
 
                             setBook({
