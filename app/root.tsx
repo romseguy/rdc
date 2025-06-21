@@ -19,7 +19,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const status = useScript("https://unpkg.com/pwacompat", {
     attributes: { async: "true", crossOrigin: "anonymous" },
   });
-  console.log("🚀 ~ pwacompat ~ status:", status);
+  // console.log("🚀 ~ pwacompat ~ status:", status);
   // const status2 = useScript(
   //   "https://unpkg.com/ios-pwa-splash@1.0.0/cdn.min.js",
   //   {
@@ -27,7 +27,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   //   },
   // );
   // useEffect(() => {
-  //   console.log("🚀 ~ ios-pwa-splash ~ status:", status2);
+  // //   console.log("🚀 ~ ios-pwa-splash ~ status:", status2);
   //   if (status2 === "ready")
   //     window.iosPWASplash("/icons/icon-512x512.png", "#000000");
   // }, [status2]);
@@ -69,7 +69,7 @@ export default function Root() {
           const data = res.json();
           //await api.post("/", { ip: data.ip });
         } catch (error) {
-          console.log("🚀 ~ ipLocation ~ error:", error);
+          // console.log("🚀 ~ ipLocation ~ error:", error);
         }
       })();
   }, []);

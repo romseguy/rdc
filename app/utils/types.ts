@@ -65,9 +65,11 @@ export type RootData = {
 };
 
 export type ModalT = {
+  id: string;
   isOpen: boolean;
-  book: Book | null;
-  note: Note | null;
+  book?: Book | null;
+  note?: Note | null;
+  email?: string | null;
 };
 
 export type SetState<T> = React.Dispatch<React.SetStateAction<T>>;

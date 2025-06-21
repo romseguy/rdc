@@ -1,5 +1,10 @@
 import { useStorage } from "@charlietango/hooks/use-storage";
-import { ArrowUpIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import {
+  ArrowUpIcon,
+  BellIcon,
+  MoonIcon,
+  SunIcon,
+} from "@radix-ui/react-icons";
 import { Toggle } from "@radix-ui/react-toggle";
 import { Button, Separator, Spinner, Theme } from "@radix-ui/themes";
 import React, { useEffect, useState } from "react";
@@ -71,13 +76,9 @@ export const Page = (props) => {
   //#endregion
 
   //#region modal
-  const [modalState, setModalState] = useState<ModalT>({
-    isOpen: false,
-    book: null,
-    note: null,
-  });
+  const [modalState, setModalState] = useState<ModalT>({});
   const toggleModal = () =>
-    setModalState({ ...modalState, isOpen: !modalState.isOpen });
+    setModalState({ id: "login-modal", isOpen: !modalState.isOpen });
   //#endregion
 
   //#region ui
@@ -169,6 +170,18 @@ export const Page = (props) => {
   const toggleButtonsRight = (
     <div style={{ position: "fixed", bottom: 0, right: 0 }}>
       <Flex p="3" gap="2">
+        <Toggle
+          css={css(toggleCss(appearance))}
+          onPressedChange={() => {
+            setModalState({
+              id: "notif-modal",
+              isOpen: true,
+              email: user?.email,
+            });
+          }}
+        >
+          <BellIcon />
+        </Toggle>
         <Toggle
           css={css(toggleCss(appearance))}
           onPressedChange={() => {
@@ -294,7 +307,7 @@ export const Page = (props) => {
     <>
       <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
         <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
-        <Modal {...childProps} />
+        {modalState.isOpen && <Modal {...childProps} />}
 
         {!modalState.isOpen && (
           <div id="page">

@@ -341,7 +341,7 @@ export const Livre = (props) => {
                         }
                         onShareClick={() => {
                           setModalState({
-                            ...modalState,
+                            id: "share-modal",
                             isOpen: true,
                             book,
                             note,

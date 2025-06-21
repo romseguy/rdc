@@ -1,5 +1,6 @@
 @import "@radix-ui/themes/styles.css";
 @config "../tailwind.config.mjs";
+@import "tailwindcss/utilities";
 @tailwind utilities;
 
 .radix-themes {
@@ -7,18 +8,20 @@
   --default-font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   --secondary-font-family: Spectral, Georgia, ui-serif, serif;
 
+  #login-modal,
+  #notif-modal,
+  #share-modal,
+  #error-page {
+    background: var(--color-background);
+    padding: 24px;
+  }
+
   #modal {
-  }
-  #login-modal {
-    background: var(--color-background);
-    padding: 24px;
-    a {
-      font-size: smaller;
+    #login-modal {
+      a {
+        font-size: smaller;
+      }
     }
-  }
-  #share-modal {
-    background: var(--color-background);
-    padding: 24px;
   }
 
   #page {
@@ -26,22 +29,20 @@
     header {
       color: white;
     }
-  }
-  #error-page {
-    background: var(--color-background);
-    height: 100%;
-    padding: 24px;
-  }
-  #home-page {
-  }
-  #book-page {
-    section p {
-      font-family: var(--secondary-font-family);
+    #error-page {
+      height: 100%;
     }
-  }
-  #note-page {
-    main p {
-      font-family: var(--secondary-font-family);
+    #home-page {
+    }
+    #book-page {
+      section p {
+        font-family: var(--secondary-font-family);
+      }
+    }
+    #note-page {
+      main p {
+        font-family: var(--secondary-font-family);
+      }
     }
   }
 

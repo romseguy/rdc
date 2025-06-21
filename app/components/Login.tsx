@@ -67,7 +67,7 @@ function ForgottenPassword({
             autoComplete="email"
           />
 
-          <Button type="submit" loading={loading}>
+          <Button loading={loading}>
             {loading ? labels?.loading_button_label : labels?.button_label}
           </Button>
 
@@ -121,10 +121,12 @@ function EmailAuth({
   }, [authView]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    console.log("🚀 ~ handleSubmit ~ handleSubmit:");
     e.preventDefault();
     setLoading(true);
     switch (authView) {
       case "sign_in":
+        console.log("🚀 ~ handleSubmit ~ authView:", authView);
         const { error: signInError } =
           await supabaseClient.auth.signInWithPassword({
             email,
@@ -213,11 +215,13 @@ function EmailAuth({
           )}
         </Flex>
 
-        <Button type="submit">
+        <Button>
           {loading ? labels?.loading_button_label : labels?.button_label}
         </Button>
+
         {authView === "sign_in" && (
           <Button
+            type="button"
             onClick={(e) => {
               e.preventDefault();
               setAuthView("sign_up");

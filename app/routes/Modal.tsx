@@ -1,21 +1,26 @@
 import { css } from "@emotion/react";
-import { Button } from "@radix-ui/themes";
+import { Badge, Button, Switch } from "@radix-ui/themes";
 import { MailTo, MailToBody, MailToTrigger } from "@slalombuild/react-mailto";
 import { decode } from "html-entities";
-import { BackButton, Flex } from "~/components";
+import { useEffect, useState } from "react";
+import { BackButton, EmailIcon, Flex } from "~/components";
 import { Login } from "~/components/Login";
+import { Input } from "~/components/ui/input";
 
 export const Modal = (props) => {
   const { modalState, setModalState, showToast, i18n, localize } = props;
   const close = () => setModalState({ isOpen: false });
-  const { isOpen, book, note } = modalState;
+  const { id, book, note } = modalState;
+  const [email, setEmail] = useState<string>("");
 
-  if (!isOpen) return null;
+  // useEffect(() => {
+  //   if (id === "login-modal") setEmail(initialValue);
+  // }, []);
 
-  if (note)
+  if (id === "share-modal")
     return (
       <div id="modal">
-        <div id="share-modal">
+        <div id={id}>
           <Flex
             direction="column"
             justify="center"
@@ -25,15 +30,14 @@ export const Modal = (props) => {
                 color: white;
                 background: var(--accent-9);
                 font-size: var(--font-size-4);
-                &:hover {
-                  background: var(--accent-10);
-                }
-              }
-              a {
+                font-weight: var(--font-weight-medium);
                 border-radius: var(--radius-4);
                 padding: 12px;
                 text-decoration: none;
                 text-align: center;
+                &:hover {
+                  background: var(--accent-10);
+                }
               }
             `}
           >
@@ -89,16 +93,109 @@ export const Modal = (props) => {
               {localize("Copier le lien", "Copy link to clipboard")}
             </Button>
 
-            <BackButton size="4" onClick={close} />
+            <BackButton size="3" onClick={close} />
           </Flex>
         </div>
       </div>
     );
 
-  if (!note)
+  if (id === "notif-modal")
     return (
       <div id="modal">
-        <div id="login-modal">
+        <div id={id}>
+          <Flex direction="column" justify="center" gap="3">
+            <h1>{localize("Vos", "Your")} notifications</h1>
+            <Flex
+              css={css`
+                position: relative;
+              `}
+            >
+              {!modalState.email ? (
+                <>
+                  <Flex
+                    css={css`
+                      position: absolute;
+                      top: 0;
+                      left: 0;
+                      width: 2.5em;
+                      height: 2.5em;
+                      font-size: 18px;
+                      color: black;
+                      svg {
+                        flex-shrink: 0;
+                        padding: 0 12px;
+                      }
+                    `}
+                  >
+                    <EmailIcon />
+                  </Flex>
+                  <Input
+                    autoFocus
+                    name="email"
+                    type="email"
+                    readOnly={!!modalState.email}
+                    value={email || modalState.email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  {localize(
+                    "Seront envoyées à votre adresse e-mail",
+                    "Will be send to your email address",
+                  )}{" "}
+                  : <Badge>{modalState.email}</Badge>
+                </>
+              )}
+            </Flex>
+
+            <h2>{localize("Fréquence", "Frequency")}</h2>
+            <Flex>
+              <label>{localize("Quotidienne", "Daily")}</label>
+              <Switch
+                checked={false}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    alert(
+                      localize(
+                        "Si vous souhaitez bénéficier de cette fonctionnalité, merci d'envoyer un mail à contact@romseguy.com pour me le faire savoir",
+                        "If you want this functionality, please send an email to contact@romseguy.com to let me know",
+                      ),
+                    );
+                  }
+                }}
+              />
+            </Flex>
+
+            <Flex>
+              <label>{localize("Hebdomadaire", "Weekly")}</label>
+              <Switch
+                checked={false}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    alert(
+                      localize(
+                        "Si vous souhaitez bénéficier de cette fonctionnalité, merci d'envoyer un mail à contact@romseguy.com pour me le faire savoir",
+                        "If you want this functionality, please send an email to contact@romseguy.com to let me know",
+                      ),
+                    );
+                  }
+                }}
+              />
+            </Flex>
+
+            <BackButton onClick={close} />
+          </Flex>
+        </div>
+      </div>
+    );
+
+  if (id === "login-modal")
+    return (
+      <div id="modal">
+        <div id={id}>
           <Login showToast={showToast} close={close} i18n={i18n} />
         </div>
       </div>
