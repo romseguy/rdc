@@ -5,19 +5,21 @@ import {
 } from "@radix-ui/react-icons";
 import { Select } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate, useNavigation } from "react-router";
 import { Flex } from "~/components";
+import { getState } from "~/store";
 import { localize } from "~/utils";
 
 export const Header = (props) => {
   const lib = props.lib || props.loaderData.lib;
   const {
     loaderData: { libs, book },
-    isMobile,
   } = props;
-
   const navigation = useNavigation();
   const navigate = useNavigate();
+  const { isMobile } = useSelector(getState);
+
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   useEffect(() => {
     if (navigation.state === "idle")

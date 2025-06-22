@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useSelector } from "react-redux";
 import {
   MailTo,
   MailToTrigger,
@@ -6,10 +6,11 @@ import {
   BackButton,
   Flex,
 } from "~/components";
+import { getState } from "~/store";
 import { localize } from "~/utils";
 
-export const Error = ({ message, details, stack, screenWidth }) => {
-  const navigate = useNavigate();
+export const Error = ({ message, details, stack }) => {
+  const { screenWidth } = useSelector(getState);
 
   return (
     <div id="error-page">

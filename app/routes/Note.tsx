@@ -1,16 +1,18 @@
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { Slider } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { BackButton, Flex } from "~/components";
+import { getState } from "~/store";
 import { localize } from "~/utils";
 
 export const Note = (props) => {
   const {
     loaderData: { lib, book, note },
-    screenWidth,
   } = props;
   const navigate = useNavigate();
+  const { screenWidth } = useSelector(getState);
 
   //const [isDark, setIsDark] = useState(true);
   const [lineHeight, setLineHeight] = useState(2);

@@ -1,5 +1,7 @@
 import { Editor, type IAllProps } from "@tinymce/tinymce-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { getState } from "~/store";
 import { bindEvent, getImageSize, MB } from "~/utils";
 
 type ProgressFn = (percent: number) => void;
@@ -19,7 +21,6 @@ export const RTEditor = ({
   value,
   onBlur,
   onChange,
-  isMobile,
   ...props
 }: {
   defaultValue?: string | null;
@@ -29,10 +30,10 @@ export const RTEditor = ({
   readOnly?: boolean;
   setIsLoading?: (bool: boolean) => void;
   value?: string;
-  isMobile: boolean;
   onBlur?: (html: string) => void;
   onChange?: ({ html }: { html: string }) => void;
 }) => {
+  const { isMobile } = useSelector(getState);
   const isDark = true;
 
   const currentIndex = 0;

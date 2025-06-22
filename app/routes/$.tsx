@@ -19,6 +19,7 @@ export const loader = async (props: Route.LoaderArgs) => {
   const data: RootData & { book?: BookT; note?: NoteT } = await rootLoader(
     props,
   );
+
   const id = props.params["*"] || "";
 
   if (id.includes("livre") || id.includes("book")) {
@@ -71,6 +72,7 @@ export const loader = async (props: Route.LoaderArgs) => {
 };
 
 export default function CatchAllRoute(props) {
+  console.log("🚀 ~ CatchAllRoute ~ props:", props);
   if (isbot()) return <Sitemap {...props} />;
 
   return useRoutes([

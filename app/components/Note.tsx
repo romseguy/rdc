@@ -10,6 +10,7 @@ import {
 } from "@radix-ui/react-icons";
 import { Badge, Box, Button, ChevronDownIcon } from "@radix-ui/themes";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import {
   RTEditor,
   EditIcon,
@@ -22,6 +23,7 @@ import {
   BackButton,
   UserIcon,
 } from "~/components";
+import { getState } from "~/store";
 import {
   toUsername,
   fullDateString,
@@ -39,10 +41,6 @@ interface NoteP {
   user?: User | null;
   isLoading?: boolean;
   isEditing?: boolean;
-  locale: string;
-  setLocale: (string) => void;
-  localize: (fr: string, en: string) => string;
-  isMobile: boolean;
   onOpenClick?: any;
   onEditClick?: any;
   onEditPageClick?: any;
@@ -59,9 +57,6 @@ export const Note = (props: NoteP) => {
     user,
     isEditing = false,
     isLoading = false,
-    locale,
-    setLocale,
-    isMobile,
     onOpenClick,
     onEditClick,
     onEditPageClick,
@@ -70,6 +65,8 @@ export const Note = (props: NoteP) => {
     onSubmitCommentClick,
     onDeleteCommentClick,
   } = props;
+  const { isMobile, locale } = useSelector(getState);
+
   const desc =
     (locale === "en" ? note.desc_en : note.desc) ||
     `<i>${locale === "en" ? "Empty quote" : "Aucun texte"}</i>`;
@@ -93,7 +90,6 @@ export const Note = (props: NoteP) => {
     return (
       <RTEditor
         defaultValue={desc}
-        isMobile={isMobile}
         onChange={({ html }) => {
           note[`desc${locale === "en" ? "_en" : ""}`] = html;
         }}
@@ -162,7 +158,6 @@ export const Note = (props: NoteP) => {
               color="var(--accent-9)"
               {...iconProps({
                 title: localize("Partager la citation", "Share the quote"),
-                isMobile,
                 onClick: onShareClick,
               })}
             />
@@ -170,14 +165,12 @@ export const Note = (props: NoteP) => {
               onClick={() => onEditClick()}
               {...iconProps({
                 title: localize("Modifier la citation", "Edit the quote"),
-                isMobile,
                 onClick: onEditClick,
               })}
             />
             <DeleteIcon
               {...iconProps({
                 title: localize("Supprimer la citation", "Delete the quote"),
-                isMobile,
                 onClick: onDeleteClick,
               })}
             />
@@ -208,7 +201,7 @@ export const Note = (props: NoteP) => {
               {note.isNew
                 ? localize("Nouvelle citation", "New quote")
                 : localize("Modifiez cette citation", "Edit this quote")}
-              <LocaleSwitch locale={locale} setLocale={setLocale} />
+              <LocaleSwitch />
             </div>
           )}
 
@@ -227,7 +220,7 @@ export const Note = (props: NoteP) => {
                   <NoteHeaderLeft />
 
                   <Flex>
-                    <LocaleSwitch locale={locale} setLocale={setLocale} />
+                    <LocaleSwitch />
                     <Badge>
                       <UserIcon />
                       {toUsername(note.note_email) ||
@@ -413,7 +406,7 @@ export const Note = (props: NoteP) => {
                     >
                       {/* comment date */}
                       <div css={toCss({ whiteSpace: "nowrap" })}>
-                        <Badge title={fullDateString(c.created_at)}>
+                        <Badge title={fullDateString(c.created_at, locale)}>
                           {timeAgo({ date: c.created_at })}
                         </Badge>
                       </div>

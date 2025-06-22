@@ -2,6 +2,7 @@ import { useStorage } from "@charlietango/hooks/use-storage";
 import {
   ArrowUpIcon,
   BellIcon,
+  HeartIcon,
   MoonIcon,
   SunIcon,
 } from "@radix-ui/react-icons";
@@ -18,45 +19,32 @@ import {
   UserIcon,
 } from "~/components";
 import { pageTitleStyle, toggleCss } from "~/lib/css";
-import { client, tokenKey } from "~/utils";
+import { tokenKey } from "~/utils";
 import type { Lib, ModalT, User } from "~/utils/types";
 import { Modal } from "./Modal";
 import { css } from "@emotion/react";
 import type { ThemeOwnProps } from "@radix-ui/themes/components/theme.props";
-
-const controller = new AbortController();
-const signal = controller.signal;
+import { useDispatch, useSelector } from "react-redux";
+import { getState, setState } from "~/store";
+import { SpinnerOverlay } from "~/components/SpinnerOverlay";
 
 export const Page = (props) => {
   const { element, loaderData = {}, noTheme, simple } = props;
-  const [{ isMobile }] = useDeviceSelectors(loaderData.userAgent);
   const navigate = useNavigate();
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const { isMobile, screenWidth } = useSelector(getState);
+
   //#region auth
   const [authToken, setAuthToken] = useStorage(tokenKey, {
     type: "local",
   });
-  const { access_token: accessToken, refresh_token: refreshToken } = authToken
-    ? JSON.parse(authToken)
-    : {};
   const [user, setUser] = useState<null | User>();
   useEffect(() => {
-    (async () => {
-      if (accessToken && refreshToken) {
-        client.defaults.headers.common = { at: accessToken, rt: refreshToken };
-
-        const { data } = await client.get("/login");
-        if (data.error) {
-          if (process.env.NODE_ENV === "development")
-            if (data.message.includes("Failed to fetch"))
-              setUser({ email: import.meta.env.VITE_PUBLIC_EMAIL2 });
-
-          return;
-        }
-        setUser(data);
-      }
-    })();
-  }, [accessToken, refreshToken]);
+    if (authToken) setUser(JSON.parse(authToken).user);
+    else if (process.env.NODE_ENV === "development")
+      setUser({ email: import.meta.env.VITE_PUBLIC_EMAIL2 });
+  }, [authToken]);
   //#endregion
 
   //#region toast
@@ -129,25 +117,6 @@ export const Page = (props) => {
       link_text: localize("Mot de passe oublié ?", "Forgotten password?"),
     },
   };
-  const [screenWidth, setScreenWidth] = useState(1000);
-  useEffect(() => {
-    const updateScreenWidth = () => {
-      const newScreenWidth = window.innerWidth - 16;
-      if (newScreenWidth !== screenWidth) setScreenWidth(newScreenWidth);
-    };
-
-    updateScreenWidth();
-    if (!isMobile) {
-      window.addEventListener("resize", updateScreenWidth);
-      signal.addEventListener("abort", () => {
-        window.removeEventListener("resize", updateScreenWidth);
-      });
-    }
-
-    return () => {
-      if (!isMobile) controller.abort();
-    };
-  }, []);
 
   const toggleButtonsLeft = null;
   // (
@@ -170,6 +139,19 @@ export const Page = (props) => {
   const toggleButtonsRight = (
     <div style={{ position: "fixed", bottom: 0, right: 0 }}>
       <Flex p="3" gap="2">
+        {process.env.NODE_ENV === "development" && (
+          <Toggle
+            css={css(toggleCss(appearance))}
+            onPressedChange={() => {
+              setModalState({
+                id: "tools-modal",
+                isOpen: !modalState.isOpen,
+              });
+            }}
+          >
+            <HeartIcon />
+          </Toggle>
+        )}
         <Toggle
           css={css(toggleCss(appearance))}
           onPressedChange={() => {
@@ -263,15 +245,8 @@ export const Page = (props) => {
     ...props,
     ...{ loaderData },
     ...{
-      isMobile,
       lib,
       setLib,
-      // auth
-      accessToken,
-      refreshToken,
-      setAuthToken,
-      user,
-      setUser,
       // toast
       showToast,
       // modal
@@ -281,9 +256,6 @@ export const Page = (props) => {
       // ui
       appearance,
       setAppearance,
-      locale,
-      setLocale,
-      localize,
       i18n,
       screenWidth,
     },
@@ -297,61 +269,40 @@ export const Page = (props) => {
     return (
       <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
         <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
-        <div id="page">{React.createElement(element, childProps)}</div>
+        {modalState.isOpen && <Modal {...childProps} />}
+
+        {!modalState.isOpen && (
+          <div id="page">{React.createElement(element, childProps)}</div>
+        )}
+
+        {navigation.state === "loading" && <SpinnerOverlay />}
+
         {toggleButtonsLeft}
         {toggleButtonsRight}
       </Theme>
     );
 
   return (
-    <>
-      <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
-        <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
-        {modalState.isOpen && <Modal {...childProps} />}
+    <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
+      <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
+      {modalState.isOpen && <Modal {...childProps} />}
 
-        {!modalState.isOpen && (
-          <div id="page">
-            <header>
-              {pageTitle}
+      {!modalState.isOpen && (
+        <div id="page">
+          <header>
+            {pageTitle}
 
-              <Header {...childProps} />
-            </header>
+            <Header {...childProps} />
+          </header>
 
-            {React.createElement(element, childProps)}
-          </div>
-        )}
+          {React.createElement(element, childProps)}
+        </div>
+      )}
 
-        {navigation.state === "loading" && (
-          <Flex
-            justify="center"
-            width={screenWidth + "px"}
-            height="100%"
-            style={{
-              position: "fixed",
-              background: "rgba(0, 0, 0, 0.5)",
-              top: 0,
-              left: 0,
-              pointerEvents: "all",
-            }}
-          >
-            <Flex
-              p="3"
-              style={{
-                background: "rgba(255, 255, 255, 0.9)",
-                borderRadius: "var(--radius-3)",
-                color: "black",
-                pointerEvents: "none",
-                userSelect: "none",
-              }}
-            >
-              <Spinner size="3" /> {localize("Chargement", "Loading")}...
-            </Flex>
-          </Flex>
-        )}
+      {navigation.state === "loading" && <SpinnerOverlay />}
 
-        {toggleButtonsLeft}
-        {toggleButtonsRight}
-      </Theme>
-    </>
+      {toggleButtonsLeft}
+      {toggleButtonsRight}
+    </Theme>
   );
 };

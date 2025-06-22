@@ -1,8 +1,10 @@
 import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { Box, Button, Select } from "@radix-ui/themes";
 import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { AddNoteButton, BackButton, BookIcon, Flex, Note } from "~/components";
+import { getState } from "~/store";
 import {
   client,
   toCss,
@@ -18,13 +20,12 @@ export const Livre = (props) => {
     loaderData: { lib },
     user,
     showToast,
-    locale,
-    setLocale,
-    isMobile,
     modalState,
     setModalState,
   } = props;
   const navigate = useNavigate();
+  const { isMobile, locale } = useSelector(getState);
+
   const [isCommentLoading, setIsCommentLoading] = useState<
     Record<string, boolean>
   >({});
@@ -187,10 +188,6 @@ export const Livre = (props) => {
                         note={note}
                         user={user}
                         isEditing
-                        locale={locale}
-                        setLocale={setLocale}
-                        localize={localize}
-                        isMobile={isMobile}
                       />
 
                       <div
@@ -310,10 +307,6 @@ export const Livre = (props) => {
                         note={{ ...note, index }}
                         user={user}
                         isLoading={isNoteLoading[note.id]}
-                        locale={locale}
-                        setLocale={setLocale}
-                        localize={localize}
-                        isMobile={isMobile}
                         onOpenClick={() => {
                           navigate("/q/" + note.id);
                           //setNote(note);

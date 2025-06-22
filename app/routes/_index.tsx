@@ -69,5 +69,6 @@ export const loader = async (props) => {
 };
 export default function IndexRoute(props) {
   if (isbot()) return <Sitemap {...props} />;
+
   return <Page element={Home} {...props} />;
 }

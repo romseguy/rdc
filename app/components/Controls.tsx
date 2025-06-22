@@ -1,12 +1,13 @@
 import { Button } from "@radix-ui/themes";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
+import { getState, setState } from "~/store";
 import { localize } from "~/utils";
 
-export const iconProps = ({
-  title,
-  isMobile,
-  ...props
-}: Record<string, any>) => {
+export const iconProps = (props) => {
+  const { title, style, onClick } = props;
+  const { isMobile } = useSelector(getState);
+
   const out: Record<string, any> = {
     "aria-label": title,
     style: {
@@ -18,15 +19,15 @@ export const iconProps = ({
             padding: "6px",
             border: "1px solid white",
           }
-        : { height: "2em", width: "2em" }),
-      ...props.style,
+        : { height: "1.5em", width: "1.5em" }),
+      ...style,
     },
   };
 
-  if (props.onClick) {
+  if (onClick) {
     out.onClick = (e) => {
       e.preventDefault();
-      props.onClick();
+      onClick();
     };
   }
 
@@ -186,7 +187,10 @@ export const EnIcon = (props) => (
 );
 
 export const LocaleSwitch = (props) => {
-  const { locale, setLocale, onClick, ...p } = props;
+  const { onClick, ...p } = props;
+  const dispatch = useDispatch();
+  const { locale } = useSelector(getState);
+  const setLocale = (locale) => dispatch(setState({ locale }));
 
   if (locale === "en")
     return (

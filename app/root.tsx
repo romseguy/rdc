@@ -1,5 +1,8 @@
-import "./root.scss";
-import type { Route } from "./+types/root";
+import { useScript } from "@charlietango/hooks/use-script";
+import { css } from "@emotion/react";
+import { useEffect } from "react";
+import { isMobile, useDeviceSelectors } from "react-device-detect";
+import { Provider, useDispatch, useSelector } from "react-redux";
 import {
   Links,
   Meta,
@@ -8,30 +11,20 @@ import {
   ScrollRestoration,
   useNavigation,
 } from "react-router";
-import { useEffect } from "react";
-import { css } from "@emotion/react";
-import { useScript } from "@charlietango/hooks/use-script";
+import type { Route } from "./+types/root";
+import "./root.scss";
+import { getState, setState, store } from "./store";
 import { iosPWASplash } from "./utils";
+const controller = new AbortController();
+const signal = controller.signal;
 
 export { ErrorBoundary } from "~/components/ErrorBoundary";
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const status = useScript("https://unpkg.com/pwacompat", {
+  const navigation = useNavigation();
+  useScript("https://unpkg.com/pwacompat", {
     attributes: { async: "true", crossOrigin: "anonymous" },
   });
-  // console.log("🚀 ~ pwacompat ~ status:", status);
-  // const status2 = useScript(
-  //   "https://unpkg.com/ios-pwa-splash@1.0.0/cdn.min.js",
-  //   {
-  //     attributes: { async: "true", crossOrigin: "anonymous" },
-  //   },
-  // );
-  // useEffect(() => {
-  // //   console.log("🚀 ~ ios-pwa-splash ~ status:", status2);
-  //   if (status2 === "ready")
-  //     window.iosPWASplash("/icons/icon-512x512.png", "#000000");
-  // }, [status2]);
-  const navigation = useNavigation();
   return (
     <html lang="en">
       <head>
@@ -57,24 +50,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function Root() {
-  useEffect(() => {
-    if (process.env.NODE_ENV === "production")
-      (async () => {
-        iosPWASplash("/icons/icon-512x512.png", "#000000");
-        const countryIS = "https://api.ipify.org?format=json";
-
-        try {
-          const res = await fetch(countryIS);
-          const data = res.json();
-          //await api.post("/", { ip: data.ip });
-        } catch (error) {
-          // console.log("🚀 ~ ipLocation ~ error:", error);
-        }
-      })();
-  }, []);
-
-  return <Outlet />;
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: import.meta.env.VITE_PUBLIC_TITLE },
+    {
+      name: "description",
+      content:
+        "Partagez des citations de livres qui participent à l'avènement d'une nouvelle conscience",
+    },
+    { name: "viewport", content: "width=device-width, initial-scale=1.0" },
+    { name: "theme-color", content: "#000000" },
+    //{ name: "apple-mobile-web-app-capable", content: "yes" },
+    { name: "apple-mobile-web-app-status-bar-style", content: "black" },
+    {
+      name: "apple-mobile-web-app-title",
+      content: import.meta.env.VITE_PUBLIC_TITLE,
+    },
+  ];
 }
 
 export const links: Route.LinksFunction = () => [
@@ -102,36 +94,71 @@ export const links: Route.LinksFunction = () => [
   //{ rel: "apple-touch-startup-image", href: "/splash/" },
 ];
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: import.meta.env.VITE_PUBLIC_TITLE },
-    {
-      name: "description",
-      content:
-        "Partagez des citations de livres qui participent à l'avènement d'une nouvelle conscience",
-    },
-    { name: "viewport", content: "width=device-width, initial-scale=1.0" },
-    { name: "theme-color", content: "#000000" },
-    //{ name: "apple-mobile-web-app-capable", content: "yes" },
-    { name: "apple-mobile-web-app-status-bar-style", content: "black" },
-    {
-      name: "apple-mobile-web-app-title",
-      content: import.meta.env.VITE_PUBLIC_TITLE,
-    },
-  ];
-}
+const App = ({ children }) => {
+  const dispatch = useDispatch();
+  const { screenWidth } = useSelector(getState);
 
-// {navigation.state === "idle" && (
-//   <span
-//     data-radix-focus-guard
-//     tabIndex={0}
-//     aria-hidden="true"
-//     data-aria-hidden="true"
-//     style={{
-//       position: "fixed",
-//       opacity: 0,
-//       pointerEvents: "none",
-//       outline: "none",
-//     }}
-//   />
-// )}
+  useEffect(() => {
+    const updateScreenWidth = () => {
+      const newScreenWidth = window.innerWidth - 16;
+      if (newScreenWidth !== screenWidth)
+        dispatch(setState({ screenWidth: newScreenWidth }));
+    };
+
+    updateScreenWidth();
+    if (!isMobile) {
+      window.addEventListener("resize", updateScreenWidth);
+      signal.addEventListener("abort", () => {
+        window.removeEventListener("resize", updateScreenWidth);
+      });
+    }
+
+    return () => {
+      if (!isMobile) controller.abort();
+    };
+  }, []);
+
+  return children;
+};
+
+export const loader = async (props) => {
+  return { userAgent: props.request.headers.get("user-agent") };
+};
+
+export default function Root(props) {
+  const {
+    loaderData: { userAgent },
+  } = props;
+  const [{ isMobile }] = useDeviceSelectors(userAgent);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production")
+      (async () => {
+        iosPWASplash("/icons/icon-512x512.png", "#000000");
+        const countryIS = "https://api.ipify.org?format=json";
+
+        try {
+          const res = await fetch(countryIS);
+          const data = res.json();
+          //await api.post("/", { ip: data.ip });
+        } catch (error) {
+          // console.log("🚀 ~ ipLocation ~ error:", error);
+        }
+      })();
+  }, []);
+
+  return (
+    <Provider
+      store={store({
+        root: {
+          isMobile,
+          locale: import.meta.env.VITE_PUBLIC_LOCALE,
+        },
+      })}
+    >
+      <App>
+        <Outlet />
+      </App>
+    </Provider>
+  );
+}
