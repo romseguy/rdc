@@ -20,6 +20,24 @@ export const seed: Seed[] = [
   {
     name: "Evolutionary Psychology",
     author: "Bernard de Montréal",
-    books: [],
+    books: [{ title: "L'incapacité", title_en: "The powerlessness" }],
   },
 ];
+
+export const collections = {
+  comments: [
+    {
+      id: "0",
+      comment_email: import.meta.env.VITE_PUBLIC_EMAIL2,
+      html: "okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b okikko aae b",
+      created_at: new Date(),
+    },
+
+    {
+      id: "1",
+      comment_email: import.meta.env.VITE_PUBLIC_EMAIL2,
+      html: "blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b blabal aae b",
+      created_at: new Date(),
+    },
+  ],
+};

@@ -8,21 +8,19 @@ import { getState } from "~/store";
 import { localize } from "~/utils";
 
 export const Note = (props) => {
-  const {
-    loaderData: { lib, book, note },
-  } = props;
-  const navigate = useNavigate();
-  const { screenWidth } = useSelector(getState);
-
-  //const [isDark, setIsDark] = useState(true);
+  const { loaderData } = props;
+  const { book, note } = loaderData;
+  const { lib = loaderData.lib, screenWidth } = useSelector(getState);
+  const defaultWidth = screenWidth > 1000 ? 1000 : screenWidth;
   const [lineHeight, setLineHeight] = useState(2);
   const [size, setSize] = useState(16);
-  const defaultWidth = screenWidth > 1000 ? 1000 : screenWidth;
   const [width, setWidth] = useState(defaultWidth);
   const [isLoaded, setIsLoaded] = useState(false);
   useEffect(() => {
     setIsLoaded(true);
   }, []);
+
+  const navigate = useNavigate();
 
   return (
     <div id="note-page">

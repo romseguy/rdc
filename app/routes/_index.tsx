@@ -1,26 +1,37 @@
+import { isbot } from "isbot";
+import { getCollections } from "~/api";
+import Sitemap from "~/components/Sitemap";
 import { Home } from "~/routes/Home";
 import { Page } from "~/routes/Page";
-import { seed, type Lib, client, type RootData } from "~/utils";
-import { isbot } from "isbot";
-import Sitemap from "~/components/Sitemap";
+import { store } from "~/store";
+import {
+  seed,
+  collections as offlineCollections,
+  type Lib,
+  type RootData,
+} from "~/utils";
 
 export const loader = async (props) => {
   let data: RootData = {
+    collections: {},
     libs: seed as Lib[],
-    lib: seed[0] as Lib,
     userAgent: props.request.headers.get("user-agent"),
   };
 
   try {
-    const { data: collections } = await client.get();
+    const { data: collections, error } = await store().dispatch(
+      getCollections.initiate(""),
+    );
 
-    if (collections.error) {
+    if (collections.error || error) {
+      data.collections = { ...offlineCollections, libraries: data.libs };
       data.libs = data.libs.map((lib, i) => {
+        const id = Number(i + 1).toString();
         return {
           ...lib,
-          id: Number(i + 1).toString(),
+          id,
           books: lib.books?.map((book, j) => {
-            const bookId = `${i}${j}`;
+            const bookId = `${id}${j + 1}`;
             return {
               ...book,
               id: bookId,
@@ -36,6 +47,7 @@ export const loader = async (props) => {
         };
       });
     } else {
+      data.collections = collections;
       data.libs = collections.libraries.map((lib) => {
         return {
           ...lib,
@@ -61,7 +73,6 @@ export const loader = async (props) => {
     }
 
     data.lib = data.libs[0];
-
     return data;
   } catch (error: any) {
     return data;
