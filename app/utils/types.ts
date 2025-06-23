@@ -59,6 +59,7 @@ export type Seed = Omit<Lib, "id" | "books"> & {
 };
 
 export type RootData = {
+  collections: Record<any, any>;
   libs: Lib[];
   lib: Lib;
   userAgent: string;
@@ -68,7 +69,7 @@ export type ModalT = {
   id: string;
   isOpen: boolean;
   book?: Book | null;
-  note?: Note | null;
+  note?: NoteT | null;
   email?: string | null;
 };
 

@@ -1,30 +1,42 @@
 import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { Box, Button, Select } from "@radix-ui/themes";
 import { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { AddNoteButton, BackButton, BookIcon, Flex, Note } from "~/components";
-import { getState } from "~/store";
+import {
+  deleteComment,
+  deleteNote,
+  editNote,
+  postComments,
+  postNotes,
+} from "~/api";
+import {
+  AddNoteButton,
+  BackButton,
+  BookIcon,
+  Flex,
+  Note,
+  useToast,
+} from "~/components";
+import { getState, setState } from "~/store";
 import {
   client,
-  toCss,
-  type BookT,
-  type NoteT,
   ENoteOrder,
   localize,
   rand,
+  toCss,
+  type BookT,
+  type NoteT,
 } from "~/utils";
 
 export const Livre = (props) => {
-  const {
-    loaderData: { lib },
-    user,
-    showToast,
-    modalState,
-    setModalState,
-  } = props;
+  const { loaderData } = props;
+  const { locale, auth, lib = loaderData.lib } = useSelector(getState);
+  const user = auth?.user;
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isMobile, locale } = useSelector(getState);
+  const showToast = useToast();
 
   const [isCommentLoading, setIsCommentLoading] = useState<
     Record<string, boolean>
@@ -68,24 +80,252 @@ export const Livre = (props) => {
     return els;
   }, [book, order, locale]);
 
-  //#region callbacks
-  const onEditPageClick = async (n: NoteT) => {
-    const { data } = await client.put("/note", {
-      note: n,
-    });
-    if (data.error) {
-      showToast(data.message, true);
-      return;
-    }
+  //#region effects
+  async function onEditSubmit(note) {
+    try {
+      let id;
+      setIsNoteLoading({
+        ...isNoteLoading,
+        [note.id]: true,
+      });
 
-    setBook({
-      ...book,
-      notes: book.notes?.map((note) => {
-        if (note.id === n.id) return n;
-        return note;
-      }),
-    });
-  };
+      if (!note.id) {
+        const { data, error } = await dispatch(
+          //@ts-expect-error
+          postNotes.initiate({
+            note: {
+              book_id: book.id,
+              [`desc${locale === "en" ? "_en" : ""}`]:
+                note[locale === "en" ? "desc_en" : "desc"],
+            },
+          }),
+        );
+        //@ts-expect-error
+        if (data.error || error)
+          //@ts-expect-error
+          data.error || error;
+        //@ts-expect-error
+        id = data.id;
+      } else {
+        const { data, error } = await dispatch(
+          //@ts-expect-error
+          editNote.initiate({
+            note: {
+              id: note.id,
+              book_id: book.id,
+              [`desc${locale === "en" ? "_en" : ""}`]:
+                note[locale === "en" ? "desc_en" : "desc"],
+            },
+          }),
+        );
+        //@ts-expect-error
+        if (data.error || error)
+          //@ts-expect-error
+          throw data.error || error;
+      }
+
+      setBook({
+        ...book,
+        notes: book.notes?.map((n) => {
+          if (n.id === note.id)
+            return {
+              ...note,
+              id: id || note.id,
+              isNew: false,
+              isEditing: false,
+              note_email: user.email,
+            };
+          return n;
+        }),
+      });
+      setIsNoteLoading({
+        ...isNoteLoading,
+        [note.id]: false,
+      });
+    } catch (error) {
+      showToast(error, true);
+      setIsNoteLoading({
+        ...isNoteLoading,
+        [note.id]: false,
+      });
+    }
+  }
+  async function onDeleteClick(note) {
+    try {
+      const ok = confirm("Êtes-vous sûr de vouloir supprimer cette citation ?");
+      if (ok) {
+        setIsNoteLoading({
+          ...isNoteLoading,
+          [note.id]: true,
+        });
+        const { data, error } = await dispatch(
+          //@ts-expect-error
+          deleteNote.initiate({
+            url: "/note?id=" + note.id,
+          }),
+        );
+
+        //@ts-expect-error
+        if (data.error || error)
+          //@ts-expect-error
+          throw data.error || error;
+
+        setBook({
+          ...book,
+          notes: book.notes?.filter((n) => n.id !== note.id),
+        });
+        setIsNoteLoading({
+          ...isNoteLoading,
+          [note.id]: false,
+        });
+      }
+    } catch (error) {
+      showToast(error, true);
+      setIsNoteLoading({
+        ...isNoteLoading,
+        [note.id]: false,
+      });
+    }
+  }
+  async function onEditPageClick(note: NoteT) {
+    try {
+      const { data, error } = await dispatch(
+        //@ts-expect-error
+        editNote.initiate({
+          note,
+        }),
+      );
+      //@ts-expect-error
+      if (data.error || error)
+        //@ts-expect-error
+        data.error || error;
+
+      setBook({
+        ...book,
+        notes: book.notes?.map((n) => {
+          if (n.id === note.id) return note;
+          return n;
+        }),
+      });
+    } catch (error) {
+      showToast(error, true);
+    }
+  }
+  async function onSubmitCommentClick(note, comment) {
+    try {
+      const { data, error } = await dispatch(
+        //@ts-expect-error
+        postComments.initiate({
+          comment: {
+            ...comment,
+            note_id: note.id,
+          },
+        }),
+      );
+
+      //@ts-expect-error
+      if (data.error || error)
+        //@ts-expect-error
+        throw data.error || error;
+
+      // if (data.error) {
+      //   if (process.env.NODE_ENV === "development") {
+      //     let r = rand();
+      //     while (
+      //       !!note.comments?.find(
+      //         ({ id }) => id === r.toString(),
+      //       )
+      //     ) {
+      //       r = rand();
+      //     }
+      //     data = {
+      //       ...comment,
+      //       id: r.toString(),
+      //       comment_email: user.email,
+      //       created_at: new Date().toISOString(),
+      //     };
+      //   } else {
+      //     showToast(data.message);
+      //     return;
+      //   }
+      // }
+
+      setBook({
+        ...book,
+        notes: book.notes?.map((n) => {
+          if (n.id === note.id) {
+            return {
+              ...n,
+              //@ts-expect-error
+              comments: (n.comments || []).concat([data]),
+            };
+          }
+          return n;
+        }),
+      });
+    } catch (error) {
+      showToast(error, true);
+      setIsNoteLoading({
+        ...isNoteLoading,
+        [note.id]: false,
+      });
+    }
+  }
+  async function onDeleteCommentClick(note, comment) {
+    try {
+      const ok = confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?");
+
+      if (ok) {
+        setIsCommentLoading({
+          ...isCommentLoading,
+          [comment.id]: true,
+        });
+        const { data, error } = await dispatch(
+          //@ts-expect-error
+          deleteComment.initiate({
+            url: "/comment?id=" + comment.id,
+          }),
+        );
+
+        //@ts-expect-error
+        if (data.error || error)
+          //@ts-expect-error
+          throw data.error || error;
+
+        // if (data.error) {
+        //   setIsCommentLoading({
+        //     ...isCommentLoading,
+        //     [comment.id]: false,
+        //   });
+
+        //   if (process.env.NODE_ENV === "development") {
+        //   } else {
+        //     showToast(data.message);
+        //     return;
+        //   }
+        // }
+
+        setBook({
+          ...book,
+          notes: (book.notes || []).map((n) => {
+            if (n.id === note.id) {
+              return {
+                ...n,
+                comments: (n.comments || []).filter((c) => c.id !== comment.id),
+              };
+            }
+            return n;
+          }),
+        });
+      }
+    } catch (error) {
+      showToast(error, true);
+      setIsCommentLoading({
+        ...isCommentLoading,
+        [comment.id]: false,
+      });
+    }
+  }
   //#endregion
 
   return (
@@ -183,12 +423,7 @@ export const Livre = (props) => {
                 .map((note) => {
                   return (
                     <div key={"note-" + note.id}>
-                      <Note
-                        notes={book.notes || []}
-                        note={note}
-                        user={user}
-                        isEditing
-                      />
+                      <Note notes={book.notes || []} note={note} isEditing />
 
                       <div
                         css={toCss({
@@ -220,66 +455,7 @@ export const Livre = (props) => {
                           </BackButton>
                         )}
 
-                        <Button
-                          onClick={async function onEditSubmit() {
-                            let id;
-                            setIsNoteLoading({
-                              ...isNoteLoading,
-                              [note.id]: true,
-                            });
-
-                            let data;
-                            if (note.isNew) {
-                              const res = await client.post("/notes", {
-                                note: {
-                                  book_id: book.id,
-                                  [`desc${locale === "en" ? "_en" : ""}`]:
-                                    note[locale === "en" ? "desc_en" : "desc"],
-                                },
-                              });
-                              data = res.data;
-                              id = data.id;
-                            } else {
-                              const res = await client.put("/note", {
-                                note: {
-                                  id: note.id,
-                                  book_id: book.id,
-                                  [`desc${locale === "en" ? "_en" : ""}`]:
-                                    note[locale === "en" ? "desc_en" : "desc"],
-                                },
-                              });
-                              data = res.data;
-                            }
-
-                            if (data.error) {
-                              showToast(data.message, true);
-                              setIsNoteLoading({
-                                ...isNoteLoading,
-                                [note.id]: false,
-                              });
-                              return;
-                            }
-
-                            setBook({
-                              ...book,
-                              notes: book.notes?.map((n) => {
-                                if (n.id === note.id)
-                                  return {
-                                    ...note,
-                                    id: id || note.id,
-                                    isNew: false,
-                                    isEditing: false,
-                                    note_email: user.email,
-                                  };
-                                return n;
-                              }),
-                            });
-                            setIsNoteLoading({
-                              ...isNoteLoading,
-                              [note.id]: false,
-                            });
-                          }}
-                        >
+                        <Button onClick={() => onEditSubmit(note)}>
                           {isNoteLoading[note.id]
                             ? "Veuillez patienter..."
                             : "Valider"}
@@ -305,7 +481,6 @@ export const Livre = (props) => {
                         key={"note-" + index + note.id}
                         notes={book.notes || []}
                         note={{ ...note, index }}
-                        user={user}
                         isLoading={isNoteLoading[note.id]}
                         onOpenClick={() => {
                           navigate("/q/" + note.id);
@@ -329,134 +504,28 @@ export const Livre = (props) => {
                             [note.id]: false,
                           });
                         }}
+                        onShareClick={() => {
+                          dispatch(
+                            setState({
+                              modal: {
+                                id: "share-modal",
+                                isOpen: true,
+                                book,
+                                note,
+                              },
+                            }),
+                          );
+                        }}
                         onEditPageClick={(page) =>
                           onEditPageClick({ ...note, page })
                         }
-                        onShareClick={() => {
-                          setModalState({
-                            id: "share-modal",
-                            isOpen: true,
-                            book,
-                            note,
-                          });
-                        }}
-                        onDeleteClick={async () => {
-                          const ok = confirm(
-                            "Êtes-vous sûr de vouloir supprimer cette citation ?",
-                          );
-                          if (ok) {
-                            setIsNoteLoading({
-                              ...isNoteLoading,
-                              [note.id]: true,
-                            });
-                            const { data } = await client.delete(
-                              "/note?id=" + note.id,
-                            );
-                            if (data.error) {
-                              setIsNoteLoading({
-                                ...isNoteLoading,
-                                [note.id]: false,
-                              });
-                              showToast(data.message, true);
-                              return;
-                            }
-                            setBook({
-                              ...book,
-                              notes: book.notes?.filter(
-                                (n) => n.id !== note.id,
-                              ),
-                            });
-                            setIsNoteLoading({
-                              ...isNoteLoading,
-                              [note.id]: false,
-                            });
-                          }
-                        }}
-                        onSubmitCommentClick={async (comment) => {
-                          let { data } = await client.post("/comments", {
-                            comment: {
-                              ...comment,
-                              note_id: note.id,
-                            },
-                          });
-
-                          if (data.error) {
-                            if (process.env.NODE_ENV === "development") {
-                              let r = rand();
-                              while (
-                                !!note.comments?.find(
-                                  ({ id }) => id === r.toString(),
-                                )
-                              ) {
-                                r = rand();
-                              }
-                              data = {
-                                ...comment,
-                                id: r.toString(),
-                                comment_email: user.email,
-                                created_at: new Date().toISOString(),
-                              };
-                            } else {
-                              showToast(data.message);
-                              return;
-                            }
-                          }
-
-                          setBook({
-                            ...book,
-                            notes: book.notes?.map((n) => {
-                              if (n.id === note.id) {
-                                return {
-                                  ...n,
-                                  comments: (n.comments || []).concat([data]),
-                                };
-                              }
-                              return n;
-                            }),
-                          });
-                        }}
-                        onDeleteCommentClick={async (comment) => {
-                          const ok = confirm(
-                            "Êtes-vous sûr de vouloir supprimer ce commentaire ?",
-                          );
-
-                          if (ok) {
-                            setIsCommentLoading({
-                              ...isCommentLoading,
-                              [comment.id]: true,
-                            });
-                            let { data } = await client.delete(
-                              "/comment?id=" + comment.id,
-                            );
-                            if (data.error) {
-                              setIsCommentLoading({
-                                ...isCommentLoading,
-                                [comment.id]: false,
-                              });
-
-                              if (process.env.NODE_ENV === "development") {
-                              } else {
-                                showToast(data.message);
-                                return;
-                              }
-                            }
-
-                            setBook({
-                              ...book,
-                              notes: (book.notes || []).map((n) => {
-                                if (n.id === note.id) {
-                                  return {
-                                    ...n,
-                                    comments: (n.comments || []).filter(
-                                      (c) => c.id !== comment.id,
-                                    ),
-                                  };
-                                }
-                                return n;
-                              }),
-                            });
-                          }
-                        }}
+                        onDeleteClick={() => onDeleteClick(note)}
+                        onSubmitCommentClick={(comment) =>
+                          onSubmitCommentClick(note, comment)
+                        }
+                        onDeleteCommentClick={(comment) =>
+                          onDeleteCommentClick(note, comment)
+                        }
                       />
                     );
                   })}

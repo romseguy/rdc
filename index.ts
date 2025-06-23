@@ -40,6 +40,7 @@ crawler.start();
 let pages = [];
 crawler.on("fetchcomplete", function (item, responseBuffer, response) {
   console.log("🚀 ~ item:", item);
+  //@ts-expect-error
   pages.push(item.url);
   console.log(pages);
 });

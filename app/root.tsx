@@ -14,11 +14,11 @@ import {
 import type { Route } from "./+types/root";
 import "./root.scss";
 import { getState, setState, store } from "./store";
-import { iosPWASplash } from "./utils";
+import { splash } from "./lib/ios/splash";
 const controller = new AbortController();
 const signal = controller.signal;
 
-export { ErrorBoundary } from "~/components/ErrorBoundary";
+//export { ErrorBoundary } from "~/components/ErrorBoundary";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const navigation = useNavigation();
@@ -134,7 +134,7 @@ export default function Root(props) {
   useEffect(() => {
     if (process.env.NODE_ENV === "production")
       (async () => {
-        iosPWASplash("/icons/icon-512x512.png", "#000000");
+        splash("/icons/icon-512x512.png", "#000000");
         const countryIS = "https://api.ipify.org?format=json";
 
         try {
@@ -150,9 +150,16 @@ export default function Root(props) {
   return (
     <Provider
       store={store({
-        root: {
+        app: {
+          auth: {
+            user:
+              process.env.NODE_ENV === "development"
+                ? { email: import.meta.env.VITE_PUBLIC_EMAIL2 }
+                : undefined,
+          },
           isMobile,
           locale: import.meta.env.VITE_PUBLIC_LOCALE,
+          modal: { isOpen: false },
         },
       })}
     >

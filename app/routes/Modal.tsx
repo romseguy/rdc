@@ -1,23 +1,32 @@
 import { css } from "@emotion/react";
-import { Badge, Button, Switch } from "@radix-ui/themes";
+import { Badge, Button, Switch, TextArea } from "@radix-ui/themes";
 import { MailTo, MailToBody, MailToTrigger } from "@slalombuild/react-mailto";
 import { decode } from "html-entities";
-import { useEffect, useState } from "react";
-import { BackButton, EmailIcon, Flex } from "~/components";
-import { Login } from "~/components/Login";
+import { lazy, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteComment, postComments } from "~/api";
+import { BackButton, EmailIcon, Flex, useToast } from "~/components";
+import { Comment } from "~/components/Comment";
+//import { Login } from "~/components/Login";
 import { Input } from "~/components/ui/input";
+import { linkButton } from "~/lib/css";
+import { getState, setState } from "~/store";
+import { localize, toCss, toCssString } from "~/utils";
+const Login = lazy(() => import("~/components/Login"));
 
 export const Modal = (props) => {
-  const { modalState, setModalState, showToast, i18n, localize } = props;
-  const close = () => setModalState({ isOpen: false });
-  const { id, book, note } = modalState;
+  const { i18n } = props;
+  const { collections, modal } = useSelector(getState);
+  const comments = collections?.comments.filter(({ note_id }) => !note_id);
+  const { id, book, note } = modal;
   const [email, setEmail] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
 
-  // useEffect(() => {
-  //   if (id === "login-modal") setEmail(initialValue);
-  // }, []);
+  const dispatch = useDispatch();
+  const showToast = useToast();
+  const toggleModal = useToggleModal();
 
-  if (id === "share-modal")
+  if (id === "share-modal" && book && note)
     return (
       <div id="modal">
         <div id={id}>
@@ -27,17 +36,7 @@ export const Modal = (props) => {
             gap="3"
             css={css`
               a {
-                color: white;
-                background: var(--accent-9);
-                font-size: var(--font-size-4);
-                font-weight: var(--font-weight-medium);
-                border-radius: var(--radius-4);
-                padding: 12px;
-                text-decoration: none;
-                text-align: center;
-                &:hover {
-                  background: var(--accent-10);
-                }
+                ${linkButton()}
               }
             `}
           >
@@ -93,7 +92,7 @@ export const Modal = (props) => {
               {localize("Copier le lien", "Copy link to clipboard")}
             </Button>
 
-            <BackButton size="3" onClick={close} />
+            <BackButton size="3" onClick={() => toggleModal(id)} />
           </Flex>
         </div>
       </div>
@@ -110,7 +109,7 @@ export const Modal = (props) => {
                 position: relative;
               `}
             >
-              {!modalState.email ? (
+              {!modal.email ? (
                 <>
                   <Flex
                     css={css`
@@ -133,8 +132,8 @@ export const Modal = (props) => {
                     autoFocus
                     name="email"
                     type="email"
-                    readOnly={!!modalState.email}
-                    value={email || modalState.email}
+                    readOnly={!!modal.email}
+                    value={email || modal.email || ""}
                     onChange={(e) => {
                       setEmail(e.target.value);
                     }}
@@ -146,7 +145,7 @@ export const Modal = (props) => {
                     "Seront envoyées à votre adresse e-mail",
                     "Will be send to your email address",
                   )}{" "}
-                  : <Badge>{modalState.email}</Badge>
+                  : <Badge>{modal.email}</Badge>
                 </>
               )}
             </Flex>
@@ -186,7 +185,7 @@ export const Modal = (props) => {
               />
             </Flex>
 
-            <BackButton onClick={close} />
+            <BackButton onClick={() => toggleModal(id)} />
           </Flex>
         </div>
       </div>
@@ -196,10 +195,129 @@ export const Modal = (props) => {
     return (
       <div id="modal">
         <div id={id}>
-          <Login showToast={showToast} close={close} i18n={i18n} />
+          <Login showToast={showToast} toggleModal={toggleModal} i18n={i18n} />
+        </div>
+      </div>
+    );
+
+  if (id === "heart-modal")
+    return (
+      <div id="modal">
+        <div id={id}>
+          <Flex direction="column" justify="center" gap="3" p="3">
+            <Flex direction="column" gap="3">
+              <Flex>
+                <BackButton onClick={() => toggleModal(id)} />
+                <a
+                  target="_blank"
+                  href="https://romseguy.com"
+                  css={css(
+                    linkButton(
+                      toCssString({
+                        padding: "6px 12px",
+                        borderRadius: "var(--radius-2)",
+                        fontWeight: "normal",
+                        fontSize: "14px",
+                      }),
+                    ),
+                  )}
+                >
+                  Faire un don
+                </a>
+              </Flex>
+              <h1>
+                Participez à la discussion ci-dessous pour suggérer des
+                améliorations
+              </h1>
+            </Flex>
+            <TextArea
+              autoFocus
+              cols={80}
+              placeholder={localize("Écrivez ici", "Write here")}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+            <Button
+              onClick={async () => {
+                try {
+                  const { data, error } = await dispatch(
+                    //@ts-expect-error
+                    postComments.initiate({ comment: { html: message } }),
+                  );
+                  //@ts-expect-error
+                  if (data.error || error)
+                    //@ts-expect-error
+                    throw new Error(data.error || error);
+
+                  dispatch(
+                    setState({
+                      collections: {
+                        ...collections,
+                        comments: collections.comments.concat([data]),
+                      },
+                    }),
+                  );
+                } catch (error) {
+                  showToast(error, true);
+                }
+              }}
+            >
+              {localize("Envoyer", "Send")}
+            </Button>
+            <Flex direction="column" width="100%" justify="center">
+              {comments.map((comment) => (
+                <Comment
+                  key={"comment-" + comment.id}
+                  width="100%"
+                  comment={comment}
+                  onDeleteClick={async (comment) => {
+                    try {
+                      const { data, error } = await dispatch(
+                        //@ts-expect-error
+                        deleteComment.initiate({
+                          url: "/comment?id=" + comment.id,
+                        }),
+                      );
+                      //@ts-expect-error
+                      if (data.error || error)
+                        //@ts-expect-error
+                        throw data.error || error;
+
+                      dispatch(
+                        setState({
+                          collections: {
+                            ...collections,
+                            comments: collections.comments.filter(
+                              ({ id }) => id !== comment.id,
+                            ),
+                          },
+                        }),
+                      );
+                    } catch (error) {
+                      showToast(error, true);
+                    }
+                  }}
+                />
+              ))}
+            </Flex>
+          </Flex>
         </div>
       </div>
     );
 
   return null;
+};
+
+export const useToggleModal = () => {
+  const dispatch = useDispatch();
+  const { modal } = useSelector(getState);
+  return (id = "login-modal", props = {}) =>
+    dispatch(
+      setState({
+        modal: {
+          id,
+          isOpen: !modal.isOpen,
+          ...props,
+        },
+      }),
+    );
 };

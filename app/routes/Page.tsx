@@ -1,4 +1,5 @@
 import { useStorage } from "@charlietango/hooks/use-storage";
+import { css } from "@emotion/react";
 import {
   ArrowUpIcon,
   BellIcon,
@@ -7,9 +8,10 @@ import {
   SunIcon,
 } from "@radix-ui/react-icons";
 import { Toggle } from "@radix-ui/react-toggle";
-import { Button, Separator, Spinner, Theme } from "@radix-ui/themes";
+import { Button, Separator, Theme } from "@radix-ui/themes";
+import type { ThemeOwnProps } from "@radix-ui/themes/components/theme.props";
 import React, { useEffect, useState } from "react";
-import { useDeviceSelectors } from "react-device-detect";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useNavigation } from "react-router";
 import {
   Flex,
@@ -18,55 +20,59 @@ import {
   ToastsContainer,
   UserIcon,
 } from "~/components";
-import { pageTitleStyle, toggleCss } from "~/lib/css";
-import { tokenKey } from "~/utils";
-import type { Lib, ModalT, User } from "~/utils/types";
-import { Modal } from "./Modal";
-import { css } from "@emotion/react";
-import type { ThemeOwnProps } from "@radix-ui/themes/components/theme.props";
-import { useDispatch, useSelector } from "react-redux";
-import { getState, setState } from "~/store";
 import { SpinnerOverlay } from "~/components/SpinnerOverlay";
+import { pageTitleStyle, toggleCss } from "~/lib/css";
+import { tokenKey } from "~/lib/supabase/tokenKey";
+import { getState, setState } from "~/store";
+import { i18n, localize, collections as offlineCollections } from "~/utils";
+import { Modal, useToggleModal } from "./Modal";
 
 export const Page = (props) => {
   const { element, loaderData = {}, noTheme, simple } = props;
+  const state = useSelector(getState);
+  const { auth, collections, isMobile, lib, locale, modal, toast } = state;
+  const user = auth?.user;
+  useEffect(() => {
+    if (!collections)
+      dispatch(
+        setState({
+          collections: loaderData.collections.error
+            ? offlineCollections
+            : loaderData.collections,
+        }),
+      );
+  }, [loaderData.collections]);
+  useEffect(() => {
+    if (!lib) dispatch(setState({ lib: loaderData.lib }));
+  }, [loaderData.lib]);
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const { isMobile, screenWidth } = useSelector(getState);
+  const toggleModal = useToggleModal();
 
   //#region auth
   const [authToken, setAuthToken] = useStorage(tokenKey, {
     type: "local",
   });
-  const [user, setUser] = useState<null | User>();
   useEffect(() => {
-    if (authToken) setUser(JSON.parse(authToken).user);
-    else if (process.env.NODE_ENV === "development")
-      setUser({ email: import.meta.env.VITE_PUBLIC_EMAIL2 });
+    if (authToken) {
+      const { user, ...token } = JSON.parse(authToken);
+      dispatch(
+        setState({
+          auth: {
+            user,
+            token,
+            bearer: authToken,
+          },
+        }),
+      );
+    }
+    // else if (process.env.NODE_ENV !== "development")
+    //   dispatch(
+    //     setState({ user: { email: import.meta.env.VITE_PUBLIC_EMAIL2 } }),
+    //   );
   }, [authToken]);
-  //#endregion
-
-  //#region toast
-  const [toasts, setToasts] = useState<any[]>([]);
-  const showToast = (message: string, isError = false) => {
-    const toast = {
-      id: toasts.length,
-      message: message,
-      delay: 2500,
-      isError,
-    };
-    setToasts([...toasts, toast].reverse());
-  };
-  const onToastFinished = (id) => {
-    setToasts(toasts.filter((toast) => toast.id !== id));
-  };
-  //#endregion
-
-  //#region modal
-  const [modalState, setModalState] = useState<ModalT>({});
-  const toggleModal = () =>
-    setModalState({ id: "login-modal", isOpen: !modalState.isOpen });
   //#endregion
 
   //#region ui
@@ -74,49 +80,6 @@ export const Page = (props) => {
     type: "local",
     defaultValue: "dark",
   });
-  const [locale, setLocale] = useState(import.meta.env.VITE_PUBLIC_LOCALE);
-  const localize = (fr, en) => {
-    if (locale === "en") return en;
-    return fr;
-  };
-  const variables = {
-    email_label: localize("Adresse e-mail", "Email address"),
-    password_label: localize("Mot de passe", "Password"),
-    email_input_placeholder: localize(
-      "Votre adresse e-mail",
-      "Your email address",
-    ),
-    password_input_placeholder: localize("Votre mot de passe", "Your password"),
-    button_label: localize("Connexion", "Login"),
-    loading_button_label: localize("Chargement...", "Loading..."),
-    //social_provider_text: localize("", ""),
-    link_text: localize("link_text", ""),
-  };
-  const i18n = {
-    sign_in: variables,
-    sign_up: {
-      ...variables,
-      button_label: localize("Créer le compte", "Create account"),
-      link_text: localize("Créer un compte", "Create a new account"),
-      confirmation_text: localize("Confirmer", "Confirm"),
-    },
-    magic_link: {
-      ...variables,
-      link_text: localize("Envoyer un mail de connexion", "Send a login email"),
-      button_label: localize(
-        "Envoyer un mail de connexion",
-        "Send a login email",
-      ),
-    },
-    forgotten_password: {
-      ...variables,
-      button_label: localize(
-        "Envoyer un mail de récupération de mot de passe",
-        "Send a password recovery email",
-      ),
-      link_text: localize("Mot de passe oublié ?", "Forgotten password?"),
-    },
-  };
 
   const toggleButtonsLeft = null;
   // (
@@ -137,16 +100,13 @@ export const Page = (props) => {
   //   </div>
   // );
   const toggleButtonsRight = (
-    <div style={{ position: "fixed", bottom: 0, right: 0 }}>
-      <Flex p="3" gap="2">
+    <div style={{ position: "fixed", bottom: 12, right: 12, zIndex: 999 }}>
+      <Flex gap="2">
         {process.env.NODE_ENV === "development" && (
           <Toggle
             css={css(toggleCss(appearance))}
             onPressedChange={() => {
-              setModalState({
-                id: "tools-modal",
-                isOpen: !modalState.isOpen,
-              });
+              toggleModal("heart-modal");
             }}
           >
             <HeartIcon />
@@ -155,9 +115,7 @@ export const Page = (props) => {
         <Toggle
           css={css(toggleCss(appearance))}
           onPressedChange={() => {
-            setModalState({
-              id: "notif-modal",
-              isOpen: true,
+            toggleModal("notif-modal", {
               email: user?.email,
             });
           }}
@@ -221,7 +179,7 @@ export const Page = (props) => {
             const ok = confirm("Êtes-vous sûr de vouloir vous déconnecter?");
             if (ok) {
               setAuthToken();
-              setUser(undefined);
+              dispatch(setState({ auth: undefined }));
             }
           } else {
             toggleModal();
@@ -233,31 +191,26 @@ export const Page = (props) => {
       </Button>
     </Flex>
   );
+  const onToastFinished = (id) => {
+    dispatch(setState({ toast: undefined }));
+  };
   //#endregion
 
   //#region child
-  const [lib, _setLib] = useState<Lib>();
-  const setLib = (libName: string) => {
-    const l = loaderData.libs?.find((li) => li.name === libName);
-    if (l) _setLib(l);
-  };
+  // const [lib, _setLib] = useState<Lib>();
+  // const setLib = (libName: string) => {
+  //   const l = loaderData.libs?.find((li) => li.name === libName);
+  //   if (l) _setLib(l);
+  // };
   const childProps = {
     ...props,
     ...{ loaderData },
     ...{
-      lib,
-      setLib,
-      // toast
-      showToast,
-      // modal
-      modalState,
-      setModalState,
-      toggleModal,
-      // ui
+      // lib,
+      // setLib,
       appearance,
       setAppearance,
       i18n,
-      screenWidth,
     },
   };
   //#endregion
@@ -268,10 +221,10 @@ export const Page = (props) => {
   if (simple)
     return (
       <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
-        <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
-        {modalState.isOpen && <Modal {...childProps} />}
+        <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
+        {modal.isOpen && <Modal {...childProps} />}
 
-        {!modalState.isOpen && (
+        {!modal.isOpen && (
           <div id="page">{React.createElement(element, childProps)}</div>
         )}
 
@@ -284,10 +237,10 @@ export const Page = (props) => {
 
   return (
     <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
-      <ToastsContainer toasts={toasts} onToastFinished={onToastFinished} />
-      {modalState.isOpen && <Modal {...childProps} />}
+      <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
+      {modal.isOpen && <Modal {...childProps} />}
 
-      {!modalState.isOpen && (
+      {!modal.isOpen && (
         <div id="page">
           <header>
             {pageTitle}

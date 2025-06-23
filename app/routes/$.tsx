@@ -1,19 +1,12 @@
 import { isbot } from "isbot";
-import { useLocation, useRoutes } from "react-router";
+import { useRoutes } from "react-router";
 import Sitemap from "~/components/Sitemap";
-import { Page } from "~/routes/Page";
 import { Livre } from "~/routes/Livre";
 import { Note } from "~/routes/Note";
-
-import { loader as rootLoader } from "./_index";
+import { Page } from "~/routes/Page";
+import { BookT, type Note as NoteT, type RootData } from "~/utils";
 import type { Route } from "./+types/$";
-import {
-  BookT,
-  localize,
-  type Book,
-  type Note as NoteT,
-  type RootData,
-} from "~/utils";
+import { loader as rootLoader } from "./_index";
 
 export const loader = async (props: Route.LoaderArgs) => {
   const data: RootData & { book?: BookT; note?: NoteT } = await rootLoader(
@@ -57,22 +50,21 @@ export const loader = async (props: Route.LoaderArgs) => {
         status: 404,
         statusText: "La citation n'a pas été trouvée",
       });
-  }
-
-  if (data.book) {
-    const lib = data.libs.find((lib) => lib.id === data.book!.library_id);
-    if (lib) data.lib = lib;
-  } else if (!data.note)
+  } else
     throw new Response("", {
       status: 404,
       statusText: "La page n'a pas été trouvée",
     });
 
+  if (data.book) {
+    const lib = data.libs.find((lib) => lib.id === data.book!.library_id);
+    if (lib) data.lib = lib;
+  }
+
   return data;
 };
 
 export default function CatchAllRoute(props) {
-  console.log("🚀 ~ CatchAllRoute ~ props:", props);
   if (isbot()) return <Sitemap {...props} />;
 
   return useRoutes([

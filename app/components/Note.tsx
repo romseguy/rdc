@@ -1,14 +1,12 @@
 import { css } from "@emotion/react";
 import {
-  ArrowDownIcon,
   ArrowRightIcon,
   ArrowUpIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   Share1Icon,
-  ThickArrowUpIcon,
 } from "@radix-ui/react-icons";
-import { Badge, Box, Button, ChevronDownIcon } from "@radix-ui/themes";
+import { Badge, Box, Button } from "@radix-ui/themes";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import {
@@ -26,14 +24,13 @@ import {
 import { getState } from "~/store";
 import {
   toUsername,
-  fullDateString,
   toCss,
   useScroll,
   type NoteT,
   type User,
   localize,
-  timeAgo,
 } from "~/utils";
+import { Comment } from "./Comment";
 
 interface NoteP {
   notes: NoteT[];
@@ -147,11 +144,6 @@ export const Note = (props: NoteP) => {
   const NoteHeaderRight = (props) => {
     return (
       <Box {...props}>
-        {isLoading && (
-          <div className="spinner">
-            <span>Chargement...</span>
-          </div>
-        )}
         {!isLoading && (
           <Flex gap="3">
             <Share1Icon
@@ -162,7 +154,6 @@ export const Note = (props: NoteP) => {
               })}
             />
             <EditIcon
-              onClick={() => onEditClick()}
               {...iconProps({
                 title: localize("Modifier la citation", "Edit the quote"),
                 onClick: onEditClick,
@@ -175,6 +166,11 @@ export const Note = (props: NoteP) => {
               })}
             />
           </Flex>
+        )}
+        {isLoading && (
+          <div className="spinner">
+            <span>Chargement...</span>
+          </div>
         )}
       </Box>
     );
@@ -380,47 +376,10 @@ export const Note = (props: NoteP) => {
             <div css={toCss({ background: "rgba(255, 255, 255, 0.2)" })}>
               {note.comments?.map((c) => {
                 return (
-                  <div
-                    key={"comment-" + c.id}
-                    css={toCss({
-                      display: "flex",
-                      justifyContent: "space-between",
-                      borderBottom: "1px solid white",
-                      padding: "12px",
-                    })}
-                  >
-                    {/* comment */}
-                    <Flex>
-                      <Badge size="3">
-                        <UserIcon />
-                        {toUsername(c.comment_email)}
-                      </Badge>
-                      : {c.html}
-                    </Flex>
-
-                    <Flex
-                      gap="1"
-                      style={{
-                        cursor: "pointer",
-                      }}
-                    >
-                      {/* comment date */}
-                      <div css={toCss({ whiteSpace: "nowrap" })}>
-                        <Badge title={fullDateString(c.created_at, locale)}>
-                          {timeAgo({ date: c.created_at })}
-                        </Badge>
-                      </div>
-
-                      {/* delete comment */}
-                      {c.comment_email === user?.email && (
-                        <DeleteIcon
-                          onClick={() => {
-                            onDeleteCommentClick(c);
-                          }}
-                        />
-                      )}
-                    </Flex>
-                  </div>
+                  <Comment
+                    comment={c}
+                    onDeleteClick={() => onDeleteCommentClick(c)}
+                  />
                 );
               })}
             </div>

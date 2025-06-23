@@ -2,62 +2,72 @@ import {
   configureStore,
   buildCreateSlice,
   asyncThunkCreator,
-  Middleware,
-  Action,
   PayloadAction,
 } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { api as rootApi } from "~/api";
+import { ToastProps } from "~/components";
+import { Lib, ModalT, User } from "~/utils";
 
 export const createSlice = buildCreateSlice({
   creators: { asyncThunk: asyncThunkCreator },
 });
 
-export interface RootSlice {
-  authToken: { access_token: string; refresh_token: string };
+export interface AppState {
+  appearance: string;
+  auth: {
+    user: User;
+    token: { access_token: string; refresh_token: string };
+    bearer: string;
+  };
+  collections: Record<any, any>;
   isMobile: boolean;
+  lib: Lib;
   locale: "fr" | "en";
+  modal: ModalT;
+  toast: ToastProps;
   screenWidth: number;
 }
 
-const rootSlice = createSlice({
-  name: "root",
-  initialState: {} as RootSlice,
+const slice = createSlice({
+  name: "app",
+  initialState: {} as AppState,
   reducers: (create) => ({
-    setState: create.reducer<Partial<RootSlice>>((state, action) => {
+    setState: create.reducer<Partial<AppState>>((state, action) => {
       const key = Object.keys(action.payload)[0];
       return { ...state, [key]: action.payload[key] };
     }),
   }),
   selectors: { getState: (state) => state },
 });
-export const { getState } = rootSlice.selectors;
-export const { setState } = rootSlice.actions;
-
+export const { getState } = slice.selectors;
+export const { setState } = slice.actions;
 const reducer = {
-  root: rootSlice.reducer,
+  app: slice.reducer,
   api: rootApi.reducer,
 };
-const m: Middleware = (api) => (next) => {
-  return (action: PayloadAction<Partial<RootSlice>, any>) => {
+const middleware = (api) => (next) => {
+  return (action: PayloadAction) => {
     if (action.type !== "__rtkq/unfocused") {
-      let state = { ...api.getState().root };
-      if (action.type === "root/setState" && action.payload) {
+      let state = { ...api.getState().app };
+      if (action.type === "app/setState" && action.payload) {
         const key = Object.keys(action.payload)[0];
         state[key] = action.payload[key];
         console.log("🚀 ~", action, state);
-      } else console.log("🚀 ~", action, api.getState());
+      } //else console.log("🚀 ~", action, api.getState());
     }
     return next(action);
   };
 };
 export const makeStore = (preloadedState) => {
   const store = configureStore({
+    //@ts-expect-error
     reducer,
+    //@ts-expect-error
     middleware: (getDefaultMiddleware) => {
       return getDefaultMiddleware({ serializableCheck: false }).concat([
         rootApi.middleware,
-        m,
+        //middleware,
       ]);
     },
     preloadedState,
@@ -107,6 +117,6 @@ export const makeStore = (preloadedState) => {
   );
   return store;
 };
-export const store = (preloadedState) => makeStore(preloadedState);
+export const store = (preloadedState?: any) => makeStore(preloadedState);
 export type AppStore = ReturnType<typeof store>;
 export type AppDispatch = AppStore["dispatch"];

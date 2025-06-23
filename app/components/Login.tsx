@@ -1,8 +1,9 @@
 import { Button } from "@radix-ui/themes";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { BackButton, Flex, useToast } from "~/components";
+import { client } from "~/lib/supabase/client";
 import { Input } from "./ui/input";
-import { BackButton, Flex } from "~/components";
-import { supabase } from "~/utils";
+import { useToggleModal } from "~/routes/Modal";
 
 function ForgottenPassword({
   i18n,
@@ -10,16 +11,15 @@ function ForgottenPassword({
   setAuthView = (string) => {},
   supabaseClient,
   showLinks = false,
-  showToast,
 }: {
   i18n: any;
   redirectTo?: string;
   setAuthView?: (string: any) => void;
   supabaseClient: any;
   showLinks?: boolean | undefined;
-  showToast: any;
   onSuccess: () => void;
 }) {
+  const showToast = useToast();
   const labels = i18n?.forgotten_password;
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -99,10 +99,10 @@ function EmailAuth({
   magicLink = true,
   i18n,
   passwordLimit = false,
-  showToast,
   onBackClick,
   onSuccess,
 }) {
+  const showToast = useToast();
   const labels = i18n?.[authView];
   const [email, setEmail] = useState(defaultEmail);
   const [password, setPassword] = useState(defaultPassword);
@@ -259,20 +259,20 @@ function EmailAuth({
   );
 }
 
-export const Login = (props) => {
-  const { close, showToast, i18n } = props;
+const Login = (props) => {
+  const { showToast, i18n } = props;
+  const toggleModal = useToggleModal();
   const [view, setView] = useState<string>();
 
   if (view === "forgotten_password")
     return (
       <div id="login-page">
         <ForgottenPassword
-          supabaseClient={supabase()}
+          supabaseClient={client}
           i18n={i18n}
           setAuthView={(viewName) => setView(viewName)}
-          showToast={showToast}
           onSuccess={() => {
-            close();
+            toggleModal();
           }}
         />
       </div>
@@ -281,16 +281,17 @@ export const Login = (props) => {
   return (
     <div id="login-page">
       <EmailAuth
+        supabaseClient={client}
         authView={view}
         setAuthView={(viewName) => setView(viewName)}
-        supabaseClient={supabase()}
         i18n={i18n}
-        showToast={showToast}
-        onBackClick={() => close()}
+        onBackClick={() => toggleModal()}
         onSuccess={() => {
-          close();
+          toggleModal();
         }}
       />
     </div>
   );
 };
+
+export default Login;
