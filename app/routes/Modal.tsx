@@ -9,9 +9,8 @@ import { BackButton, EmailIcon, Flex, useToast } from "~/components";
 import { Comment } from "~/components/Comment";
 //import { Login } from "~/components/Login";
 import { Input } from "~/components/ui/input";
-import { linkButton } from "~/lib/css";
 import { getState, setState } from "~/store";
-import { localize, toCss, toCssString } from "~/utils";
+import { linkButton, localize, toCss, toCssString } from "~/utils";
 const Login = lazy(() => import("~/components/Login"));
 
 export const Modal = (props) => {

@@ -61,7 +61,7 @@ export type Seed = Omit<Lib, "id" | "books"> & {
 export type RootData = {
   collections: Record<any, any>;
   libs: Lib[];
-  lib: Lib;
+  lib?: Lib;
   userAgent: string;
 };
 

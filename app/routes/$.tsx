@@ -1,12 +1,13 @@
 import { isbot } from "isbot";
+import { lazy } from "react";
 import { useRoutes } from "react-router";
 import Sitemap from "~/components/Sitemap";
 import { Livre } from "~/routes/Livre";
 import { Note } from "~/routes/Note";
-import { Page } from "~/routes/Page";
 import { BookT, type Note as NoteT, type RootData } from "~/utils";
 import type { Route } from "./+types/$";
 import { loader as rootLoader } from "./_index";
+const Page = lazy(() => import("~/routes/Page"));
 
 export const loader = async (props: Route.LoaderArgs) => {
   const data: RootData & { book?: BookT; note?: NoteT } = await rootLoader(
@@ -21,6 +22,7 @@ export const loader = async (props: Route.LoaderArgs) => {
       let index = 0;
       for (const b of lib.books || []) {
         if (b.id === bookId) {
+          data.lib = lib;
           data.book = { ...b, index };
         }
         index++;
@@ -38,8 +40,9 @@ export const loader = async (props: Route.LoaderArgs) => {
       for (const b of lib.books || []) {
         for (const n of b.notes || []) {
           if (n.id === noteId) {
-            data.note = n;
+            data.lib = lib;
             data.book = { ...b, index };
+            data.note = n;
           }
         }
         index++;
@@ -50,15 +53,11 @@ export const loader = async (props: Route.LoaderArgs) => {
         status: 404,
         statusText: "La citation n'a pas été trouvée",
       });
-  } else
+  } else if (id !== ".well-known/appspecific/com.chrome.devtools.json") {
     throw new Response("", {
       status: 404,
       statusText: "La page n'a pas été trouvée",
     });
-
-  if (data.book) {
-    const lib = data.libs.find((lib) => lib.id === data.book!.library_id);
-    if (lib) data.lib = lib;
   }
 
   return data;
@@ -68,6 +67,7 @@ export default function CatchAllRoute(props) {
   if (isbot()) return <Sitemap {...props} />;
 
   return useRoutes([
+    //{ path: "/", element: null },
     { path: "livre/:id", element: <Page element={Livre} {...props} /> },
     {
       path: "book/:id",

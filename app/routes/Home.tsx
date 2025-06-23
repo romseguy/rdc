@@ -1,13 +1,12 @@
 import { DoubleArrowRightIcon } from "@radix-ui/react-icons";
+import { useSelector } from "react-redux";
 import { Flex } from "~/components";
+import { getState } from "~/store";
 import { localize } from "~/utils";
 
 export function Home(props) {
-  const {
-    loaderData: { libs },
-    isMobile,
-  } = props;
-  const lib = props.lib || props.loaderData.lib;
+  const { loaderData, isMobile } = props;
+  const { lib = loaderData.lib } = useSelector(getState);
   return (
     <div
       id="home-page"
@@ -16,7 +15,8 @@ export function Home(props) {
       <Flex>
         <DoubleArrowRightIcon />
         <h1>
-          {localize("Bibliothèque", "Library")} : <i>{lib[localize("name")]}</i>
+          {localize("Bibliothèque", "Library")} :{" "}
+          <i>{lib[localize("name")] || lib.name}</i>
         </h1>
       </Flex>
       <ul>

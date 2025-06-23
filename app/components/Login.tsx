@@ -1,21 +1,19 @@
 import { Button } from "@radix-ui/themes";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { BackButton, Flex, useToast } from "~/components";
-import { client } from "~/lib/supabase/client";
-import { Input } from "./ui/input";
 import { useToggleModal } from "~/routes/Modal";
+import { Input } from "./ui/input";
+import client from "~/lib/supabase/client";
 
 function ForgottenPassword({
   i18n,
   redirectTo,
   setAuthView = (string) => {},
-  supabaseClient,
   showLinks = false,
 }: {
   i18n: any;
   redirectTo?: string;
   setAuthView?: (string: any) => void;
-  supabaseClient: any;
   showLinks?: boolean | undefined;
   onSuccess: () => void;
 }) {
@@ -37,7 +35,7 @@ function ForgottenPassword({
     setError("");
     setMessage("");
     setLoading(true);
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    const { error } = await client().auth.resetPasswordForEmail(email, {
       redirectTo,
     });
     if (error) setError(error.message);
@@ -93,7 +91,6 @@ function EmailAuth({
   setAuthView = (string) => {},
   defaultEmail = "",
   defaultPassword = "",
-  supabaseClient,
   redirectTo = "",
   additionalData = {},
   magicLink = true,
@@ -127,11 +124,10 @@ function EmailAuth({
     switch (authView) {
       case "sign_in":
         console.log("🚀 ~ handleSubmit ~ authView:", authView);
-        const { error: signInError } =
-          await supabaseClient.auth.signInWithPassword({
-            email,
-            password,
-          });
+        const { error: signInError } = await client().auth.signInWithPassword({
+          email,
+          password,
+        });
         if (signInError) setError("Identifiants incorrects");
         else onSuccess();
         break;
@@ -151,7 +147,7 @@ function EmailAuth({
         const {
           data: { user: signUpUser, session: signUpSession },
           error: signUpError,
-        } = await supabaseClient.auth.signUp({
+        } = await client().auth.signUp({
           email,
           password,
           options,
@@ -268,7 +264,6 @@ const Login = (props) => {
     return (
       <div id="login-page">
         <ForgottenPassword
-          supabaseClient={client}
           i18n={i18n}
           setAuthView={(viewName) => setView(viewName)}
           onSuccess={() => {
@@ -281,7 +276,6 @@ const Login = (props) => {
   return (
     <div id="login-page">
       <EmailAuth
-        supabaseClient={client}
         authView={view}
         setAuthView={(viewName) => setView(viewName)}
         i18n={i18n}

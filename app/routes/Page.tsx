@@ -8,54 +8,59 @@ import {
   SunIcon,
 } from "@radix-ui/react-icons";
 import { Toggle } from "@radix-ui/react-toggle";
-import { Button, Separator, Theme } from "@radix-ui/themes";
+import { Theme } from "@radix-ui/themes";
 import type { ThemeOwnProps } from "@radix-ui/themes/components/theme.props";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useNavigation } from "react-router";
-import {
-  Flex,
-  Header,
-  LocaleSwitch,
-  ToastsContainer,
-  UserIcon,
-} from "~/components";
+import { useNavigation } from "react-router";
+import { Flex, ToastsContainer } from "~/components";
+import { Header } from "~/components/Header";
+import { PageTitle } from "~/components/PageTitle";
 import { SpinnerOverlay } from "~/components/SpinnerOverlay";
-import { pageTitleStyle, toggleCss } from "~/lib/css";
 import { tokenKey } from "~/lib/supabase/tokenKey";
 import { getState, setState } from "~/store";
-import { i18n, localize, collections as offlineCollections } from "~/utils";
+import { i18n, length, toggleCss } from "~/utils";
 import { Modal, useToggleModal } from "./Modal";
 
-export const Page = (props) => {
-  const { element, loaderData = {}, noTheme, simple } = props;
+const Page = (props) => {
+  //#region state
+  const { element, loaderData, noTheme, simple } = props;
   const state = useSelector(getState);
-  const { auth, collections, isMobile, lib, locale, modal, toast } = state;
+  const { auth, isMobile, locale, modal, toast } = state;
   const user = auth?.user;
-  useEffect(() => {
-    if (!collections)
-      dispatch(
-        setState({
-          collections: loaderData.collections.error
-            ? offlineCollections
-            : loaderData.collections,
-        }),
-      );
-  }, [loaderData.collections]);
-  useEffect(() => {
-    if (!lib) dispatch(setState({ lib: loaderData.lib }));
-  }, [loaderData.lib]);
-
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const navigation = useNavigation();
-  const toggleModal = useToggleModal();
-
-  //#region auth
-  const [authToken, setAuthToken] = useStorage(tokenKey, {
+  const [appearance, setAppearance] = useStorage("color-mode", {
+    type: "local",
+    defaultValue: "dark",
+  });
+  let [authToken, setAuthToken] = useStorage(tokenKey, {
     type: "local",
   });
+  //#endregion
+
+  //#region hooks
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const toggleModal = useToggleModal();
   useEffect(() => {
+    if (navigation.state === "idle" && !length(state.collections))
+      dispatch(
+        setState({
+          collections: loaderData.collections,
+        }),
+      );
+  }, [navigation.state, loaderData.collections]);
+  useEffect(() => {
+    if (navigation.state === "idle" && !length(state.libs))
+      dispatch(setState({ libs: loaderData.libs }));
+  }, [navigation.state, loaderData.libs]);
+  useEffect(() => {
+    if (navigation.state === "idle" && !length(state.lib))
+      dispatch(setState({ lib: loaderData.lib }));
+  }, [navigation.state, loaderData.lib]);
+  useEffect(() => {
+    if (!authToken && process.env.NODE_ENV === "development") {
+      authToken = import.meta.env.VITE_PUBLIC_AUTH_TOKEN;
+    }
     if (authToken) {
       const { user, ...token } = JSON.parse(authToken);
       dispatch(
@@ -68,19 +73,13 @@ export const Page = (props) => {
         }),
       );
     }
-    // else if (process.env.NODE_ENV !== "development")
-    //   dispatch(
-    //     setState({ user: { email: import.meta.env.VITE_PUBLIC_EMAIL2 } }),
-    //   );
   }, [authToken]);
+  useEffect(() => {
+    if (!auth) setAuthToken(undefined);
+  }, [auth]);
   //#endregion
 
   //#region ui
-  const [appearance, setAppearance] = useStorage("color-mode", {
-    type: "local",
-    defaultValue: "dark",
-  });
-
   const toggleButtonsLeft = null;
   // (
   //   <div style={{ position: "fixed", bottom: 0, left: 0 }}>
@@ -142,55 +141,6 @@ export const Page = (props) => {
     </div>
   );
 
-  const pageTitle = (
-    <Flex justify="between" pb="3" pr="1" pt="3">
-      {!isMobile && (
-        <Separator style={{ width: "80px", visibility: "hidden" }} />
-      )}
-      <h1
-        style={pageTitleStyle(isMobile)}
-        onClick={() => {
-          console.log("navigating to /");
-          navigate("/");
-        }}
-      >
-        <Flex>
-          {localize("Recueil de citations", "Know my quotes")}
-          <LocaleSwitch
-            locale={locale}
-            width="1em"
-            height="1em"
-            onClick={(e) => {
-              window.location.replace(
-                locale === "en"
-                  ? "https://recueildecitations.fr"
-                  : "https://knowmyquotes.com",
-              );
-            }}
-          />
-        </Flex>
-      </h1>
-      <Button
-        className="with-icon"
-        onClick={async (e) => {
-          e.stopPropagation();
-
-          if (user) {
-            const ok = confirm("Êtes-vous sûr de vouloir vous déconnecter?");
-            if (ok) {
-              setAuthToken();
-              dispatch(setState({ auth: undefined }));
-            }
-          } else {
-            toggleModal();
-          }
-        }}
-      >
-        <UserIcon />
-        {user ? <div>{user.email}</div> : localize("Connexion", "Login")}
-      </Button>
-    </Flex>
-  );
   const onToastFinished = (id) => {
     dispatch(setState({ toast: undefined }));
   };
@@ -240,22 +190,23 @@ export const Page = (props) => {
       <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
       {modal.isOpen && <Modal {...childProps} />}
 
-      {!modal.isOpen && (
+      {!modal.isOpen && navigation.state === "idle" && (
         <div id="page">
           <header>
-            {pageTitle}
-
+            <PageTitle />
             <Header {...childProps} />
           </header>
 
           {React.createElement(element, childProps)}
+
+          {toggleButtonsLeft}
+          {toggleButtonsRight}
         </div>
       )}
 
       {navigation.state === "loading" && <SpinnerOverlay />}
-
-      {toggleButtonsLeft}
-      {toggleButtonsRight}
     </Theme>
   );
 };
+
+export default Page;

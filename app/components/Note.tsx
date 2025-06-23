@@ -8,7 +8,7 @@ import {
 } from "@radix-ui/react-icons";
 import { Badge, Box, Button } from "@radix-ui/themes";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   RTEditor,
   EditIcon,
@@ -21,7 +21,7 @@ import {
   BackButton,
   UserIcon,
 } from "~/components";
-import { getState } from "~/store";
+import { getState, setState } from "~/store";
 import {
   toUsername,
   toCss,
@@ -66,7 +66,13 @@ export const Note = (props: NoteP) => {
 
   const desc =
     (locale === "en" ? note.desc_en : note.desc) ||
-    `<i>${locale === "en" ? "Empty quote" : "Aucun texte"}</i>`;
+    `<i>${
+      locale === "en"
+        ? note.desc
+          ? "Quote is in french only, click the French flag icon above to read it"
+          : "Empty quote"
+        : "Aucun texte"
+    }</i>`;
   // locale === "en"
   //   ? note.desc_en
   //     ? note.desc_en
@@ -80,6 +86,8 @@ export const Note = (props: NoteP) => {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [comment, setComment] = useState<{ html: string }>();
   const [isShowComments, setIsShowComments] = useState(false);
+
+  const dispatch = useDispatch();
   const [executeScroll, elementToScrollRef] = useScroll<HTMLDivElement>();
   const [isAddComment, setIsAddComment] = useState(false);
 
@@ -197,7 +205,9 @@ export const Note = (props: NoteP) => {
               {note.isNew
                 ? localize("Nouvelle citation", "New quote")
                 : localize("Modifiez cette citation", "Edit this quote")}
-              <LocaleSwitch />
+              <LocaleSwitch
+                setLocale={(locale) => dispatch(setState({ locale }))}
+              />
             </div>
           )}
 
@@ -216,7 +226,9 @@ export const Note = (props: NoteP) => {
                   <NoteHeaderLeft />
 
                   <Flex>
-                    <LocaleSwitch />
+                    <LocaleSwitch
+                      setLocale={(locale) => dispatch(setState({ locale }))}
+                    />
                     <Badge>
                       <UserIcon />
                       {toUsername(note.note_email) ||

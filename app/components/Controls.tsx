@@ -74,7 +74,6 @@ export const AddNoteButton = ({ book, setBook, ...props }) => {
 };
 
 export const FrIcon = (props) => {
-  const { onClick, ...p } = props;
   return (
     <svg
       width="2em"
@@ -83,13 +82,7 @@ export const FrIcon = (props) => {
       viewBox="0 0 30 30.000001"
       preserveAspectRatio="xMidYMid meet"
       zoomAndPan="magnify"
-      onClick={(e) => {
-        if (onClick) {
-          e.stopPropagation();
-          onClick(e);
-        }
-      }}
-      {...p}
+      {...props}
     >
       <defs>
         <clipPath id="id1">
@@ -187,26 +180,25 @@ export const EnIcon = (props) => (
 );
 
 export const LocaleSwitch = (props) => {
-  const { onClick, ...p } = props;
-  const dispatch = useDispatch();
+  const { onClick, setLocale, ...p } = props;
   const { locale } = useSelector(getState);
-  const setLocale = (locale) => dispatch(setState({ locale }));
 
   if (locale === "en")
     return (
       <FrIcon
         onClick={(e) => {
           if (setLocale) setLocale("fr");
-          if (onClick) onClick(e);
+          else if (onClick) onClick(e);
         }}
         {...p}
       />
     );
+
   return (
     <EnIcon
       onClick={(e) => {
         if (setLocale) setLocale("en");
-        if (onClick) onClick(e);
+        else if (onClick) onClick(e);
       }}
       {...p}
     />

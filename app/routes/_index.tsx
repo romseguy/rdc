@@ -1,15 +1,16 @@
 import { isbot } from "isbot";
+import { lazy } from "react";
 import { getCollections } from "~/api";
 import Sitemap from "~/components/Sitemap";
 import { Home } from "~/routes/Home";
-import { Page } from "~/routes/Page";
 import { store } from "~/store";
 import {
-  seed,
   collections as offlineCollections,
+  seed,
   type Lib,
   type RootData,
 } from "~/utils";
+const Page = lazy(() => import("~/routes/Page"));
 
 export const loader = async (props) => {
   let data: RootData = {

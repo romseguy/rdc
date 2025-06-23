@@ -23,6 +23,7 @@ export interface AppState {
   collections: Record<any, any>;
   isMobile: boolean;
   lib: Lib;
+  libs: Lib[];
   locale: "fr" | "en";
   modal: ModalT;
   toast: ToastProps;
@@ -54,7 +55,7 @@ const middleware = (api) => (next) => {
         const key = Object.keys(action.payload)[0];
         state[key] = action.payload[key];
         console.log("🚀 ~", action, state);
-      } //else console.log("🚀 ~", action, api.getState());
+      } //else console.log(" ~", action, api.getState());
     }
     return next(action);
   };

@@ -1,8 +1,5 @@
 import { css } from "@emotion/react";
-import {
-  DoubleArrowRightIcon,
-  ThickArrowRightIcon,
-} from "@radix-ui/react-icons";
+import { DoubleArrowRightIcon } from "@radix-ui/react-icons";
 import { Select } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,7 +10,11 @@ import { localize } from "~/utils";
 
 export const Header = (props) => {
   const { loaderData } = props;
-  const { isMobile, lib = loaderData.lib, libs } = useSelector(getState);
+  const {
+    isMobile,
+    lib = loaderData.lib,
+    libs = loaderData.libs,
+  } = useSelector(getState);
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   const [item, setItem] = useState("0");
 
@@ -30,6 +31,7 @@ export const Header = (props) => {
         ),
       );
   }, [navigation.state]);
+
   const onBookClick = async (b) => {
     setIsLoading({ ...isLoading, [b.id]: true });
     await navigate("/" + localize("livre", "book") + "/" + b.id);
@@ -96,7 +98,7 @@ export const Header = (props) => {
 
         {item === "0" && (
           <Select.Root
-            defaultValue={lib.name}
+            defaultValue={lib[localize("name")] || lib.name}
             onValueChange={(value) => {
               dispatch(
                 setState({
@@ -107,8 +109,11 @@ export const Header = (props) => {
           >
             <Select.Trigger variant="classic" />
             <Select.Content>
-              {loaderData.libs.map((l) => (
-                <Select.Item key={"lib-" + l.id} value={l.name}>
+              {libs.map((l) => (
+                <Select.Item
+                  key={"lib-" + l.id}
+                  value={l[localize("name")] || l.name}
+                >
                   {l[localize("name")] || l.name}
                 </Select.Item>
               ))}
