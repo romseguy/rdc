@@ -1,12 +1,13 @@
 import { css } from "@emotion/react";
 import { DoubleArrowRightIcon } from "@radix-ui/react-icons";
 import { Select } from "@radix-ui/themes";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useNavigation } from "react-router";
+import { Link } from "react-router";
 import { Flex } from "~/components";
 import { getState, setState } from "~/store";
 import { localize } from "~/utils";
+import { BookTitle } from "./BookTitle";
 
 export const Header = (props) => {
   const { loaderData } = props;
@@ -15,27 +16,9 @@ export const Header = (props) => {
     lib = loaderData.lib,
     libs = loaderData.libs,
   } = useSelector(getState);
-  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   const [item, setItem] = useState("0");
 
   const dispatch = useDispatch();
-  const navigation = useNavigation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (navigation.state === "idle")
-      setIsLoading(
-        Object.keys(isLoading).reduce(
-          (ret, key) => ({ ...ret, [key]: false }),
-          {},
-        ),
-      );
-  }, [navigation.state]);
-
-  const onBookClick = async (b) => {
-    setIsLoading({ ...isLoading, [b.id]: true });
-    await navigate("/" + localize("livre", "book") + "/" + b.id);
-  };
 
   return (
     <Flex direction="column" gap="3" {...(isMobile ? { align: "start" } : {})}>
@@ -100,11 +83,12 @@ export const Header = (props) => {
           <Select.Root
             defaultValue={lib[localize("name")] || lib.name}
             onValueChange={(value) => {
+              const newLib = libs.find(
+                (lib) => (lib[localize("name")] || lib.name) === value,
+              );
               dispatch(
                 setState({
-                  lib: libs.find(
-                    (lib) => lib[localize("name") || lib.name] === value,
-                  ),
+                  lib: newLib,
                 }),
               );
             }}
@@ -132,6 +116,12 @@ export const Header = (props) => {
         </h3>
       </Flex>
 
+      {loaderData.book && (
+        <Flex width="100%" pl="1">
+          <BookTitle lib={lib} book={loaderData.book} />
+        </Flex>
+      )}
+
       {/* books list */}
       <Flex gap="0" width="100%" overflowX="scroll">
         {lib.books?.map((b, index) => {
@@ -154,14 +144,10 @@ export const Header = (props) => {
                   : "1px solid white"};
                 font-weight: bold;
               `}
-              onClick={() =>
-                !Object.keys(isLoading).find((key) => !!isLoading[key]) &&
-                !isLoading[b.id] &&
-                onBookClick(b)
-              }
             >
-              {isLoading[b.id] && <div className="spinner" />}
-              {!isLoading[b.id] && <>{b[localize("title")] || b.title}</>}
+              <Link to={"/" + localize("livre", "book") + "/" + b.id}>
+                {b[localize("title")] || b.title}
+              </Link>
             </div>
           );
         })}

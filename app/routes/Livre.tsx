@@ -1,4 +1,3 @@
-import { ChatBubbleIcon } from "@radix-ui/react-icons";
 import { Box, Button, Select } from "@radix-ui/themes";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,28 +9,16 @@ import {
   postComments,
   postNotes,
 } from "~/api";
-import {
-  AddNoteButton,
-  BackButton,
-  BookIcon,
-  Flex,
-  Note,
-  useToast,
-} from "~/components";
+import { AddNoteButton, BackButton, Flex, Note, useToast } from "~/components";
+import { BookTitle } from "~/components/BookTitle";
 import { getState, setState } from "~/store";
-import {
-  client,
-  ENoteOrder,
-  localize,
-  rand,
-  toCss,
-  type BookT,
-  type NoteT,
-} from "~/utils";
+import { ENoteOrder, localize, toCss, type BookT, type NoteT } from "~/utils";
 
 export const Livre = (props) => {
   const { loaderData } = props;
-  const { locale, auth, lib = loaderData.lib } = useSelector(getState);
+  const state = useSelector(getState);
+  const { auth, lib = loaderData.lib, locale } = state;
+  const defaultLocale = import.meta.env.VITE_PUBLIC_LOCALE;
   const user = auth?.user;
 
   const dispatch = useDispatch();
@@ -335,48 +322,7 @@ export const Livre = (props) => {
         <header>
           <Flex justify="center" pl="4">
             <h1>
-              <Flex>
-                {book.title && (
-                  <>
-                    {book.is_conf ? (
-                      <>
-                        <ChatBubbleIcon />
-                        {localize("Conférence", "Talk show")}
-                      </>
-                    ) : (
-                      <>
-                        <BookIcon />
-                        {localize("Livre", "Book")}
-                      </>
-                    )}
-                    <span> : </span>
-                    {book.title && (
-                      <i>{book[localize("title")] || book.title}</i>
-                    )}
-                  </>
-                )}
-
-                {!book.title && (
-                  <>
-                    {book.is_conf ? <ChatBubbleIcon /> : <BookIcon />}
-                    {book.index === 0
-                      ? localize("Premier", "First")
-                      : book.index === 1
-                      ? `${book.index + 1}${localize("ème", "nd")}`
-                      : book.index === 2
-                      ? book.index + localize("ème", "rd")
-                      : book.index + localize("ème", "th")}
-                    <span> </span>
-                    {book.is_conf
-                      ? localize("conférence", "talk show")
-                      : localize("livre", "book")}
-                    <span> </span>
-                    {localize("de la bibliothèque", "from the library")} :
-                    <span> </span>
-                    <i>{lib[localize("name")] || lib.name}</i>
-                  </>
-                )}
-              </Flex>
+              <BookTitle lib={lib} book={book} />
             </h1>
           </Flex>
         </header>
@@ -483,7 +429,9 @@ export const Livre = (props) => {
                         note={{ ...note, index }}
                         isLoading={isNoteLoading[note.id]}
                         onOpenClick={() => {
-                          navigate("/q/" + note.id);
+                          navigate(
+                            `/${locale === "en" ? "q" : "c"}/${note.id}`,
+                          );
                           //setNote(note);
                         }}
                         onEditClick={() => {

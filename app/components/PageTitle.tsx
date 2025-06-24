@@ -2,6 +2,7 @@ import { Button, Separator } from "@radix-ui/themes";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Flex, LocaleSwitch, UserIcon } from "~/components";
+import { tokenKey } from "~/lib/supabase/tokenKey";
 import { useToggleModal } from "~/routes/Modal";
 import { getState, setState } from "~/store";
 import { localize, pageTitleStyle } from "~/utils";
@@ -50,6 +51,7 @@ export const PageTitle = () => {
             const ok = confirm("Êtes-vous sûr de vouloir vous déconnecter?");
             if (ok) {
               dispatch(setState({ auth: undefined }));
+              localStorage.removeItem(tokenKey);
             }
           } else {
             toggleModal();

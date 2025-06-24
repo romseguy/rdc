@@ -33,7 +33,7 @@ export const loader = async (props: Route.LoaderArgs) => {
         status: 404,
         statusText: "Le livre n'a pas été trouvé",
       });
-  } else if (id.includes("q")) {
+  } else if (id.includes("c") || id.includes("q")) {
     const noteId = id.substring(2);
     for (const lib of data.libs) {
       let index = 0;
@@ -67,15 +67,21 @@ export default function CatchAllRoute(props) {
   if (isbot()) return <Sitemap {...props} />;
 
   return useRoutes([
-    //{ path: "/", element: null },
-    { path: "livre/:id", element: <Page element={Livre} {...props} /> },
+    {
+      path: "livre/:id",
+      element: <Page element={Livre} locale="fr" {...props} />,
+    },
     {
       path: "book/:id",
-      element: <Page element={Livre} {...props} />,
+      element: <Page element={Livre} locale="en" {...props} />,
+    },
+    {
+      path: "c/:id",
+      element: <Page element={Note} locale="fr" simple {...props} />,
     },
     {
       path: "q/:id",
-      element: <Page element={Note} simple {...props} />,
+      element: <Page element={Note} locale="en" simple {...props} />,
     },
   ]);
 }

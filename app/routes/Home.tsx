@@ -1,4 +1,5 @@
 import { DoubleArrowRightIcon } from "@radix-ui/react-icons";
+import { Link } from "@radix-ui/themes";
 import { useSelector } from "react-redux";
 import { Flex } from "~/components";
 import { getState } from "~/store";
@@ -21,10 +22,10 @@ export function Home(props) {
       </Flex>
       <ul>
         <li>
-          {localize("Auteur", "Author")} :{" "}
-          <a href={lib.author_url || "#"} target="_blank">
+          <b>{localize("Auteur", "Author")} : </b>
+          <Link href={lib.author_url || "#"} target="_blank">
             {lib?.author || localize("Anonyme", "Anonymous")}
-          </a>
+          </Link>
         </li>
       </ul>
     </div>

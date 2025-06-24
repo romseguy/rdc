@@ -3,7 +3,7 @@ import { baseUrl } from "./baseUrl";
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({
-    mode: "no-cors",
+    mode: process.env.NODE_ENV === "development" ? "no-cors" : "cors",
     baseUrl,
     prepareHeaders: (headers, api) => {
       //@ts-expect-error

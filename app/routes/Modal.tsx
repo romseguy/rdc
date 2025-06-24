@@ -221,7 +221,7 @@ export const Modal = (props) => {
                     ),
                   )}
                 >
-                  Faire un don
+                  {localize("Faire un don", "Donate")}
                 </a>
               </Flex>
               <h1>

@@ -9,6 +9,7 @@ import {
 import { Badge, Box, Button } from "@radix-ui/themes";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate, useNavigation } from "react-router";
 import {
   BackButton,
   Comment,
@@ -51,7 +52,6 @@ export const Note = (props: NoteP) => {
   const {
     notes,
     note,
-    user,
     isEditing = false,
     isLoading = false,
     onOpenClick,
@@ -88,6 +88,8 @@ export const Note = (props: NoteP) => {
   const [isShowComments, setIsShowComments] = useState(false);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [executeScroll, elementToScrollRef] = useScroll<HTMLDivElement>();
   const [isAddComment, setIsAddComment] = useState(false);
 
@@ -227,9 +229,15 @@ export const Note = (props: NoteP) => {
 
                   <Flex>
                     <LocaleSwitch
-                      setLocale={(locale) => dispatch(setState({ locale }))}
+                      setLocale={(locale) =>
+                        navigate(
+                          locale === "fr"
+                            ? location.pathname.replace("book", "livre")
+                            : location.pathname.replace("livre", "book"),
+                        )
+                      }
                     />
-                    <Badge>
+                    <Badge variant="solid">
                       <UserIcon />
                       {toUsername(note.note_email) ||
                         localize("Anonyme", "Anonymous")}

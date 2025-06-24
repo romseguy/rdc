@@ -1,21 +1,15 @@
 import { useScript } from "@charlietango/hooks/use-script";
 import { css } from "@emotion/react";
-import { useEffect } from "react";
-import { isMobile, useDeviceSelectors } from "react-device-detect";
-import { Provider, useDispatch, useSelector } from "react-redux";
 import {
   Links,
   Meta,
-  Outlet,
   Scripts,
   ScrollRestoration,
   useNavigation,
 } from "react-router";
-import { splash } from "./lib/ios/splash";
+import { App } from "./app";
 import "./root.scss";
 import { Route } from "./routes/+types/$";
-import { getState, setState, store } from "./store";
-import { postIp } from "./api";
 
 export { ErrorBoundary } from "~/components/ErrorBoundary";
 
@@ -93,81 +87,10 @@ export const links: Route.LinksFunction = () => [
   //{ rel: "apple-touch-startup-image", href: "/splash/" },
 ];
 
-const controller = new AbortController();
-const signal = controller.signal;
-const App = ({ children }) => {
-  const dispatch = useDispatch();
-  const { screenWidth } = useSelector(getState);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const data = await res.json();
-        if (data.ip)
-          //@ts-expect-error
-          dispatch(postIp.initiate({ ip: data.ip }));
-      } catch (error) {
-        console.log("🚀 ~ error:", error);
-      }
-    })();
-
-    const updateScreenWidth = () => {
-      const newScreenWidth = window.innerWidth - 16;
-      if (newScreenWidth !== screenWidth) {
-        dispatch(setState({ screenWidth: newScreenWidth }));
-      }
-    };
-    updateScreenWidth();
-
-    if (!isMobile) {
-      window.addEventListener("resize", updateScreenWidth);
-      signal.addEventListener("abort", () => {
-        window.removeEventListener("resize", updateScreenWidth);
-      });
-      return () => {
-        if (!isMobile) controller.abort();
-      };
-    }
-  }, []);
-
-  return children;
-};
-
 export const loader = async (props) => {
   return { userAgent: props.request.headers.get("user-agent") };
 };
 
 export default function Root(props) {
-  const {
-    loaderData: { userAgent },
-  } = props;
-  const [{ isMobile }] = useDeviceSelectors(userAgent);
-
-  useEffect(() => {
-    if (process.env.NODE_ENV === "production")
-      splash("/icons/icon-512x512.png", "#000000");
-  }, []);
-
-  return (
-    <Provider
-      store={store({
-        app: {
-          auth: {
-            user:
-              process.env.NODE_ENV === "development"
-                ? { email: import.meta.env.VITE_PUBLIC_EMAIL2 }
-                : undefined,
-          },
-          isMobile,
-          locale: import.meta.env.VITE_PUBLIC_LOCALE,
-          modal: { isOpen: false },
-        },
-      })}
-    >
-      <App>
-        <Outlet />
-      </App>
-    </Provider>
-  );
+  return <App {...props} />;
 }

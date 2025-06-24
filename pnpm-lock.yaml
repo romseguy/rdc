@@ -86,9 +86,6 @@ dependencies:
   lucide-react:
     specifier: ^0.515.0
     version: 0.515.0(react@19.1.0)
-  postcss:
-    specifier: ^8.5.6
-    version: 8.5.6
   react:
     specifier: ^19.1.0
     version: 19.1.0

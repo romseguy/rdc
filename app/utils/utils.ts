@@ -21,6 +21,11 @@ export const length = (arrayOrObject) => {
     : Object.keys(arrayOrObject).length;
 };
 
+export const createLocalize = (locale) => (fr, en?: string) => {
+  if (!en) return locale === "en" ? `${fr}_en` : fr;
+  return locale === "en" ? en : fr;
+};
+
 export const localize: (fr: string, en?: string) => string = (fr, en) => {
   if (!en) return import.meta.env.VITE_PUBLIC_LOCALE === "en" ? `${fr}_en` : fr;
   return import.meta.env.VITE_PUBLIC_LOCALE === "en" ? en : fr;

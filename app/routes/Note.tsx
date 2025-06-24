@@ -1,3 +1,4 @@
+import { css } from "@emotion/react";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { Slider } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
@@ -5,12 +6,23 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { BackButton, Flex } from "~/components";
 import { getState } from "~/store";
-import { localize } from "~/utils";
+import { createLocalize, toCssString } from "~/utils";
 
 export const Note = (props) => {
   const { loaderData } = props;
   const { book, note } = loaderData;
-  const { lib = loaderData.lib, screenWidth } = useSelector(getState);
+  const state = useSelector(getState);
+  const { lib = loaderData.lib, locale, screenWidth } = state;
+  const desc =
+    (locale === "en" ? note.desc_en : note.desc) ||
+    `<i>${
+      locale === "en"
+        ? note.desc
+          ? `Quote is in french only, <a href='/c/${note.id}'>click here to read it in french`
+          : "Empty quote"
+        : "Aucun texte"
+    }</i>`;
+  const localize = createLocalize(locale);
   const defaultWidth = screenWidth > 1000 ? 1000 : screenWidth;
   const [lineHeight, setLineHeight] = useState(2);
   const [size, setSize] = useState(16);
@@ -27,6 +39,7 @@ export const Note = (props) => {
       <header>
         <Flex p="3">
           <BackButton
+            label={localize("Retour", "Back")}
             style={{ marginRight: "6px" }}
             onClick={() =>
               navigate("/" + localize("livre", "book") + "/" + book.id)
@@ -39,9 +52,9 @@ export const Note = (props) => {
               <>
                 {book.is_conf && (
                   <>
-                    de la conférence :{" "}
+                    {localize("de la conférence", "from the talk show")} :{" "}
                     <i>
-                      {book.title} ({lib.name})
+                      {book.title} ({lib[localize("name")] || lib.name})
                     </i>
                   </>
                 )}
@@ -140,16 +153,25 @@ export const Note = (props) => {
       </header>
 
       <main
-        style={{
-          fontSize: size + "px",
-          lineHeight,
-          margin: "0 auto",
-          width: width > screenWidth ? screenWidth : width + "px",
-          maxWidth: screenWidth + "px",
-          textAlign: "justify",
-        }}
+        css={css`
+          ${toCssString({
+            fontSize: size + "px",
+            lineHeight,
+            margin: "0 auto",
+            width: width > screenWidth ? screenWidth : width + "px",
+            maxWidth: screenWidth + "px",
+            textAlign: "justify",
+          })}
+          a {
+            color: red;
+          }
+        `}
       >
-        <div dangerouslySetInnerHTML={{ __html: note.desc }} />
+        <div
+          dangerouslySetInnerHTML={{
+            __html: desc,
+          }}
+        />
       </main>
     </div>
   );

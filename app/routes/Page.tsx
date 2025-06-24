@@ -14,26 +14,24 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "react-router";
 import { Flex, ToastsContainer } from "~/components";
+import { Config } from "~/components/Config";
 import { Header } from "~/components/Header";
 import { PageTitle } from "~/components/PageTitle";
 import { SpinnerOverlay } from "~/components/SpinnerOverlay";
-import { tokenKey } from "~/lib/supabase/tokenKey";
 import { getState, setState } from "~/store";
 import { i18n, length, toggleCss } from "~/utils";
 import { Modal, useToggleModal } from "./Modal";
+import { Auth } from "~/components/Auth";
 
 const Page = (props) => {
   //#region state
-  const { element, loaderData, noTheme, simple } = props;
+  const { element, loaderData, noTheme, simple, locale } = props;
   const state = useSelector(getState);
   const { auth, modal, toast } = state;
   const user = auth?.user;
   const [appearance, setAppearance] = useStorage("color-mode", {
     type: "local",
     defaultValue: "dark",
-  });
-  let [authToken, setAuthToken] = useStorage(tokenKey, {
-    type: "local",
   });
   //#endregion
 
@@ -58,25 +56,10 @@ const Page = (props) => {
       dispatch(setState({ lib: loaderData.lib }));
   }, [navigation.state, loaderData.lib]);
   useEffect(() => {
-    if (!authToken && process.env.NODE_ENV === "development") {
-      authToken = import.meta.env.VITE_PUBLIC_AUTH_TOKEN;
+    if (navigation.state === "idle") {
+      dispatch(setState({ locale }));
     }
-    if (authToken) {
-      const { user, ...token } = JSON.parse(authToken);
-      dispatch(
-        setState({
-          auth: {
-            user,
-            token,
-            bearer: authToken,
-          },
-        }),
-      );
-    }
-  }, [authToken]);
-  useEffect(() => {
-    if (!auth) setAuthToken(undefined);
-  }, [auth]);
+  }, [navigation.state, locale]);
   //#endregion
 
   //#region ui
@@ -154,8 +137,6 @@ const Page = (props) => {
     ...props,
     ...{ loaderData },
     ...{
-      // lib,
-      // setLib,
       appearance,
       setAppearance,
       i18n,
@@ -169,6 +150,8 @@ const Page = (props) => {
   if (simple)
     return (
       <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
+        <Auth />
+        <Config />
         <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
         {modal.isOpen && <Modal {...childProps} />}
 
@@ -185,6 +168,8 @@ const Page = (props) => {
 
   return (
     <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
+      <Auth />
+      <Config />
       <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
       {modal.isOpen && <Modal {...childProps} />}
 

@@ -48,12 +48,14 @@
     }
     #book-page {
       background: var(--color-background);
-      section p {
+      section main * {
         font-family: var(--secondary-font-family);
       }
     }
     #note-page {
       main {
+        border-radius: var(--radius-4);
+        padding: 6px 12px;
         p  {
           font-family: var(--secondary-font-family);
         }
