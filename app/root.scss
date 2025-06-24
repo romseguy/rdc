@@ -39,9 +39,6 @@
     }
     #book-page {
       background: var(--color-background);
-      section > main {
-        background: rgba(211, 211, 211, 0.9);
-      }
       section p {
         font-family: var(--secondary-font-family);
       }
@@ -56,18 +53,9 @@
     }
   }
 
-  button {
-    &.back-btn {
-      background: var(--red-9);
-      &:hover {
-        background: var(--red-10);
-      }
-    }
-    &.with-icon {
-      padding: 3px 3px 3px 6px;
-      & > svg {
-        stroke: currentColor;
-      }
+  &.light {
+    #book-page section > main {
+      background: rgba(211, 211, 211, 0.9);
     }
   }
 
@@ -87,6 +75,21 @@
     }
     #note-page > main {
       background: rgba(0, 0, 0, 0.7);
+    }
+  }
+}
+
+button {
+  &.back-btn {
+    background: var(--red-9);
+    &:hover {
+      background: var(--red-10);
+    }
+  }
+  &.with-icon {
+    padding: 3px 3px 3px 6px;
+    & > svg {
+      stroke: currentColor;
     }
   }
 }

@@ -26,7 +26,7 @@ const Page = (props) => {
   //#region state
   const { element, loaderData, noTheme, simple } = props;
   const state = useSelector(getState);
-  const { auth, isMobile, locale, modal, toast } = state;
+  const { auth, modal, toast } = state;
   const user = auth?.user;
   const [appearance, setAppearance] = useStorage("color-mode", {
     type: "local",
@@ -101,16 +101,14 @@ const Page = (props) => {
   const toggleButtonsRight = (
     <div style={{ position: "fixed", bottom: 12, right: 12, zIndex: 999 }}>
       <Flex gap="2">
-        {process.env.NODE_ENV === "development" && (
-          <Toggle
-            css={css(toggleCss(appearance))}
-            onPressedChange={() => {
-              toggleModal("heart-modal");
-            }}
-          >
-            <HeartIcon />
-          </Toggle>
-        )}
+        <Toggle
+          css={css(toggleCss(appearance))}
+          onPressedChange={() => {
+            toggleModal("heart-modal");
+          }}
+        >
+          <HeartIcon />
+        </Toggle>
         <Toggle
           css={css(toggleCss(appearance))}
           onPressedChange={() => {

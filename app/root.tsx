@@ -11,12 +11,11 @@ import {
   ScrollRestoration,
   useNavigation,
 } from "react-router";
-import type { Route } from "./+types/root";
-import "./root.scss";
-import { getState, setState, store } from "./store";
 import { splash } from "./lib/ios/splash";
-const controller = new AbortController();
-const signal = controller.signal;
+import "./root.scss";
+import { Route } from "./routes/+types/$";
+import { getState, setState, store } from "./store";
+import { postIp } from "./api";
 
 export { ErrorBoundary } from "~/components/ErrorBoundary";
 
@@ -99,23 +98,36 @@ const App = ({ children }) => {
   const { screenWidth } = useSelector(getState);
 
   useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        if (data.ip)
+          //@ts-expect-error
+          dispatch(postIp.initiate({ ip: data.ip }));
+      } catch (error) {
+        console.log("🚀 ~ error:", error);
+      }
+    })();
+
     const updateScreenWidth = () => {
       const newScreenWidth = window.innerWidth - 16;
       if (newScreenWidth !== screenWidth)
         dispatch(setState({ screenWidth: newScreenWidth }));
     };
-
     updateScreenWidth();
+
     if (!isMobile) {
+      const controller = new AbortController();
+      const signal = controller.signal;
       window.addEventListener("resize", updateScreenWidth);
       signal.addEventListener("abort", () => {
         window.removeEventListener("resize", updateScreenWidth);
       });
+      return () => {
+        if (!isMobile) controller.abort();
+      };
     }
-
-    return () => {
-      if (!isMobile) controller.abort();
-    };
   }, []);
 
   return children;
@@ -133,18 +145,7 @@ export default function Root(props) {
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production")
-      (async () => {
-        splash("/icons/icon-512x512.png", "#000000");
-        const countryIS = "https://api.ipify.org?format=json";
-
-        try {
-          const res = await fetch(countryIS);
-          const data = res.json();
-          //await api.post("/", { ip: data.ip });
-        } catch (error) {
-          // console.log("🚀 ~ ipLocation ~ error:", error);
-        }
-      })();
+      splash("/icons/icon-512x512.png", "#000000");
   }, []);
 
   return (

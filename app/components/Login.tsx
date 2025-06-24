@@ -1,9 +1,9 @@
 import { Button } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { BackButton, Flex, useToast } from "~/components";
+import client from "~/lib/supabase/client";
 import { useToggleModal } from "~/routes/Modal";
 import { Input } from "./ui/input";
-import client from "~/lib/supabase/client";
 
 function ForgottenPassword({
   i18n,

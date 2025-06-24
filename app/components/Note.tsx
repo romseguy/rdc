@@ -10,27 +10,27 @@ import { Badge, Box, Button } from "@radix-ui/themes";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  RTEditor,
+  BackButton,
+  Comment,
+  DeleteIcon,
   EditIcon,
   ExternalIcon,
-  DeleteIcon,
+  Flex,
   LocaleSwitch,
   PageSwitch,
-  iconProps,
-  Flex,
-  BackButton,
+  RTEditor,
   UserIcon,
+  iconProps,
 } from "~/components";
 import { getState, setState } from "~/store";
 import {
-  toUsername,
+  localize,
   toCss,
+  toUsername,
   useScroll,
   type NoteT,
   type User,
-  localize,
 } from "~/utils";
-import { Comment } from "./Comment";
 
 interface NoteP {
   notes: NoteT[];

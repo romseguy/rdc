@@ -3,7 +3,7 @@ import { baseUrl } from "./baseUrl";
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({
-    //mode: "no-cors",
+    mode: "no-cors",
     baseUrl,
     prepareHeaders: (headers, api) => {
       //@ts-expect-error
@@ -18,6 +18,9 @@ export const api = createApi({
   endpoints: (build) => ({
     getCollections: build.query<any, any>({
       query: () => ({ url: "/" }),
+    }),
+    postIp: build.mutation({
+      query: (body) => ({ url: "/", method: "POST", body }),
     }),
     postNotes: build.mutation({
       query: (body) => ({ url: "/notes", method: "POST", body }),
@@ -39,6 +42,7 @@ export const api = createApi({
 
 export const {
   getCollections,
+  postIp,
   postNotes,
   editNote,
   deleteNote,
