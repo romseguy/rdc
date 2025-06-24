@@ -2,14 +2,8 @@ import { isMobile } from "react-device-detect";
 import "./App.scss";
 import { client, prefix } from "./client";
 import { toCss } from "./utils";
-import { css } from "@emotion/react";
 
 export const Header = ({
-  lib,
-  setLib,
-  libs,
-  book,
-  setBook,
   user,
   setUser,
   setAccessToken,
@@ -81,66 +75,9 @@ export const Header = ({
           </svg>
           {user ? <div css={toCss({})}>{user.email}</div> : "Connexion"}
         </button>
-
-        <div>Bibliothèque :</div>
-
-        <select
-          defaultValue={lib?.name}
-          onChange={(e) => {
-            setLib(e.target.value);
-          }}
-        >
-          {libs?.map((l) => (
-            <option key={"lib-" + l.id}>{l.name}</option>
-          ))}
-        </select>
       </div>
 
-      <div css={toCss({ display: "flex", overflowX: "scroll" })}>
-        {lib?.books.map((b, index) => {
-          //if (b.id !== book?.id) return null;
-
-          if (b.src)
-            return (
-              <img
-                key={"book-" + index}
-                src={b.src}
-                css={css`
-                  cursor: pointer;
-                  ${b.id === book?.id ? "border: 5px solid yellow" : ""}
-                `}
-                onClick={() => {
-                  if (b.id !== index) {
-                    setBook(lib.books[index]);
-                  }
-                }}
-              />
-            );
-
-          return (
-            <div
-              key={"book-" + index}
-              css={toCss({
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                textAlign: "center",
-                border: "1px solid white",
-                height: "225px",
-                width: "140px",
-                cursor: "pointer",
-              })}
-              onClick={() => {
-                if (b.id !== index) {
-                  setBook(lib.books[index]);
-                }
-              }}
-            >
-              {b.title}
-            </div>
-          );
-        })}
-      </div>
+      <div css={toCss({ display: "flex", overflowX: "scroll" })}>HEADER</div>
     </div>
   );
 };

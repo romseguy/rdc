@@ -1,9 +1,9 @@
 # Build
 
 dist
-.next
-.swc
 tsconfig.tsbuildinfo
+/.react-router/
+/build/
 
 # Dependency directories
 

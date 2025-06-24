@@ -34,30 +34,6 @@ export const BackButton = ({ onClick, ...props }) => (
   </button>
 );
 
-export const AddNoteButton = ({ book, setBook, ...props }) => {
-  return (
-    <button
-      disabled={!!book?.notes?.find(({ isNew }) => isNew)}
-      onClick={() => {
-        const id = book?.notes?.length + 1;
-        setBook({
-          ...book,
-          notes: book.notes?.concat([
-            {
-              id: id.toString(),
-              isEditing: true,
-              isNew: true,
-            },
-          ]),
-        });
-      }}
-      {...props}
-    >
-      Ajouter une citation
-    </button>
-  );
-};
-
 export const LocaleSwitch = ({ locale, setLocale }) => {
   return (
     <>
@@ -169,61 +145,6 @@ export const LocaleSwitch = ({ locale, setLocale }) => {
         </svg>
       )}
     </>
-  );
-};
-
-export const PageSwitch = ({
-  isPageEdit,
-  setIsPageEdit,
-  page,
-  setPage,
-  note,
-  onClick,
-}) => {
-  return (
-    <div>
-      {!isPageEdit ? (
-        <button className="with-icon" onClick={() => setIsPageEdit(true)}>
-          p.{note.page}
-          <EditIcon
-            {...iconProps({
-              title: "Modifier la page",
-              style: {
-                height: "1em",
-                width: "1em",
-                border: "none",
-              },
-            })}
-          />
-        </button>
-      ) : (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          <input
-            autoFocus
-            type="number"
-            defaultValue={page}
-            onChange={(e) => {
-              const p = Number(e.target.value);
-              if (p < 10000) setPage(p);
-            }}
-          />
-          <button
-            onClick={() => {
-              setIsPageEdit(false);
-              onClick(page);
-            }}
-          >
-            ok
-          </button>
-        </div>
-      )}
-    </div>
   );
 };
 
