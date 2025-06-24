@@ -34,6 +34,20 @@ const Sitemap = (props) => {
       )),
     },
     {
+      path: "book/:id",
+      element: React.createElement(() => (
+        <ul>
+          {book &&
+            book.notes?.map((note) => (
+              <li
+                key={note.id}
+                dangerouslySetInnerHTML={{ __html: note.desc }}
+              />
+            ))}
+        </ul>
+      )),
+    },
+    {
       path: "livre/:id",
       element: React.createElement(() => (
         <ul>

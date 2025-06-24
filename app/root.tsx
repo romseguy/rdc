@@ -18,7 +18,7 @@ import { splash } from "./lib/ios/splash";
 const controller = new AbortController();
 const signal = controller.signal;
 
-//export { ErrorBoundary } from "~/components/ErrorBoundary";
+export { ErrorBoundary } from "~/components/ErrorBoundary";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const navigation = useNavigation();

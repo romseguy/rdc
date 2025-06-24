@@ -4,19 +4,19 @@
 @tailwind utilities;
 
 .radix-themes {
+  --color-background: rgba(211, 211, 211, 0.3);
   --cursor-button: pointer;
   --default-font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   --secondary-font-family: Spectral, Georgia, ui-serif, serif;
 
-  #login-modal,
-  #notif-modal,
-  #share-modal,
-  #error-page {
-    background: var(--color-background);
-    padding: 24px;
-  }
-
   #modal {
+    background: var(--color-background);
+    #login-modal,
+    #notif-modal,
+    #share-modal {
+      background: var(--color-background);
+      padding: 24px;
+    }
     #login-modal {
       a {
         font-size: smaller;
@@ -31,17 +31,27 @@
     }
     #error-page {
       height: 100%;
+      background: var(--color-background);
+      padding: 24px;
     }
     #home-page {
+      background: var(--color-background);
     }
     #book-page {
+      background: var(--color-background);
+      section > main {
+        background: rgba(211, 211, 211, 0.9);
+      }
       section p {
         font-family: var(--secondary-font-family);
       }
     }
     #note-page {
-      main p {
-        font-family: var(--secondary-font-family);
+      main {
+        background: rgba(211, 211, 211, 0.9);
+        p  {
+          font-family: var(--secondary-font-family);
+        }
       }
     }
   }
@@ -61,24 +71,6 @@
     }
   }
 
-  &.light {
-    --color-background: rgba(211, 211, 211, 0.3);
-    #modal {
-      background: var(--color-background);
-    }
-    #home-page {
-      background: var(--color-background);
-    }
-    #book-page {
-      background: var(--color-background);
-      section > main {
-        background: rgba(211, 211, 211, 0.9);
-      }
-    }
-    #note-page > main {
-      background: rgba(211, 211, 211, 0.9);
-    }
-  }
   &.dark {
     --color-background: rgba(0, 0, 0, 0.5);
     #modal {

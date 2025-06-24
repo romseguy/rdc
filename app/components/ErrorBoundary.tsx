@@ -1,9 +1,10 @@
-import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router";
-import type { Route } from "../+types/root";
-import { Page } from "~/routes/Page";
-import { Error as ErrorPage } from "~/routes/Error";
 import { useEffect, useState } from "react";
+import { Provider } from "react-redux";
+import { isRouteErrorResponse, useRouteError } from "react-router";
+import { Error as ErrorPage } from "~/routes/Error";
+import { store } from "~/store";
 import { localize } from "~/utils";
+import { Route } from "../routes/+types/$";
 
 export const ErrorBoundary = (props: Route.ErrorBoundaryProps) => {
   const routeError = useRouteError();
@@ -35,12 +36,8 @@ export const ErrorBoundary = (props: Route.ErrorBoundaryProps) => {
   if (!isLoaded) return null;
 
   return (
-    <Page
-      element={ErrorPage}
-      simple
-      message={message}
-      details={details}
-      stack={stack}
-    />
+    <Provider store={store()}>
+      <ErrorPage message={message} details={details} stack={stack} />;
+    </Provider>
   );
 };

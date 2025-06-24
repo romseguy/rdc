@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query";
+import { baseUrl } from "./baseUrl";
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     //mode: "no-cors",
-    baseUrl: import.meta.env.VITE_PUBLIC_API || "http://localhost:3001/api",
+    baseUrl,
     prepareHeaders: (headers, api) => {
       //@ts-expect-error
       const auth = api.getState().app.auth;
