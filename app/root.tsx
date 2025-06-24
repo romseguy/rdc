@@ -93,6 +93,8 @@ export const links: Route.LinksFunction = () => [
   //{ rel: "apple-touch-startup-image", href: "/splash/" },
 ];
 
+const controller = new AbortController();
+const signal = controller.signal;
 const App = ({ children }) => {
   const dispatch = useDispatch();
   const { screenWidth } = useSelector(getState);
@@ -112,14 +114,13 @@ const App = ({ children }) => {
 
     const updateScreenWidth = () => {
       const newScreenWidth = window.innerWidth - 16;
-      if (newScreenWidth !== screenWidth)
+      if (newScreenWidth !== screenWidth) {
         dispatch(setState({ screenWidth: newScreenWidth }));
+      }
     };
     updateScreenWidth();
 
     if (!isMobile) {
-      const controller = new AbortController();
-      const signal = controller.signal;
       window.addEventListener("resize", updateScreenWidth);
       signal.addEventListener("abort", () => {
         window.removeEventListener("resize", updateScreenWidth);

@@ -102,7 +102,9 @@ export const Header = (props) => {
             onValueChange={(value) => {
               dispatch(
                 setState({
-                  lib: libs.find(({ name }) => name === value),
+                  lib: libs.find(
+                    (lib) => lib[localize("name") || lib.name] === value,
+                  ),
                 }),
               );
             }}

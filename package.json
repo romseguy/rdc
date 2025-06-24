@@ -37,6 +37,7 @@
     "html-entities": "^2.6.0",
     "isbot": "^5.1.27",
     "lucide-react": "^0.515.0",
+    "postcss": "^8.5.6",
     "react": "^19.1.0",
     "react-device-detect": "^2.2.3",
     "react-dom": "^19.1.0",
@@ -46,8 +47,8 @@
     "redux": "^5.0.1",
     "sass-embedded": "^1.89.1",
     "simplecrawler": "^1.1.9",
-    "tailwind-merge": "^2.6.0",
-    "tailwindcss": "^3.4.17",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.10",
     "typescript": "^5.8.3",
     "vite": "^6.3.3",
     "vite-tsconfig-paths": "^5.1.4"

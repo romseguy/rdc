@@ -1,7 +1,16 @@
-@import "@radix-ui/themes/styles.css";
-@config "../tailwind.config.mjs";
-@import "tailwindcss/utilities";
-@tailwind utilities;
+@config "./lib/tw/tailwind.config.mjs";
+
+// without layers
+// @import "tailwindcss";
+
+// with layers
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "@radix-ui/themes/styles.css" layer(components);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+// @import "@radix-ui/themes/styles.css";
 
 .radix-themes {
   --color-background: rgba(211, 211, 211, 0.3);
@@ -45,7 +54,6 @@
     }
     #note-page {
       main {
-        background: rgba(211, 211, 211, 0.9);
         p  {
           font-family: var(--secondary-font-family);
         }
@@ -55,6 +63,9 @@
 
   &.light {
     #book-page section > main {
+      background: rgba(211, 211, 211, 0.9);
+    }
+    #note-page main {
       background: rgba(211, 211, 211, 0.9);
     }
   }

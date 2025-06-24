@@ -225,8 +225,10 @@ export const Modal = (props) => {
                 </a>
               </Flex>
               <h1>
-                Participez à la discussion ci-dessous pour suggérer des
-                améliorations
+                {localize(
+                  "Participez à la discussion ci-dessous pour suggérer des améliorations",
+                  "Engage in the discussion below to suggest improvements",
+                )}
               </h1>
             </Flex>
             <TextArea
