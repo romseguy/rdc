@@ -38,7 +38,7 @@ export const BookTitle = ({ lib, book }) => {
             ? localize("conférence", "talk show")
             : localize("livre", "book")}
           <span> </span>
-          {localize("de la bibliothèque", "from the library")} :<span> </span>
+          {localize("de la bibliothèque", "in the library")} :<span> </span>
           <i>{lib[localize("name")] || lib.name}</i>
         </>
       )}

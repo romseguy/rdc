@@ -16,12 +16,11 @@ import { useNavigation } from "react-router";
 import { Flex, ToastsContainer } from "~/components";
 import { Config } from "~/components/Config";
 import { Header } from "~/components/Header";
+import { Modal, useToggleModal } from "~/components/Modal";
 import { PageTitle } from "~/components/PageTitle";
 import { SpinnerOverlay } from "~/components/SpinnerOverlay";
 import { getState, setState } from "~/store";
 import { i18n, length, toggleCss } from "~/utils";
-import { Modal, useToggleModal } from "./Modal";
-import { Auth } from "~/components/Auth";
 
 const Page = (props) => {
   //#region state
@@ -150,7 +149,6 @@ const Page = (props) => {
   if (simple)
     return (
       <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
-        <Auth />
         <Config />
         <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
         {modal.isOpen && <Modal {...childProps} />}
@@ -168,7 +166,6 @@ const Page = (props) => {
 
   return (
     <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
-      <Auth />
       <Config />
       <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
       {modal.isOpen && <Modal {...childProps} />}

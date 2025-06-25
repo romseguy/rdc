@@ -41,7 +41,9 @@ const Sitemap = (props) => {
             book.notes?.map((note) => (
               <li
                 key={note.id}
-                dangerouslySetInnerHTML={{ __html: note.desc }}
+                dangerouslySetInnerHTML={{
+                  __html: note.desc_en ? note.desc_en : note.desc,
+                }}
               />
             ))}
         </ul>

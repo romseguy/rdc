@@ -2,6 +2,7 @@
 
 // without layers
 // @import "tailwindcss";
+// @import "@radix-ui/themes/styles.css";
 
 // with layers
 @layer theme, base, components, utilities;
@@ -9,8 +10,6 @@
 @import "tailwindcss/preflight.css" layer(base);
 @import "@radix-ui/themes/styles.css" layer(components);
 @import "tailwindcss/utilities.css" layer(utilities);
-
-// @import "@radix-ui/themes/styles.css";
 
 .radix-themes {
   --color-background: rgba(211, 211, 211, 0.3);
@@ -56,9 +55,7 @@
       main {
         border-radius: var(--radius-4);
         padding: 6px 12px;
-        p  {
-          font-family: var(--secondary-font-family);
-        }
+        font-family: var(--secondary-font-family);
       }
     }
   }

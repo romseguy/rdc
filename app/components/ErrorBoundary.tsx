@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Provider } from "react-redux";
 import { isRouteErrorResponse, useRouteError } from "react-router";
-import { Error as ErrorPage } from "~/routes/Error";
+import { Error as ErrorPage } from "~/components/Error";
 import { store } from "~/store";
 import { localize } from "~/utils";
 import { Route } from "../routes/+types/$";

@@ -1,9 +1,10 @@
 import { Button } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { BackButton, Flex, useToast } from "~/components";
+import { useToggleModal } from "~/components/Modal";
 import client from "~/lib/supabase/client";
-import { useToggleModal } from "~/routes/Modal";
 import { Input } from "./ui/input";
+import { useLocation, useNavigate } from "react-router";
 
 function ForgottenPassword({
   i18n,
@@ -118,12 +119,10 @@ function EmailAuth({
   }, [authView]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    console.log("🚀 ~ handleSubmit ~ handleSubmit:");
     e.preventDefault();
     setLoading(true);
     switch (authView) {
       case "sign_in":
-        console.log("🚀 ~ handleSubmit ~ authView:", authView);
         const { error: signInError } = await client().auth.signInWithPassword({
           email,
           password,
@@ -259,6 +258,8 @@ const Login = (props) => {
   const { showToast, i18n } = props;
   const toggleModal = useToggleModal();
   const [view, setView] = useState<string>();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   if (view === "forgotten_password")
     return (
@@ -281,7 +282,7 @@ const Login = (props) => {
         i18n={i18n}
         onBackClick={() => toggleModal()}
         onSuccess={() => {
-          toggleModal();
+          navigate(location.pathname);
         }}
       />
     </div>

@@ -18,7 +18,8 @@ export default ({ addBase, theme }) => {
   });
 };
 
-/*
+{
+  /*
   theme: {
     accentColor: ({ theme }) => ({
       ...theme('colors'),
@@ -1076,3 +1077,4 @@ export default ({ addBase, theme }) => {
     },
   }
 */
+}

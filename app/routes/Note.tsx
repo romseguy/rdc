@@ -1,18 +1,18 @@
 import { css } from "@emotion/react";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
-import { Slider } from "@radix-ui/themes";
+import { Slider, Spinner } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router";
-import { BackButton, Flex } from "~/components";
+import { Flex } from "~/components";
+import { NoteTitle } from "~/components/NoteTitle";
 import { getState } from "~/store";
 import { createLocalize, toCssString } from "~/utils";
 
 export const Note = (props) => {
   const { loaderData } = props;
-  const { book, note } = loaderData;
+  const { note } = loaderData;
   const state = useSelector(getState);
-  const { lib = loaderData.lib, locale, screenWidth } = state;
+  const { locale, screenWidth } = state;
   const desc =
     (locale === "en" ? note.desc_en : note.desc) ||
     `<i>${
@@ -32,49 +32,10 @@ export const Note = (props) => {
     setIsLoaded(true);
   }, []);
 
-  const navigate = useNavigate();
-
   return (
     <div id="note-page">
       <header>
-        <Flex p="3">
-          <BackButton
-            label={localize("Retour", "Back")}
-            style={{ marginRight: "6px" }}
-            onClick={() =>
-              navigate("/" + localize("livre", "book") + "/" + book.id)
-            }
-          />
-
-          <h2>
-            {localize("Citation", "Quote")} {note.page && `p.${note.page} `}
-            {book.title ? (
-              <>
-                {book.is_conf && (
-                  <>
-                    {localize("de la conférence", "from the talk show")} :{" "}
-                    <i>
-                      {book.title} ({lib[localize("name")] || lib.name})
-                    </i>
-                  </>
-                )}
-                {!book.is_conf && (
-                  <>
-                    {localize("du livre", "from book")} :{" "}
-                    <i>
-                      {book[localize("title")]} ({lib[localize("name")]})
-                    </i>
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                du {book?.id === 1 ? "premier" : book?.id + "ème"} livre de la
-                bibliothèque : <i>{lib?.name}</i>
-              </>
-            )}
-          </h2>
-        </Flex>
+        <NoteTitle {...loaderData} />
 
         {/* sliders */}
         <Flex
@@ -106,7 +67,7 @@ export const Note = (props) => {
             <InfoCircledIcon stroke="lightblue" />
             {localize("Taille du texte", "Font size")}
           </Flex>
-          {isLoaded && (
+          {isLoaded ? (
             <Slider
               defaultValue={[16]}
               min={6}
@@ -116,13 +77,15 @@ export const Note = (props) => {
                 setSize(v[0]);
               }}
             />
+          ) : (
+            <Spinner />
           )}
 
           <Flex>
             <InfoCircledIcon stroke="lightblue" />
             {localize("Largeur du texte", "Text width")}
           </Flex>
-          {isLoaded && (
+          {isLoaded ? (
             <Slider
               defaultValue={[defaultWidth]}
               min={defaultWidth / 3}
@@ -132,13 +95,15 @@ export const Note = (props) => {
                 setWidth(v[0]);
               }}
             />
+          ) : (
+            <Spinner />
           )}
 
           <Flex>
             <InfoCircledIcon stroke="lightblue" />
             {localize("Espace entre les lignes", "Space between lines")}
           </Flex>
-          {isLoaded && (
+          {isLoaded ? (
             <Slider
               defaultValue={[2]}
               min={0.1}
@@ -148,6 +113,8 @@ export const Note = (props) => {
                 setLineHeight(v[0]);
               }}
             />
+          ) : (
+            <Spinner />
           )}
         </Flex>
       </header>
@@ -163,7 +130,7 @@ export const Note = (props) => {
             textAlign: "justify",
           })}
           a {
-            color: red;
+            color: var(--accent-a11);
           }
         `}
       >

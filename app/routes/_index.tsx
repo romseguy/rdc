@@ -10,7 +10,7 @@ import {
   type Lib,
   type RootData,
 } from "~/utils";
-const Page = lazy(() => import("~/routes/Page"));
+import Page from "./Page";
 
 export const loader = async (props) => {
   let data: RootData = {
@@ -79,6 +79,7 @@ export const loader = async (props) => {
     return data;
   }
 };
+
 export default function IndexRoute(props) {
   if (isbot()) return <Sitemap {...props} />;
 
