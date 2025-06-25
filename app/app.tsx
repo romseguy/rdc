@@ -1,26 +1,51 @@
 import { useDeviceSelectors } from "react-device-detect";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import { Provider } from "react-redux";
 import { store } from "./store";
+import { tokenKey } from "./lib/supabase/tokenKey";
+import { useStorage } from "@charlietango/hooks/use-storage";
 
 export const App = (props) => {
   const {
     loaderData: { userAgent },
   } = props;
+
+  let bearer = "";
+  if (typeof window !== "undefined") {
+    if (localStorage.getItem(tokenKey)) {
+      bearer = localStorage.getItem(tokenKey);
+    } else if (process.env.NODE_ENV === "development") {
+      bearer = import.meta.env.VITE_PUBLIC_AUTH_TOKEN;
+    }
+    if (bearer) {
+      localStorage.setItem(tokenKey, bearer);
+    }
+  }
+
+  const { user, ...token } = bearer ? JSON.parse(bearer) : {};
+
   const [{ isMobile }] = useDeviceSelectors(userAgent);
+
+  const location = useLocation();
+  const locale =
+    location.pathname.includes("/c/") || location.pathname.includes("/livre/")
+      ? "fr"
+      : location.pathname.includes("/q/") ||
+        location.pathname.includes("/book/")
+      ? "en"
+      : import.meta.env.VITE_PUBLIC_LOCALE;
 
   return (
     <Provider
       store={store({
         app: {
           auth: {
-            user:
-              process.env.NODE_ENV === "development"
-                ? { email: import.meta.env.VITE_PUBLIC_EMAIL2 }
-                : undefined,
+            bearer,
+            token,
+            user,
           },
           isMobile,
-          locale: import.meta.env.VITE_PUBLIC_LOCALE,
+          locale,
           modal: { isOpen: false },
         },
       })}

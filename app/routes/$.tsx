@@ -7,7 +7,7 @@ import { Note } from "~/routes/Note";
 import { BookT, type Note as NoteT, type RootData } from "~/utils";
 import type { Route } from "./+types/$";
 import { loader as rootLoader } from "./_index";
-const Page = lazy(() => import("~/routes/Page"));
+import Page from "./Page";
 
 export const loader = async (props: Route.LoaderArgs) => {
   const data: RootData & { book?: BookT; note?: NoteT } = await rootLoader(

@@ -1,8 +1,8 @@
 {
-  "name": "Know my quotes",
-  "short_name": "KMQ",
-  "description": "Let's remember anew'",
-  "lang": "en",
+  "name": "Recueil de citations",
+  "short_name": "RDC",
+  "description": "Partagez des citations qui participent à l'avènement d'une nouvelle conscience",
+  "lang": "fr",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "display": "standalone",
@@ -48,11 +48,6 @@
     {
       "src": "icons/icon-256x256.png",
       "sizes": "256x256",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-384x384.png",
-      "sizes": "384x384",
       "type": "image/png"
     },
     {

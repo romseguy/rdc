@@ -49,7 +49,9 @@ export function meta({}: Route.MetaArgs) {
     {
       name: "description",
       content:
-        "Partagez des citations de livres qui participent à l'avènement d'une nouvelle conscience",
+        import.meta.env.LOCALE === "fr"
+          ? "Partagez des citations qui participent à l'avènement d'une nouvelle conscience"
+          : "Share quotes for the advent of a new evolution",
     },
     { name: "viewport", content: "width=device-width, initial-scale=1.0" },
     { name: "theme-color", content: "#000000" },

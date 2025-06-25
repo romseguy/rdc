@@ -1,8 +1,8 @@
 import { Spinner } from "@radix-ui/themes";
 import { useSelector } from "react-redux";
+import { Flex } from "~/components";
 import { getState } from "~/store";
 import { localize } from "~/utils";
-import { Flex } from "./Containers";
 
 export const SpinnerOverlay = () => {
   const { screenWidth } = useSelector(getState);
