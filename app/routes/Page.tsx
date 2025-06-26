@@ -13,18 +13,21 @@ import type { ThemeOwnProps } from "@radix-ui/themes/components/theme.props";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "react-router";
-import { Flex, ToastsContainer } from "~/components";
-import { Config } from "~/components/Config";
-import { Header } from "~/components/Header";
-import { Modal, useToggleModal } from "~/components/Modal";
-import { PageTitle } from "~/components/PageTitle";
-import { SpinnerOverlay } from "~/components/SpinnerOverlay";
+import {
+  Config,
+  Flex,
+  Modal,
+  PageTitle,
+  SpinnerOverlay,
+  ToastsContainer,
+  useToggleModal,
+} from "~/components";
 import { getState, setState } from "~/store";
 import { i18n, length, toggleCss } from "~/utils";
 
 const Page = (props) => {
   //#region state
-  const { element, loaderData, noTheme, simple, locale } = props;
+  const { element, loaderData, noTheme, simple } = props;
   const state = useSelector(getState);
   const { auth, modal, toast } = state;
   const user = auth?.user;
@@ -39,58 +42,20 @@ const Page = (props) => {
   const navigation = useNavigation();
   const toggleModal = useToggleModal();
   useEffect(() => {
-    if (navigation.state === "idle" && !length(state.collections))
+    if (navigation.state === "idle" && !length(state.stuff))
       dispatch(
         setState({
-          collections: loaderData.collections,
+          stuff: loaderData.stuff,
         }),
       );
-  }, [navigation.state, loaderData.collections]);
-  useEffect(() => {
-    if (navigation.state === "idle" && !length(state.libs))
-      dispatch(setState({ libs: loaderData.libs }));
-  }, [navigation.state, loaderData.libs]);
-  useEffect(() => {
-    if (navigation.state === "idle" && !length(state.lib))
-      dispatch(setState({ lib: loaderData.lib }));
-  }, [navigation.state, loaderData.lib]);
-  useEffect(() => {
-    if (navigation.state === "idle") {
-      dispatch(setState({ locale }));
-    }
-  }, [navigation.state, locale]);
+  }, [navigation.state, loaderData.stuff]);
   //#endregion
 
   //#region ui
   const toggleButtonsLeft = null;
-  // (
-  //   <div style={{ position: "fixed", bottom: 0, left: 0 }}>
-  //     <Flex p="3" gap="2">
-  //       <Toggle
-  //         onPressedChange={(pressed) => {
-  //           window.location.replace(
-  //             locale === "en"
-  //               ? "https://recueildecitations.fr"
-  //               : "https://knowmyquotes.com",
-  //           );
-  //         }}
-  //       >
-  //         {locale === "en" ? <FrIcon /> : <EnIcon />}
-  //       </Toggle>
-  //     </Flex>
-  //   </div>
-  // );
   const toggleButtonsRight = (
     <div style={{ position: "fixed", bottom: 12, right: 12, zIndex: 999 }}>
       <Flex gap="2">
-        <Toggle
-          css={css(toggleCss(appearance))}
-          onPressedChange={() => {
-            toggleModal("heart-modal");
-          }}
-        >
-          <HeartIcon />
-        </Toggle>
         <Toggle
           css={css(toggleCss(appearance))}
           onPressedChange={() => {
@@ -127,11 +92,6 @@ const Page = (props) => {
   //#endregion
 
   //#region child
-  // const [lib, _setLib] = useState<Lib>();
-  // const setLib = (libName: string) => {
-  //   const l = loaderData.libs?.find((li) => li.name === libName);
-  //   if (l) _setLib(l);
-  // };
   const childProps = {
     ...props,
     ...{ loaderData },
@@ -174,7 +134,6 @@ const Page = (props) => {
         <div id="page">
           <header>
             <PageTitle />
-            <Header {...childProps} />
           </header>
 
           {React.createElement(element, childProps)}

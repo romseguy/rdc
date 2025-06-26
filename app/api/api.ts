@@ -16,36 +16,19 @@ export const api = createApi({
     },
   }),
   endpoints: (build) => ({
-    getCollections: build.query<any, any>({
+    getStuff: build.query<any, any>({
       query: () => ({ url: "/" }),
     }),
     postIp: build.mutation({
       query: (body) => ({ url: "/", method: "POST", body }),
     }),
-    postNotes: build.mutation({
-      query: (body) => ({ url: "/notes", method: "POST", body }),
+    editStuff: build.mutation({
+      query: (body) => ({ url: "/", method: "PUT", body }),
     }),
-    editNote: build.mutation({
-      query: (body) => ({ url: "/note", method: "PUT", body }),
-    }),
-    deleteNote: build.mutation({
+    deleteCollections: build.mutation({
       query: ({ url }) => ({ url, method: "DELETE" }),
-    }),
-    deleteComment: build.mutation({
-      query: ({ url }) => ({ url, method: "DELETE" }),
-    }),
-    postComments: build.mutation({
-      query: (body) => ({ url: "/comments", method: "POST", body }),
     }),
   }),
 });
 
-export const {
-  getCollections,
-  postIp,
-  postNotes,
-  editNote,
-  deleteNote,
-  postComments,
-  deleteComment,
-} = api.endpoints;
+export const { getStuff, postIp, editStuff, deleteCollections } = api.endpoints;

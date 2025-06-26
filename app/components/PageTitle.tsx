@@ -1,7 +1,7 @@
 import { Button, Separator } from "@radix-ui/themes";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { Flex, LocaleSwitch, UserIcon } from "~/components";
+import { Flex, UserIcon } from "~/components";
 import { useToggleModal } from "~/components/Modal";
 import { tokenKey } from "~/lib/supabase/tokenKey";
 import { getState, setState } from "~/store";
@@ -9,7 +9,7 @@ import { localize, pageTitleStyle } from "~/utils";
 
 export const PageTitle = () => {
   const state = useSelector(getState);
-  const { isMobile, locale, auth } = state;
+  const { isMobile, auth } = state;
   const user = auth?.user;
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -26,21 +26,7 @@ export const PageTitle = () => {
           navigate("/");
         }}
       >
-        <Flex>
-          {localize("Recueil de citations", "Know my quotes")}
-          <LocaleSwitch
-            width="1em"
-            height="1em"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.location.replace(
-                locale === "en"
-                  ? "https://recueildecitations.fr"
-                  : "https://knowmyquotes.com",
-              );
-            }}
-          />
-        </Flex>
+        <Flex>{import.meta.env.VITE_PUBLIC_TITLE}</Flex>
       </h1>
       <Button
         className="with-icon"

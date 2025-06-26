@@ -1,7 +1,6 @@
 import { Button } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
-import { BackButton, Flex, useToast } from "~/components";
-import { useToggleModal } from "~/components/Modal";
+import { BackButton, Flex, useToast, useToggleModal } from "~/components";
 import client from "~/lib/supabase/client";
 import { Input } from "./ui/input";
 import { useLocation, useNavigate } from "react-router";

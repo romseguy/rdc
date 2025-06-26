@@ -11,7 +11,7 @@ import { App } from "./app";
 import "./root.scss";
 import { Route } from "./routes/+types/$";
 
-export { ErrorBoundary } from "~/components/ErrorBoundary";
+export { ErrorBoundary } from "~/components";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const navigation = useNavigation();
@@ -26,15 +26,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body
-        css={
-          navigation.state === "loading" &&
-          css`
-            overscroll-behavior: contain;
-            overflow: hidden !important;
-          `
-        }
-      >
+      <body>
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -48,10 +40,7 @@ export function meta({}: Route.MetaArgs) {
     { title: import.meta.env.VITE_PUBLIC_TITLE },
     {
       name: "description",
-      content:
-        import.meta.env.LOCALE === "fr"
-          ? "Partagez des citations qui participent à l'avènement d'une nouvelle conscience"
-          : "Share quotes for the advent of a new evolution",
+      content: import.meta.env.LOCALE === "fr" ? "" : "",
     },
     { name: "viewport", content: "width=device-width, initial-scale=1.0" },
     { name: "theme-color", content: "#000000" },

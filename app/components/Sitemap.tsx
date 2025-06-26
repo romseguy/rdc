@@ -3,7 +3,7 @@ import { useParams } from "react-router";
 import { Link, useLocation, useRoutes, type RouteObject } from "react-router";
 import { localize } from "~/utils";
 
-const Sitemap = (props) => {
+export const Sitemap = (props) => {
   // console.log("🚀 ~ Sitemap ~ props:", props);
   const location = useLocation();
   // console.log("🚀 ~ Sitemap ~ location:", location);

@@ -10,7 +10,7 @@ export const App = (props) => {
     loaderData: { userAgent },
   } = props;
 
-  let bearer = "";
+  let bearer: string | null = "";
   if (typeof window !== "undefined") {
     if (localStorage.getItem(tokenKey)) {
       bearer = localStorage.getItem(tokenKey);
@@ -26,14 +26,7 @@ export const App = (props) => {
 
   const [{ isMobile }] = useDeviceSelectors(userAgent);
 
-  const location = useLocation();
-  const locale =
-    location.pathname.includes("/c/") || location.pathname.includes("/livre/")
-      ? "fr"
-      : location.pathname.includes("/q/") ||
-        location.pathname.includes("/book/")
-      ? "en"
-      : import.meta.env.VITE_PUBLIC_LOCALE;
+  const locale = import.meta.env.VITE_PUBLIC_LOCALE;
 
   return (
     <Provider

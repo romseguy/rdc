@@ -7,7 +7,7 @@ import {
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { api as rootApi } from "~/api";
 import { ToastProps } from "~/components";
-import { Lib, ModalT, User } from "~/utils";
+import { ModalT, User } from "~/utils";
 
 export const createSlice = buildCreateSlice({
   creators: { asyncThunk: asyncThunkCreator },
@@ -20,10 +20,8 @@ export interface AppState {
     token: { access_token: string; refresh_token: string };
     bearer: string;
   };
-  collections: Record<any, any>;
+  stuff: any;
   isMobile: boolean;
-  lib: Lib;
-  libs: Lib[];
   locale: "fr" | "en";
   modal: ModalT;
   toast: ToastProps;

@@ -45,17 +45,10 @@
     #home-page {
       background: var(--color-background);
     }
-    #book-page {
-      background: var(--color-background);
-      section main * {
-        font-family: var(--secondary-font-family);
-      }
-    }
-    #note-page {
+    #stuff-page {
       main {
         border-radius: var(--radius-4);
         padding: 6px 12px;
-        font-family: var(--secondary-font-family);
       }
     }
   }
