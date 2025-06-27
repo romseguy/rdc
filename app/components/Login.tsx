@@ -287,7 +287,7 @@ const Login = (props) => {
         i18n={i18n}
         onBackClick={() => toggleModal()}
         onSuccess={() => {
-          navigate(location.pathname);
+          window.location.reload();
         }}
       />
     </div>

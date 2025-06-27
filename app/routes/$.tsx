@@ -20,6 +20,7 @@ export const loader = async (props) => {
       status: 404,
       statusText: "La page n'a pas été trouvée",
     });
+
   const data: RootData & { book?: BookT; note?: NoteT } = await rootLoader(
     props,
   );

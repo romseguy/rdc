@@ -1,4 +1,5 @@
-import { Box, Button, Select } from "@radix-ui/themes";
+import { css } from "@emotion/react";
+import { Box, Button, Select, Separator } from "@radix-ui/themes";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
@@ -23,7 +24,7 @@ import { ENoteOrder, localize, toCss, type BookT, type NoteT } from "~/utils";
 export const Livre = (props) => {
   const { loaderData } = props;
   const state = useSelector(getState);
-  const { auth, lib = loaderData.lib, locale } = state;
+  const { auth, isMobile, lib = loaderData.lib, locale } = state;
   const defaultLocale = import.meta.env.VITE_PUBLIC_LOCALE;
   const user = auth?.user;
 
@@ -321,6 +322,27 @@ export const Livre = (props) => {
   }
   //#endregion
 
+  const SelectOrder =
+    book.notes && book.notes.length > 0 ? (
+      <Select.Root
+        defaultValue={ENoteOrder.ID}
+        onValueChange={(value) => setOrder(value as unknown as ENoteOrder)}
+      >
+        <Select.Trigger variant="classic" />
+        <Select.Content>
+          <Select.Item value={ENoteOrder.ID}>
+            {localize(
+              "Citations plus récentes en premier",
+              "Most recent quotes first",
+            )}
+          </Select.Item>
+          <Select.Item value={ENoteOrder.PAGE}>
+            {localize("Dans l'ordre des pages", "By page order")}
+          </Select.Item>
+        </Select.Content>
+      </Select.Root>
+    ) : null;
+
   return (
     <div id="book-page">
       {/* book header */}
@@ -337,31 +359,31 @@ export const Livre = (props) => {
       <main>
         {/* order & add note button */}
         {!hasEditing && (
-          <Flex justify="between" p="3">
-            {book.notes && book.notes.length > 0 && (
-              <Select.Root
-                defaultValue={ENoteOrder.ID}
-                onValueChange={(value) =>
-                  setOrder(value as unknown as ENoteOrder)
-                }
+          <>
+            {isMobile && (
+              <Flex
+                direction="column"
+                css={css`
+                  button {
+                    margin: 12px 0;
+                  }
+                  button:last-of-type {
+                    margin-top: 0;
+                  }
+                `}
               >
-                <Select.Trigger variant="classic" />
-                <Select.Content>
-                  <Select.Item value={ENoteOrder.ID}>
-                    {localize(
-                      "Citations plus récentes en premier",
-                      "Most recent quotes first",
-                    )}
-                  </Select.Item>
-                  <Select.Item value={ENoteOrder.PAGE}>
-                    {localize("Dans l'ordre des pages", "By page order")}
-                  </Select.Item>
-                </Select.Content>
-              </Select.Root>
+                <AddNoteButton book={book} setBook={setBook} />
+                {SelectOrder}
+              </Flex>
             )}
 
-            <AddNoteButton book={book} setBook={setBook} />
-          </Flex>
+            {!isMobile && (
+              <Flex direction="column">
+                <AddNoteButton book={book} setBook={setBook} my="3" />
+                {SelectOrder}
+              </Flex>
+            )}
+          </>
         )}
 
         {!book.notes?.length && <Box pl="3">Aucune citations.</Box>}

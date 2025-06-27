@@ -11,104 +11,11 @@ import { BookTitle } from "./BookTitle";
 
 export const Header = (props) => {
   const { loaderData } = props;
-  const {
-    isMobile,
-    lib = loaderData.lib,
-    libs = loaderData.libs,
-  } = useSelector(getState);
-  const [item, setItem] = useState("0");
-
-  const dispatch = useDispatch();
+  const { isMobile, lib = loaderData.lib } = useSelector(getState);
   const navigate = useNavigate();
 
   return (
     <Flex direction="column" gap="3" {...(isMobile ? { align: "start" } : {})}>
-      <Flex
-        {...(isMobile ? { direction: "column", align: "start", gap: "3" } : {})}
-      >
-        <Select.Root
-          defaultValue={item}
-          onOpenChange={(open) => {
-            if (open)
-              alert(
-                localize(
-                  `Si vous voulez accéder à des citations classées par catégories, merci d'envoyer un mail à ${
-                    import.meta.env.VITE_PUBLIC_EMAIL
-                  } pour me le faire savoir.`,
-                  `If you are interested in having quotes grouped by categories, please send an email to ${
-                    import.meta.env.VITE_PUBLIC_EMAIL
-                  } to make me know.`,
-                ),
-              );
-          }}
-        >
-          <Select.Trigger variant="classic" />
-          <Select.Content>
-            <Select.Item value="0">
-              {localize("Catégories", "Categories")}
-            </Select.Item>
-          </Select.Content>
-        </Select.Root>
-
-        <Select.Root
-          defaultValue={item}
-          value={item}
-          onValueChange={(value) => {
-            //setItem(value);
-            if (value === "1") {
-              alert(
-                localize(
-                  `Si vous voulez accéder à des citations classées par thématiques, merci d'envoyer un mail à ${
-                    import.meta.env.VITE_PUBLIC_EMAIL
-                  } pour me le faire savoir.`,
-                  `If you are interested in having quotes grouped by topics, please send an email to ${
-                    import.meta.env.VITE_PUBLIC_EMAIL
-                  } to make me know.`,
-                ),
-              );
-            }
-          }}
-        >
-          <Select.Trigger variant="classic" />
-          <Select.Content>
-            <Select.Item value="0">
-              {localize("Bibliothèques", "Libraries")}
-            </Select.Item>
-            <Select.Item value="1">
-              {localize("Thématiques", "Topics")}
-            </Select.Item>
-          </Select.Content>
-        </Select.Root>
-
-        {item === "0" && (
-          <Select.Root
-            defaultValue={lib[localize("name")] || lib.name}
-            onValueChange={(value) => {
-              const newLib = libs.find(
-                (lib) => (lib[localize("name")] || lib.name) === value,
-              );
-              dispatch(
-                setState({
-                  lib: newLib,
-                }),
-              );
-            }}
-          >
-            <Select.Trigger variant="classic" />
-            <Select.Content>
-              {libs.map((l) => (
-                <Select.Item
-                  key={"lib-" + l.id}
-                  value={l[localize("name")] || l.name}
-                >
-                  {l[localize("name")] || l.name}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Root>
-        )}
-      </Flex>
-
       <Flex width="100%" pl="1">
         <DoubleArrowRightIcon />
         <h3>

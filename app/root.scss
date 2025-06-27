@@ -1,6 +1,8 @@
 @plugin "@tailwindcss/typography";
 
-@import "tailwindcss" prefix(tw);
+//@import "tailwindcss" prefix(tw);
+@import "tailwindcss";
+@import "./palette.css";
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
@@ -8,37 +10,37 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 
 @theme {
-  --tw-color-primary: #aab9ff;
+  --color-primary: #aab9ff;
 }
 
 @layer base {
   [data-theme="ocean"] {
-    --tw-color-primary: #aab9ff;
+    --color-primary: #aab9ff;
   }
 
   [data-theme="rainforest"] {
-    --tw-color-primary: #56d0a0;
+    --color-primary: #56d0a0;
   }
 
   [data-theme="candy"] {
-    --tw-color-primary: #f9a8d4;
+    --color-primary: #f9a8d4;
   }
 
   body {
-    max-width: var(--tw-breakpoint-lg);
+    max-width: var(--breakpoint-lg);
     background-image: url("/bg.jpg");
     background-repeat: repeat;
     margin: 0 auto;
   }
 
   h1 {
-    font-size: var(--tw-text-2xl);
+    font-size: var(--text-2xl);
   }
   h2 {
-    font-size: var(--tw-text-xl);
+    font-size: var(--text-xl);
   }
   h3 {
-    font-size: var(--tw-text-lg);
+    font-size: var(--text-lg);
   }
 }
 
@@ -46,9 +48,9 @@
   button {
     &[type="button"] {
       &.back-btn {
-        background-color: var(--tw-color-red-700);
+        background-color: var(--color-red-700);
         &:hover {
-          background-color: var(--tw-color-red-600);
+          background-color: var(--color-red-600);
         }
       }
 
@@ -123,11 +125,11 @@
     }
   }
   .radix-themes {
-    --width-sm: var(--tw-breakpoint-sm);
-    --width-md: var(--tw-breakpoint-md);
-    --width-lg: var(--tw-breakpoint-lg);
-    --width-xl: var(--tw-breakpoint-xl);
-    --width-2xl: var(--tw-breakpoint-2xl);
+    --width-sm: var(--breakpoint-sm);
+    --width-md: var(--breakpoint-md);
+    --width-lg: var(--breakpoint-lg);
+    --width-xl: var(--breakpoint-xl);
+    --width-2xl: var(--breakpoint-2xl);
 
     --color-background: rgba(211, 211, 211, 0.3);
     --cursor-button: pointer;

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Provider } from "react-redux";
 import { isRouteErrorResponse, useRouteError } from "react-router";
 import { Error as ErrorPage } from "~/components";
-import { store } from "~/store";
+import { createStore } from "~/store";
 import { localize } from "~/utils";
 import type { Route } from "../+types/root";
 
@@ -36,8 +36,8 @@ export const ErrorBoundary = (props: Route.ErrorBoundaryProps) => {
   if (!isLoaded) return null;
 
   return (
-    <Provider store={store()}>
-      <ErrorPage message={message} details={details} stack={stack} />;
+    <Provider store={createStore().store}>
+      <ErrorPage message={message} details={details} stack={stack} />
     </Provider>
   );
 };

@@ -110,8 +110,8 @@ export const Note = (props: NoteP) => {
     return (
       <Flex
         direction={isMobile ? "column" : "row"}
-        gap={isMobile ? "1" : "3"}
-        mt={isMobile ? "2" : "0"}
+        gap={isMobile ? "0" : "3"}
+        mt={isMobile ? "0" : "0"}
         {...props}
       >
         <Flex>
@@ -125,25 +125,31 @@ export const Note = (props: NoteP) => {
           />
 
           {note.index !== 0 && (
-            <Button>
+            <Button type="button">
               <ChevronLeftIcon />
               {localize("Précédente", "Previous")}
             </Button>
           )}
 
           {note.index !== notes.length - 1 && (
-            <Button>
+            <Button type="button">
               {localize("Suivant", "Next")}
               <ChevronRightIcon />
             </Button>
           )}
         </Flex>
 
-        <Button className="with-icon" variant="surface" onClick={onOpenClick}>
+        <Button
+          type="button"
+          className="with-icon"
+          variant="surface"
+          onClick={onOpenClick}
+        >
           {openLabel}
           <ExternalIcon
             {...iconProps({
               title: openLabel,
+              style: { border: 0, padding: "unset" },
             })}
           />
         </Button>
@@ -157,7 +163,7 @@ export const Note = (props: NoteP) => {
         {!isLoading && (
           <Flex gap="3">
             <Share1Icon
-              color="var(--accent-9)"
+              color="var(--color-blue-500)"
               {...iconProps({
                 title: localize("Partager la citation", "Share the quote"),
                 onClick: onShareClick,
@@ -192,7 +198,7 @@ export const Note = (props: NoteP) => {
       <header>
         <div
           css={toCss({
-            padding: isMobile ? "0 0 6px 0" : "6px",
+            padding: "6px",
             background: "purple",
           })}
         >
@@ -217,9 +223,19 @@ export const Note = (props: NoteP) => {
             <>
               {/* note header */}
               {isMobile && (
-                <Flex direction="column" gap="0">
+                <Flex
+                  direction="column"
+                  css={css`
+                    button {
+                      margin: 12px 0;
+                    }
+                    button:last-of-type {
+                      margin-top: 0;
+                    }
+                  `}
+                >
                   <NoteHeaderLeft />
-                  <NoteHeaderRight mt="2" />
+                  <NoteHeaderRight />
                 </Flex>
               )}
 

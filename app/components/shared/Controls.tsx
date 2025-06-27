@@ -10,12 +10,12 @@ export const iconProps = (props) => {
 
   const out: Record<string, any> = {
     "aria-label": title,
+    height: "2em",
+    width: "2em",
     style: {
       cursor: "pointer",
       ...(isMobile
         ? {
-            height: "1em",
-            width: "1em",
             padding: "6px",
             border: "1px solid white",
           }
@@ -222,8 +222,6 @@ export const PageSwitch = ({
             {...iconProps({
               title: "Modifier la page",
               style: {
-                height: "1em",
-                width: "1em",
                 border: "none",
               },
             })}

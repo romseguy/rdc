@@ -1,18 +1,18 @@
 import React from "react";
-import { getSelectorsByUserAgent } from "react-device-detect";
+import {
+  getSelectorsByUserAgent,
+  useDeviceSelectors,
+} from "react-device-detect";
 import { Provider } from "react-redux";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
-import "./root.scss";
-import { store } from "./store";
 import type { Route } from "./+types/root";
+import "./root.scss";
+import { createStore } from "./store";
 
 export { ErrorBoundary } from "~/components";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   // const navigation = useNavigation();
-  // useScript("https://unpkg.com/pwacompat", {
-  //   attributes: { async: "true", crossOrigin: "anonymous" },
-  // });
   return (
     <html lang="en">
       <head>
@@ -85,17 +85,40 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export const loader = async (props: Route.LoaderArgs) => {
-  return { userAgent: props.request.headers.get("user-agent") || "" };
+  const userAgent = props.request.headers.get("user-agent") || "";
+  const isMobile = getSelectorsByUserAgent(userAgent).isMobile;
+
+  const data = {
+    userAgent,
+    isMobile,
+  };
+  return data;
 };
 
 export default function Root(props) {
+  const [{ isMobile }] =
+    typeof window === "object"
+      ? useDeviceSelectors(props.userAgent)
+      : [{ isMobile: props.isMobile }];
   const initialState = {
-    isMobile: getSelectorsByUserAgent(props.loaderData.userAgent).isMobile,
+    isMobile,
+    locale: import.meta.env.VITE_PUBLIC_LOCALE,
     modal: { isOpen: false },
   };
+  //const { store, persistor } = createStore(initialState);
+  const { store } = createStore(initialState);
+
   return (
-    <Provider store={store(initialState)}>
+    <Provider store={store}>
       <Outlet />
     </Provider>
   );
+
+  // return (
+  //   <Provider store={store}>
+  //     <PersistGate persistor={persistor}>
+  //       <Outlet />
+  //     </PersistGate>
+  //   </Provider>
+  // );
 }

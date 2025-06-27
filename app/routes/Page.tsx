@@ -29,15 +29,9 @@ import { length, toggleCss } from "~/utils";
 
 const Page = (props) => {
   //#region state
-  const {
-    element,
-    loaderData,
-    noTheme,
-    simple,
-    locale = import.meta.env.VITE_PUBLIC_LOCALE,
-  } = props;
+  const { element, loaderData, noTheme, simple } = props;
   const state = useSelector(getState);
-  const { auth, modal, toast } = state;
+  const { auth, locale, modal, toast } = state;
   const user = auth?.user;
   const [appearance, setAppearance] = useStorage("color-mode", {
     type: "local",
@@ -175,7 +169,7 @@ const Page = (props) => {
       {!modal.isOpen && navigation.state === "idle" && (
         <div id="page">
           <header>
-            <PageTitle />
+            <PageTitle {...childProps} />
             <Header {...childProps} />
           </header>
 

@@ -63,6 +63,7 @@ export type RootData = {
   collections?: Record<any, any>;
   libs: Seed[] | Lib[];
   lib: Seed | Lib;
+  isMobile: boolean;
 };
 
 export type ModalT = {

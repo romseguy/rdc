@@ -1,4 +1,5 @@
-import { Button, Separator, Spinner } from "@radix-ui/themes";
+import { Button, Select, Separator, Spinner } from "@radix-ui/themes";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useNavigation } from "react-router";
 import { Flex, LocaleSwitch, UserIcon, useToggleModal } from "~/components";
@@ -6,42 +7,26 @@ import { tokenKey } from "~/lib/supabase/tokenKey";
 import { getState, setState } from "~/store";
 import { localize, pageTitleStyle } from "~/utils";
 
-export const PageTitle = () => {
+export const PageTitle = (props) => {
+  const { loaderData } = props;
   const state = useSelector(getState);
-  const { isMobile, locale, auth, isLoaded } = state;
+  const {
+    lib = loaderData.lib,
+    libs = loaderData.libs,
+    locale,
+    auth,
+    isLoaded,
+  } = state;
+  const isMobile = loaderData.isMobile;
   const user = auth?.user;
+  const [item, setItem] = useState("0");
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const navigation = useNavigation();
   const toggleModal = useToggleModal();
 
-  return (
-    <Flex justify="between" pb="3" pr="1" pt="3">
-      {!isMobile && (
-        <Separator style={{ width: "80px", visibility: "hidden" }} />
-      )}
-      <h1
-        style={pageTitleStyle(isMobile)}
-        onClick={() => {
-          navigate("/");
-        }}
-      >
-        <Flex>
-          {localize("Recueil de citations", "Know my quotes")}
-          <LocaleSwitch
-            width="1em"
-            height="1em"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.location.replace(
-                locale === "en"
-                  ? "https://recueildecitations.fr"
-                  : "https://knowmyquotes.com",
-              );
-            }}
-          />
-        </Flex>
-      </h1>
+  const LoginButton = (
+    <>
       {isLoaded && (
         <Button
           className="with-icon"
@@ -65,6 +50,134 @@ export const PageTitle = () => {
         </Button>
       )}
       {!isLoaded && <Spinner />}
+    </>
+  );
+
+  return (
+    <Flex
+      p="3"
+      {...(isMobile
+        ? { direction: "column", align: "start" }
+        : { justify: "between" })}
+    >
+      {/* {!isMobile && <Separator style={{ visibility: "hidden" }} />} */}
+      <h1
+        style={pageTitleStyle(isMobile)}
+        onClick={() => {
+          navigate("/");
+        }}
+      >
+        <Flex
+          direction={isMobile ? "column" : "row"}
+          align={isMobile ? "start" : "center"}
+        >
+          {localize("Recueil de citations", "Know my quotes")}
+          <LocaleSwitch
+            width={isMobile ? "2em" : "1em"}
+            height={isMobile ? "2em" : "1em"}
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.replace(
+                locale === "en"
+                  ? "https://recueildecitations.fr"
+                  : "https://knowmyquotes.com",
+              );
+            }}
+          />
+        </Flex>
+      </h1>
+
+      <Flex
+        align="start"
+        {...(isMobile ? { direction: "column", gap: "3" } : {})}
+      >
+        {isMobile && LoginButton}
+
+        <Select.Root
+          defaultValue={item}
+          onOpenChange={(open) => {
+            if (open)
+              alert(
+                localize(
+                  `Si vous voulez accéder à des citations classées par catégories, merci d'envoyer un mail à ${
+                    import.meta.env.VITE_PUBLIC_EMAIL
+                  } pour me le faire savoir.`,
+                  `If you are interested in having quotes grouped by categories, please send an email to ${
+                    import.meta.env.VITE_PUBLIC_EMAIL
+                  } to make me know.`,
+                ),
+              );
+          }}
+        >
+          <Select.Trigger variant="classic" />
+          <Select.Content>
+            <Select.Item value="0">
+              {localize("Catégories", "Categories")}
+            </Select.Item>
+          </Select.Content>
+        </Select.Root>
+
+        <Select.Root
+          defaultValue={item}
+          value={item}
+          onValueChange={(value) => {
+            //setItem(value);
+            if (value === "1") {
+              alert(
+                localize(
+                  `Si vous voulez accéder à des citations classées par thématiques, merci d'envoyer un mail à ${
+                    import.meta.env.VITE_PUBLIC_EMAIL
+                  } pour me le faire savoir.`,
+                  `If you are interested in having quotes grouped by topics, please send an email to ${
+                    import.meta.env.VITE_PUBLIC_EMAIL
+                  } to make me know.`,
+                ),
+              );
+            }
+          }}
+        >
+          <Select.Trigger variant="classic" />
+          <Select.Content>
+            <Select.Item value="0">
+              {localize("Bibliothèques", "Libraries")}
+            </Select.Item>
+            <Select.Item value="1">
+              {localize("Thématiques", "Topics")}
+            </Select.Item>
+          </Select.Content>
+        </Select.Root>
+
+        {item === "0" && (
+          <Select.Root
+            defaultValue={lib[localize("name")] || lib.name}
+            onValueChange={(value) => {
+              const newLib = libs.find(
+                (lib) => (lib[localize("name")] || lib.name) === value,
+              );
+              dispatch(
+                setState({
+                  lib: newLib,
+                }),
+              );
+              navigate("/");
+            }}
+          >
+            <Select.Trigger variant="classic" />
+            <Select.Content>
+              {libs.map((l) => (
+                <Select.Item
+                  key={"lib-" + l.id}
+                  value={l[localize("name")] || l.name}
+                >
+                  {l[localize("name")] || l.name}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+        )}
+      </Flex>
+
+      {!isMobile && LoginButton}
     </Flex>
   );
 };

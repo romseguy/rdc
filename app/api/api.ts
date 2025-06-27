@@ -1,23 +1,89 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query";
+import {
+  buildCreateApi,
+  coreModule,
+  //fetchBaseQuery,
+  type BaseQueryFn,
+} from "@reduxjs/toolkit/query";
+import { reactHooksModule } from "@reduxjs/toolkit/query/react";
+//import { REHYDRATE } from "redux-persist";
+import type { AxiosError, AxiosRequestConfig } from "axios";
+import axios from "axios";
 import { baseUrl } from "./baseUrl";
+import { createStore } from "~/store";
+
+axios.interceptors.request.use(
+  (config) => {
+    if (typeof window !== "undefined") {
+      const { store } = createStore();
+      config.headers.common.authorization = `Bearer ${
+        store.getState().app.auth?.bearer
+      }`;
+    }
+    config.headers.common["Access-Control-Allow-Origin"] = "*";
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+axios.interceptors.response.use(
+  (config) => {
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+const createApi = buildCreateApi(
+  coreModule(),
+  reactHooksModule({ unstable__sideEffectsInRender: true }),
+);
+
+const axiosBaseQuery =
+  (
+    { baseUrl }: { baseUrl: string } = { baseUrl: "" },
+  ): BaseQueryFn<
+    {
+      url: string;
+      method?: AxiosRequestConfig["method"];
+      body?: AxiosRequestConfig["data"];
+      params?: AxiosRequestConfig["params"];
+      headers?: AxiosRequestConfig["headers"];
+    },
+    unknown,
+    unknown
+  > =>
+  async (props) => {
+    const { url, method, body, params, headers } = props;
+    try {
+      const result = await axios({
+        url: `${baseUrl}${url !== "/" ? url : ""}`,
+        method,
+        data: body,
+        params,
+        headers,
+      });
+      return { data: result.data };
+    } catch (axiosError) {
+      //console.log("~ axiosError:", axiosError);
+      const err = axiosError as AxiosError;
+      return {
+        error: {
+          status: err.response?.status,
+          data: err.response?.data || err.message,
+        },
+      };
+    }
+  };
 
 export const api = createApi({
-  baseQuery: fetchBaseQuery({
-    mode: process.env.NODE_ENV === "development" ? "no-cors" : "cors",
+  baseQuery: axiosBaseQuery({
     baseUrl,
-    prepareHeaders: (headers, api) => {
-      //@ts-expect-error
-      const auth = api.getState().app.auth;
-      if (auth) {
-        headers.set("authorization", `Bearer ${auth.bearer}`);
-      }
-      headers.set("locale", import.meta.env.VITE_PUBLIC_LOCALE);
-      return headers;
-    },
   }),
   endpoints: (build) => ({
     getCollections: build.query<any, any>({
-      query: () => ({ url: "/" }),
+      query: () => {
+        console.log("GET /");
+        return { url: "/" };
+      },
     }),
     postIp: build.mutation({
       query: (body) => ({ url: "/", method: "POST", body }),
@@ -49,3 +115,19 @@ export const {
   postComments,
   deleteComment,
 } = api.endpoints;
+
+// baseQuery: fetchBaseQuery({
+//   mode: "no-cors",
+//   baseUrl,
+//   prepareHeaders: (headers, api: { getState: () => any }) => {
+//     const auth = api.getState().app.auth;
+//     if (auth) {
+//       headers.set("authorization", `Bearer ${auth.bearer}`);
+//     }
+//     headers.set("locale", import.meta.env.VITE_PUBLIC_LOCALE);
+//     return headers;
+//   },
+// }),
+// extractRehydrationInfo(action): any {
+//   if (action.type === REHYDRATE && action.key === "api") return action.payload
+// },
