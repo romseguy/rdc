@@ -1,3 +1,4 @@
+//@ts-nocheck
 import type { Seed } from "./types";
 
 export const seed: Seed[] = [

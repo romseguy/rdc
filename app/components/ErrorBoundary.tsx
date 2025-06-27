@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Provider } from "react-redux";
 import { isRouteErrorResponse, useRouteError } from "react-router";
-import { Error as ErrorPage } from "~/components/Error";
-import { store } from "~/store";
+import { Error as ErrorPage } from "~/components";
 import { localize } from "~/utils";
 import { Route } from "../routes/+types/$";
+import { store } from "~/store";
 
 export const ErrorBoundary = (props: Route.ErrorBoundaryProps) => {
   const routeError = useRouteError();

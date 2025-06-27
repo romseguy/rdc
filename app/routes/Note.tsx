@@ -3,8 +3,7 @@ import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { Slider, Spinner } from "@radix-ui/themes";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Flex } from "~/components";
-import { NoteTitle } from "~/components/NoteTitle";
+import { Flex, NoteTitle } from "~/components";
 import { getState } from "~/store";
 import { createLocalize, toCssString } from "~/utils";
 

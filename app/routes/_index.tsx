@@ -1,30 +1,27 @@
 import { isbot } from "isbot";
-import { lazy } from "react";
 import { getCollections } from "~/api";
-import Sitemap from "~/components/Sitemap";
+import { Sitemap } from "~/components";
 import { Home } from "~/routes/Home";
 import { store } from "~/store";
 import {
+  seed as libs,
   collections as offlineCollections,
-  seed,
-  type Lib,
   type RootData,
 } from "~/utils";
+import { Route } from "./+types/_index";
 import Page from "./Page";
 
-export const loader = async (props) => {
+export const loader = async (props: Route.LoaderArgs) => {
   let data: RootData = {
-    collections: {},
-    libs: seed as Lib[],
-    userAgent: props.request.headers.get("user-agent"),
+    libs,
+    lib: libs[0],
   };
 
   try {
-    const { data: collections, error } = await store().dispatch(
+    const { data: collections } = await store().dispatch(
       getCollections.initiate(""),
     );
-
-    if (collections.error || error) {
+    if (!collections || collections.error) {
       data.collections = { ...offlineCollections, libraries: data.libs };
       data.libs = data.libs.map((lib, i) => {
         const id = Number(i + 1).toString();
@@ -48,7 +45,6 @@ export const loader = async (props) => {
         };
       });
     } else {
-      data.collections = collections;
       data.libs = collections.libraries.map((lib) => {
         return {
           ...lib,
@@ -82,6 +78,5 @@ export const loader = async (props) => {
 
 export default function IndexRoute(props) {
   if (isbot()) return <Sitemap {...props} />;
-
   return <Page element={Home} {...props} />;
 }

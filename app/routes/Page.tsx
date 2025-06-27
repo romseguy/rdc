@@ -13,18 +13,29 @@ import type { ThemeOwnProps } from "@radix-ui/themes/components/theme.props";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "react-router";
-import { Flex, ToastsContainer } from "~/components";
-import { Config } from "~/components/Config";
-import { Header } from "~/components/Header";
-import { Modal, useToggleModal } from "~/components/Modal";
-import { PageTitle } from "~/components/PageTitle";
-import { SpinnerOverlay } from "~/components/SpinnerOverlay";
+import {
+  Flex,
+  ToastsContainer,
+  Config,
+  Header,
+  Modal,
+  PageTitle,
+  SpinnerOverlay,
+  useToggleModal,
+} from "~/components";
+import { tokenKey } from "~/lib/supabase/tokenKey";
 import { getState, setState } from "~/store";
-import { i18n, length, toggleCss } from "~/utils";
+import { length, toggleCss } from "~/utils";
 
 const Page = (props) => {
   //#region state
-  const { element, loaderData, noTheme, simple, locale } = props;
+  const {
+    element,
+    loaderData,
+    noTheme,
+    simple,
+    locale = import.meta.env.VITE_PUBLIC_LOCALE,
+  } = props;
   const state = useSelector(getState);
   const { auth, modal, toast } = state;
   const user = auth?.user;
@@ -59,27 +70,41 @@ const Page = (props) => {
       dispatch(setState({ locale }));
     }
   }, [navigation.state, locale]);
+  useEffect(() => {
+    let bearer = "";
+    if (localStorage.getItem(tokenKey)) {
+      bearer = localStorage.getItem(tokenKey) || "";
+    } else if (process.env.NODE_ENV === "development") {
+      bearer = import.meta.env.VITE_PUBLIC_AUTH_TOKEN;
+    }
+    if (bearer) {
+      localStorage.setItem(tokenKey, bearer);
+    }
+    const { user, ...token } = bearer ? JSON.parse(bearer) : {};
+    dispatch(
+      setState({
+        isLoaded: true,
+        locale,
+        auth: { bearer, token, user },
+      }),
+    );
+  }, []);
   //#endregion
 
   //#region ui
-  const toggleButtonsLeft = null;
-  // (
-  //   <div style={{ position: "fixed", bottom: 0, left: 0 }}>
-  //     <Flex p="3" gap="2">
-  //       <Toggle
-  //         onPressedChange={(pressed) => {
-  //           window.location.replace(
-  //             locale === "en"
-  //               ? "https://recueildecitations.fr"
-  //               : "https://knowmyquotes.com",
-  //           );
-  //         }}
-  //       >
-  //         {locale === "en" ? <FrIcon /> : <EnIcon />}
-  //       </Toggle>
-  //     </Flex>
-  //   </div>
-  // );
+  const onToastFinished = (id) => {
+    dispatch(setState({ toast: undefined }));
+  };
+  const childProps = {
+    ...props,
+    ...{ loaderData }, // ssr
+    ...{
+      appearance,
+      setAppearance,
+    },
+  };
+  //#endregion
+
   const toggleButtonsRight = (
     <div style={{ position: "fixed", bottom: 12, right: 12, zIndex: 999 }}>
       <Flex gap="2">
@@ -121,28 +146,6 @@ const Page = (props) => {
     </div>
   );
 
-  const onToastFinished = (id) => {
-    dispatch(setState({ toast: undefined }));
-  };
-  //#endregion
-
-  //#region child
-  // const [lib, _setLib] = useState<Lib>();
-  // const setLib = (libName: string) => {
-  //   const l = loaderData.libs?.find((li) => li.name === libName);
-  //   if (l) _setLib(l);
-  // };
-  const childProps = {
-    ...props,
-    ...{ loaderData },
-    ...{
-      appearance,
-      setAppearance,
-      i18n,
-    },
-  };
-  //#endregion
-
   if (noTheme)
     return <div id="page">{React.createElement(element, childProps)}</div>;
 
@@ -159,7 +162,6 @@ const Page = (props) => {
 
         {navigation.state === "loading" && <SpinnerOverlay />}
 
-        {toggleButtonsLeft}
         {toggleButtonsRight}
       </Theme>
     );
@@ -179,7 +181,6 @@ const Page = (props) => {
 
           {React.createElement(element, childProps)}
 
-          {toggleButtonsLeft}
           {toggleButtonsRight}
         </div>
       )}

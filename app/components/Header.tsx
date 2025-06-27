@@ -3,7 +3,7 @@ import { DoubleArrowRightIcon } from "@radix-ui/react-icons";
 import { Select } from "@radix-ui/themes";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Flex } from "~/components";
 import { getState, setState } from "~/store";
 import { localize } from "~/utils";
@@ -19,6 +19,7 @@ export const Header = (props) => {
   const [item, setItem] = useState("0");
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   return (
     <Flex direction="column" gap="3" {...(isMobile ? { align: "start" } : {})}>
@@ -125,6 +126,7 @@ export const Header = (props) => {
       {/* books list */}
       <Flex gap="0" width="100%" overflowX="scroll">
         {lib.books?.map((b, index) => {
+          const to = "/" + localize("livre", "book") + "/" + b.id;
           return (
             <div
               key={"book-" + index}
@@ -144,10 +146,11 @@ export const Header = (props) => {
                   : "1px solid white"};
                 font-weight: bold;
               `}
+              onClick={() => {
+                navigate(to);
+              }}
             >
-              <Link to={"/" + localize("livre", "book") + "/" + b.id}>
-                {b[localize("title")] || b.title}
-              </Link>
+              <Link to={to}>{b[localize("title")] || b.title}</Link>
             </div>
           );
         })}

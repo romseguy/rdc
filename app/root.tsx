@@ -1,23 +1,18 @@
-import { useScript } from "@charlietango/hooks/use-script";
-import { css } from "@emotion/react";
-import {
-  Links,
-  Meta,
-  Scripts,
-  ScrollRestoration,
-  useNavigation,
-} from "react-router";
-import { App } from "./app";
+import React from "react";
+import { getSelectorsByUserAgent } from "react-device-detect";
+import { Provider } from "react-redux";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import { Route } from "./+types/root";
 import "./root.scss";
-import { Route } from "./routes/+types/$";
+import { store } from "./store";
 
-export { ErrorBoundary } from "~/components/ErrorBoundary";
+export { ErrorBoundary } from "~/components";
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const navigation = useNavigation();
-  useScript("https://unpkg.com/pwacompat", {
-    attributes: { async: "true", crossOrigin: "anonymous" },
-  });
+  // const navigation = useNavigation();
+  // useScript("https://unpkg.com/pwacompat", {
+  //   attributes: { async: "true", crossOrigin: "anonymous" },
+  // });
   return (
     <html lang="en">
       <head>
@@ -27,13 +22,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body
-        css={
-          navigation.state === "loading" &&
-          css`
-            overscroll-behavior: contain;
-            overflow: hidden !important;
-          `
-        }
+      // css={
+      //   navigation.state === "loading" &&
+      //   css`
+      //     overscroll-behavior: contain;
+      //     overflow: hidden !important;
+      //   `
+      // }
       >
         {children}
         <ScrollRestoration />
@@ -89,10 +84,18 @@ export const links: Route.LinksFunction = () => [
   //{ rel: "apple-touch-startup-image", href: "/splash/" },
 ];
 
-export const loader = async (props) => {
-  return { userAgent: props.request.headers.get("user-agent") };
+export const loader = async (props: Route.LoaderArgs) => {
+  return { userAgent: props.request.headers.get("user-agent") || "" };
 };
 
 export default function Root(props) {
-  return <App {...props} />;
+  const initialState = {
+    isMobile: getSelectorsByUserAgent(props.loaderData.userAgent).isMobile,
+    modal: { isOpen: false },
+  };
+  return (
+    <Provider store={store(initialState)}>
+      <Outlet />
+    </Provider>
+  );
 }

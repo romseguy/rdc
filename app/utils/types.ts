@@ -51,18 +51,18 @@ export type Lib = {
 
 type SeedNote = Omit<Note, "id" | "book_id"> & { id?: string };
 type SeedBook = Omit<Book, "notes" | "id"> & {
+  id?: string;
   notes?: SeedNote[];
 };
-export type Seed = Omit<Lib, "id" | "books"> & {
+export type Seed = Omit<Lib, "id"> & {
   id?: string;
-  books: SeedBook[];
+  //books: SeedBook[];
 };
 
 export type RootData = {
-  collections: Record<any, any>;
-  libs: Lib[];
-  lib?: Lib;
-  userAgent: string;
+  collections?: Record<any, any>;
+  libs: Seed[] | Lib[];
+  lib: Seed | Lib;
 };
 
 export type ModalT = {

@@ -19,11 +19,13 @@ export const Config = () => {
 
     (async () => {
       try {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const data = await res.json();
-        if (data.ip)
-          //@ts-expect-error
-          dispatch(postIp.initiate({ ip: data.ip }));
+        if (process.env.NODE_ENV === "production") {
+          const res = await fetch("https://api.ipify.org?format=json");
+          const data = await res.json();
+          if (data.ip)
+            //@ts-expect-error
+            dispatch(postIp.initiate({ ip: data.ip }));
+        }
       } catch (error) {
         console.log("🚀 ~ error:", error);
       }

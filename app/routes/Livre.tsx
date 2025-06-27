@@ -9,8 +9,14 @@ import {
   postComments,
   postNotes,
 } from "~/api";
-import { AddNoteButton, BackButton, Flex, Note, useToast } from "~/components";
-import { BookTitle } from "~/components/BookTitle";
+import {
+  AddNoteButton,
+  BackButton,
+  BookTitle,
+  Flex,
+  Note,
+  useToast,
+} from "~/components";
 import { getState, setState } from "~/store";
 import { ENoteOrder, localize, toCss, type BookT, type NoteT } from "~/utils";
 

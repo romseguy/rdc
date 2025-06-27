@@ -1,15 +1,13 @@
 import { isbot } from "isbot";
-import { lazy } from "react";
 import { useRoutes } from "react-router";
-import Sitemap from "~/components/Sitemap";
+import { Sitemap } from "~/components";
 import { Livre } from "~/routes/Livre";
 import { Note } from "~/routes/Note";
 import { BookT, type Note as NoteT, type RootData } from "~/utils";
-import type { Route } from "./+types/$";
 import { loader as rootLoader } from "./_index";
 import Page from "./Page";
 
-export const loader = async (props: Route.LoaderArgs) => {
+export const loader = async (props) => {
   const data: RootData & { book?: BookT; note?: NoteT } = await rootLoader(
     props,
   );
