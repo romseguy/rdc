@@ -1,13 +1,13 @@
 import { css } from "@emotion/react";
 import { Theme } from "@radix-ui/themes";
-import { ThemeOwnProps } from "@radix-ui/themes/components/theme.props";
+import { type ThemeOwnProps } from "@radix-ui/themes/components/theme.props";
 import { useSelector } from "react-redux";
 import {
-  MailTo,
-  MailToTrigger,
-  MailToBody,
   BackButton,
   Flex,
+  MailTo,
+  MailToBody,
+  MailToTrigger,
 } from "~/components";
 import { getState } from "~/store";
 import { linkButton, localize, toCssString } from "~/utils";

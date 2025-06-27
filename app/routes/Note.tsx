@@ -73,7 +73,7 @@ export const Note = (props) => {
               max={72}
               step={1}
               onValueChange={(v) => {
-                setSize(v[0]);
+                setSize(Number(v[0]));
               }}
             />
           ) : (
@@ -109,7 +109,7 @@ export const Note = (props) => {
               max={10}
               step={0.1}
               onValueChange={(v) => {
-                setLineHeight(v[0]);
+                setLineHeight(Number(v[0]));
               }}
             />
           ) : (
@@ -119,6 +119,7 @@ export const Note = (props) => {
       </header>
 
       <main
+        className="prose"
         css={css`
           ${toCssString({
             fontSize: size + "px",

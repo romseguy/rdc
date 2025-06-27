@@ -66,7 +66,7 @@ export const Livre = (props) => {
         els.push([n]);
         ++c;
       } else {
-        els[c].push(n);
+        els[c]?.push(n);
       }
       ++i;
     }

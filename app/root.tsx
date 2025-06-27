@@ -2,9 +2,9 @@ import React from "react";
 import { getSelectorsByUserAgent } from "react-device-detect";
 import { Provider } from "react-redux";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
-import { Route } from "./+types/root";
 import "./root.scss";
 import { store } from "./store";
+import type { Route } from "./+types/root";
 
 export { ErrorBoundary } from "~/components";
 

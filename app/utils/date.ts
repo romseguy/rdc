@@ -1,20 +1,20 @@
 import {
   format,
-  formatDuration as oFormatDuration,
   getDay,
   getHours,
   getMinutes,
   getSeconds,
   intervalToDuration,
+  formatDuration as oFormatDuration,
   parseISO,
   setDay,
   setHours,
   setMinutes,
   setSeconds,
-  Duration,
-  DurationUnit,
+  type Duration,
+  type DurationUnit,
 } from "date-fns";
-import { fr, enUS as en } from "date-fns/locale";
+import { enUS as en, fr } from "date-fns/locale";
 import { localize } from "./utils";
 
 /*
@@ -68,8 +68,11 @@ export const formatDuration = (
   return oFormatDuration(duration, {
     format,
     locale: {
-      formatDistance: (token, count) =>
-        formatDistanceLocale[token].replace("{{count}}", count.toString()),
+      formatDistance: (token, count) => {
+        const str = formatDistanceLocale[token];
+        if (str) return str.replace("{{count}}", count.toString());
+        return count.toString() + "s";
+      },
     },
   });
 };

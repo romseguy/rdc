@@ -40,8 +40,8 @@ export const RTEditor = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isTouched, setIsTouched] = useState(false);
   const [shortId, setShortId] = useState<string | undefined>();
-  const [minHeight, setMinHeight] = useState(250);
-  const [maxHeight, setMaxHeight] = useState(250);
+  const [minHeight, setMinHeight] = useState(238);
+  const [maxHeight, setMaxHeight] = useState(238);
   //useEffect(() => setMaxHeight(window.innerHeight - 250), []);
 
   //#region tinymce

@@ -4,17 +4,19 @@ import { Sitemap } from "~/components";
 import { Home } from "~/routes/Home";
 import { store } from "~/store";
 import {
-  seed as libs,
   collections as offlineCollections,
+  seed,
+  type Lib,
   type RootData,
+  type Seed,
 } from "~/utils";
-import { Route } from "./+types/_index";
+import type { Route } from "../+types/root";
 import Page from "./Page";
 
 export const loader = async (props: Route.LoaderArgs) => {
   let data: RootData = {
-    libs,
-    lib: libs[0],
+    libs: seed,
+    lib: seed[0] as Seed,
   };
 
   try {
@@ -69,7 +71,7 @@ export const loader = async (props: Route.LoaderArgs) => {
       });
     }
 
-    data.lib = data.libs[0];
+    data.lib = data.libs[0] as Seed | Lib;
     return data;
   } catch (error: any) {
     return data;

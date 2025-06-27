@@ -1,37 +1,84 @@
-@config "./lib/tw/tailwind.config.mjs";
+@plugin "@tailwindcss/typography";
 
-// without layers
-// @import "tailwindcss";
-// @import "@radix-ui/themes/styles.css";
-
-// with layers
+@import "tailwindcss" prefix(tw);
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
 @import "@radix-ui/themes/styles.css" layer(components);
 @import "tailwindcss/utilities.css" layer(utilities);
 
-.radix-themes {
-  --color-background: rgba(211, 211, 211, 0.3);
-  --cursor-button: pointer;
-  --default-font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  --secondary-font-family: Spectral, Georgia, ui-serif, serif;
+@theme {
+  --tw-color-primary: #aab9ff;
+}
 
-  #modal {
-    background: var(--color-background);
-    #login-modal,
-    #notif-modal,
-    #share-modal {
-      background: var(--color-background);
-      padding: 24px;
-    }
-    #login-modal {
-      a {
-        font-size: smaller;
+@layer base {
+  [data-theme="ocean"] {
+    --tw-color-primary: #aab9ff;
+  }
+
+  [data-theme="rainforest"] {
+    --tw-color-primary: #56d0a0;
+  }
+
+  [data-theme="candy"] {
+    --tw-color-primary: #f9a8d4;
+  }
+
+  body {
+    max-width: var(--tw-breakpoint-lg);
+    background-image: url("/bg.jpg");
+    background-repeat: repeat;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: var(--tw-text-2xl);
+  }
+  h2 {
+    font-size: var(--tw-text-xl);
+  }
+  h3 {
+    font-size: var(--tw-text-lg);
+  }
+}
+
+@layer components {
+  button {
+    &[type="button"] {
+      &.back-btn {
+        background-color: var(--tw-color-red-700);
+        &:hover {
+          background-color: var(--tw-color-red-600);
+        }
+      }
+
+      & > svg {
+        stroke: currentColor !important;
       }
     }
   }
+  svg {
+    &.delete-icon {
+      fill: white;
+      stroke: red;
+    }
+    &.edit-icon {
+      stroke: var(--green-9);
+      fill: none;
+    }
+    &.external-icon {
+      stroke: white;
+    }
+    &.share-icon {
+      fill: white;
+    }
+  }
+}
 
+@layer utilities {
+  .prose {
+    --tw-prose-body: unset;
+  }
   #page {
     padding-bottom: 36px;
     header {
@@ -49,6 +96,7 @@
       background: var(--color-background);
       section main * {
         font-family: var(--secondary-font-family);
+        letter-spacing: var(--letter-spacing-1);
       }
     }
     #note-page {
@@ -56,76 +104,70 @@
         border-radius: var(--radius-4);
         padding: 6px 12px;
         font-family: var(--secondary-font-family);
+        letter-spacing: var(--letter-spacing-1);
       }
     }
   }
-
-  &.light {
-    #book-page section > main {
-      background: rgba(211, 211, 211, 0.9);
+  #modal {
+    background: var(--color-background);
+    #login-modal,
+    #notif-modal,
+    #share-modal {
+      background: var(--color-background);
+      padding: 24px;
     }
-    #note-page main {
-      background: rgba(211, 211, 211, 0.9);
+    #login-modal {
+      a {
+        font-size: smaller;
+      }
     }
   }
+  .radix-themes {
+    --width-sm: var(--tw-breakpoint-sm);
+    --width-md: var(--tw-breakpoint-md);
+    --width-lg: var(--tw-breakpoint-lg);
+    --width-xl: var(--tw-breakpoint-xl);
+    --width-2xl: var(--tw-breakpoint-2xl);
 
-  &.dark {
-    --color-background: rgba(0, 0, 0, 0.5);
-    #modal {
-      background: var(--color-background);
+    --color-background: rgba(211, 211, 211, 0.3);
+    --cursor-button: pointer;
+    --default-font-family: Inter, system-ui, Avenir, Helvetica, Arial,
+      sans-serif;
+    --secondary-font-family: Spectral, Georgia, ui-serif, serif;
+    --default-letter-spacing: 0em;
+    --letter-spacing-1: 0.07em;
+
+    &.light {
+      #book-page section > main {
+        background: rgba(211, 211, 211, 0.9);
+      }
+      #note-page main {
+        background: rgba(211, 211, 211, 0.9);
+      }
     }
-    #home-page {
-      background: rgba(0, 0, 0, 0.7);
-    }
-    #book-page {
-      background: var(--color-background);
-      section > main {
+    &.dark {
+      --color-background: rgba(0, 0, 0, 0.5);
+      #modal {
+        background: var(--color-background);
+      }
+      #home-page {
+        background: rgba(0, 0, 0, 0.7);
+      }
+      #book-page {
+        background: var(--color-background);
+        section > main {
+          background: rgba(0, 0, 0, 0.7);
+        }
+      }
+      #note-page > main {
         background: rgba(0, 0, 0, 0.7);
       }
     }
-    #note-page > main {
-      background: rgba(0, 0, 0, 0.7);
-    }
+  }
+  .tox-tinymce {
+    border-radius: 0 !important;
   }
 }
-
-button {
-  &.back-btn {
-    background: var(--red-9);
-    &:hover {
-      background: var(--red-10);
-    }
-  }
-  &.with-icon {
-    padding: 3px 3px 3px 6px;
-    & > svg {
-      stroke: currentColor;
-    }
-  }
-}
-
-/* #region icons */
-.delete-icon {
-  fill: white;
-  stroke: red;
-}
-.edit-icon {
-  stroke: var(--green-9);
-  fill: none;
-}
-.external-icon {
-  stroke: white;
-}
-.share-icon {
-  fill: white;
-}
-/* #endregion */
-
-/* #region editor */
-.tox-tinymce {
-  border-radius: 0 !important;
-}
-/* #endregion */
 
 /* #region spinner */
 @keyframes rotator {

@@ -1,7 +1,7 @@
 import {
   combineReducers,
   configureStore,
-  PayloadAction,
+  type PayloadAction,
 } from "@reduxjs/toolkit";
 import { api } from "~/api";
 

@@ -216,7 +216,7 @@ export const PageSwitch = ({
   return (
     <div>
       {!isPageEdit ? (
-        <Button className="with-icon" onClick={() => setIsPageEdit(true)}>
+        <Button type="button" onClick={() => setIsPageEdit(true)}>
           p.{note.page}
           <EditIcon
             {...iconProps({

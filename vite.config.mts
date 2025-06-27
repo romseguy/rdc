@@ -8,9 +8,9 @@ export default defineConfig({
   //     external: ["pkgname"],
   //   },
   // },
-  ssr: {
-    noExternal: ["date-fns"],
-  },
+  // ssr: {
+  //   noExternal: ["date-fns"],
+  // },
   plugins: [reactRouter(), tsconfigPaths()],
   server: { port: 3000 },
   preview: { port: 5000 },
