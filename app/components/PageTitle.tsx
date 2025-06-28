@@ -1,25 +1,38 @@
 import { Button, Select, Separator, Spinner } from "@radix-ui/themes";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useNavigation } from "react-router";
-import { Flex, LocaleSwitch, UserIcon, useToggleModal } from "~/components";
+import {
+  BooksIcon,
+  Flex,
+  LocaleSwitch,
+  UserIcon,
+  useToggleModal,
+} from "~/components";
 import { tokenKey } from "~/lib/supabase/tokenKey";
 import { getState, setState } from "~/store";
-import { localize, pageTitleStyle } from "~/utils";
+import { localize, pageTitleStyle, type Lib } from "~/utils";
 
 export const PageTitle = (props) => {
   const { loaderData } = props;
-  const state = useSelector(getState);
   const {
-    lib = loaderData.lib,
+    auth,
+    isMobile,
+    isLoaded,
     libs = loaderData.libs,
     locale,
-    auth,
-    isLoaded,
-  } = state;
-  const isMobile = loaderData.isMobile;
+  } = useSelector(getState);
   const user = auth?.user;
   const [item, setItem] = useState("0");
+  const libsGroupedByAuthor = useMemo(() => {
+    if (!libs) {
+    }
+    let els: Record<string, Lib[]> = {};
+    for (const row of libs) {
+      els[row.author] = (els[row.author] || []).concat([row]);
+    }
+    return els;
+  }, [libs]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -61,20 +74,19 @@ export const PageTitle = (props) => {
         : { justify: "between" })}
     >
       {/* {!isMobile && <Separator style={{ visibility: "hidden" }} />} */}
-      <h1
-        style={pageTitleStyle(isMobile)}
-        onClick={() => {
-          navigate("/");
-        }}
-      >
-        <Flex
-          direction={isMobile ? "column" : "row"}
-          align={isMobile ? "start" : "center"}
+      <Flex {...(isMobile ? { justify: "between", width: "100%" } : {})}>
+        <h1
+          style={pageTitleStyle(isMobile)}
+          onClick={() => {
+            navigate("/");
+          }}
         >
           {localize("Recueil de citations", "Know my quotes")}
+        </h1>
+        {isMobile && (
           <LocaleSwitch
-            width={isMobile ? "2em" : "1em"}
-            height={isMobile ? "2em" : "1em"}
+            width={"2em"}
+            height={"2em"}
             onClick={(e) => {
               e.stopPropagation();
               window.location.replace(
@@ -84,8 +96,8 @@ export const PageTitle = (props) => {
               );
             }}
           />
-        </Flex>
-      </h1>
+        )}
+      </Flex>
 
       <Flex
         align="start"
@@ -93,13 +105,13 @@ export const PageTitle = (props) => {
       >
         {isMobile && LoginButton}
 
-        <Select.Root
+        {/* <Select.Root
           defaultValue={item}
           onOpenChange={(open) => {
             if (open)
               alert(
                 localize(
-                  `Si vous voulez accéder à des citations classées par catégories, merci d'envoyer un mail à ${
+                  `Si vous voulez avoir les bibliothèques classées par catégories, merci d'envoyer un mail à ${
                     import.meta.env.VITE_PUBLIC_EMAIL
                   } pour me le faire savoir.`,
                   `If you are interested in having quotes grouped by categories, please send an email to ${
@@ -115,41 +127,43 @@ export const PageTitle = (props) => {
               {localize("Catégories", "Categories")}
             </Select.Item>
           </Select.Content>
-        </Select.Root>
+        </Select.Root> */}
 
-        <Select.Root
-          defaultValue={item}
-          value={item}
-          onValueChange={(value) => {
-            //setItem(value);
-            if (value === "1") {
-              alert(
-                localize(
-                  `Si vous voulez accéder à des citations classées par thématiques, merci d'envoyer un mail à ${
-                    import.meta.env.VITE_PUBLIC_EMAIL
-                  } pour me le faire savoir.`,
-                  `If you are interested in having quotes grouped by topics, please send an email to ${
-                    import.meta.env.VITE_PUBLIC_EMAIL
-                  } to make me know.`,
-                ),
-              );
-            }
-          }}
-        >
-          <Select.Trigger variant="classic" />
-          <Select.Content>
-            <Select.Item value="0">
-              {localize("Bibliothèques", "Libraries")}
-            </Select.Item>
-            <Select.Item value="1">
-              {localize("Thématiques", "Topics")}
-            </Select.Item>
-          </Select.Content>
-        </Select.Root>
+        <Flex>
+          <BooksIcon />
+          <Select.Root
+            value={item}
+            onValueChange={(value) => {
+              //setItem(value);
+              if (value === "1") {
+                alert(
+                  localize(
+                    `Si vous voulez accéder à des citations classées par thématiques, merci d'envoyer un mail à ${
+                      import.meta.env.VITE_PUBLIC_EMAIL
+                    } pour me le faire savoir.`,
+                    `If you are interested in having quotes grouped by topics, please send an email to ${
+                      import.meta.env.VITE_PUBLIC_EMAIL
+                    } to make me know.`,
+                  ),
+                );
+              }
+            }}
+          >
+            <Select.Trigger variant="classic" />
+            <Select.Content>
+              <Select.Item value="0">
+                {localize("Bibliothèques", "Libraries")}
+              </Select.Item>
+              <Select.Item value="1">
+                {localize("Thématiques", "Topics")}
+              </Select.Item>
+            </Select.Content>
+          </Select.Root>
+        </Flex>
 
         {item === "0" && (
           <Select.Root
-            defaultValue={lib[localize("name")] || lib.name}
+            //defaultValue={lib[localize("name")] || lib.name}
             onValueChange={(value) => {
               const newLib = libs.find(
                 (lib) => (lib[localize("name")] || lib.name) === value,
@@ -162,22 +176,49 @@ export const PageTitle = (props) => {
               navigate("/");
             }}
           >
-            <Select.Trigger variant="classic" />
+            <Select.Trigger
+              placeholder={localize(
+                "Choisir une bibliothèque",
+                "Pick a library",
+              )}
+              variant="classic"
+            />
             <Select.Content>
-              {libs.map((l) => (
-                <Select.Item
-                  key={"lib-" + l.id}
-                  value={l[localize("name")] || l.name}
-                >
-                  {l[localize("name")] || l.name}
-                </Select.Item>
+              {Object.keys(libsGroupedByAuthor).map((author, i) => (
+                <Select.Group key={"author" + i}>
+                  <Select.Label>{author}</Select.Label>
+                  {(libsGroupedByAuthor[author] || []).map((l) => (
+                    <Select.Item
+                      key={"lib-" + l.id}
+                      value={l[localize("name")] || l.name}
+                    >
+                      {l[localize("name")] || l.name}
+                    </Select.Item>
+                  ))}
+                </Select.Group>
               ))}
             </Select.Content>
           </Select.Root>
         )}
       </Flex>
 
-      {!isMobile && LoginButton}
+      <Flex>
+        {!isMobile && LoginButton}
+        {!isMobile && (
+          <LocaleSwitch
+            width={"2em"}
+            height={"2em"}
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.replace(
+                locale === "en"
+                  ? "https://recueildecitations.fr"
+                  : "https://knowmyquotes.com",
+              );
+            }}
+          />
+        )}
+      </Flex>
     </Flex>
   );
 };

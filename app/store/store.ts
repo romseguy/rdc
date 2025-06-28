@@ -3,14 +3,7 @@ import {
   configureStore,
   type PayloadAction,
 } from "@reduxjs/toolkit";
-import { persistReducer, persistStore, type Persistor } from "redux-persist";
-import storage from "redux-persist/lib/storage";
 import { api } from "~/api";
-// const serverStorage = {
-//   getItem: async () => null,
-//   setItem: async () => {},
-//   removeItem: async () => {},
-// };
 
 const reducer = (i) => {
   const app = (state = i, action: PayloadAction<any>) => {
@@ -20,26 +13,14 @@ const reducer = (i) => {
         ...state,
         ...action.payload,
       };
-      //console.log(action, newState);
+      console.log(action, newState);
       return newState;
     }
     return state;
   };
   return combineReducers({
-    // app: persistReducer(
-    //   {
-    //     key: "app",
-    //     storage: typeof window === "undefined" ? serverStorage : storage,
-    //   },
     app,
     api: api.reducer,
-    // api: persistReducer(
-    //   {
-    //     key: "api",
-    //     storage: typeof window === "undefined" ? serverStorage : storage,
-    //   },
-    //   api.reducer,
-    // ),
   });
 };
 const middleware = (getDefaultMiddleware) => {
@@ -48,7 +29,6 @@ const middleware = (getDefaultMiddleware) => {
   ]);
 };
 const makeStore = (i) => {
-  console.log("MARKING NEW STORE WITH", i);
   return configureStore({
     reducer: reducer(i),
     middleware,
@@ -57,14 +37,11 @@ const makeStore = (i) => {
 };
 
 export let store;
-//let persistor;
 export const createStore: (i?: any) => {
   store: AppStore;
-  //persistor: Persistor;
 } = (i) => {
-  store = store || makeStore(i);
-  //persistor = persistor || persistStore(store);
-  //return { store, persistor };
+  if (!store || i.noCache) store = makeStore(i);
+
   return { store };
 };
 export const getState = (state) => {

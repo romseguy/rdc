@@ -4,6 +4,7 @@ import {
   ArrowUpIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ReaderIcon,
   Share1Icon,
 } from "@radix-ui/react-icons";
 import { Badge, Box, Button } from "@radix-ui/themes";
@@ -146,7 +147,7 @@ export const Note = (props: NoteP) => {
           onClick={onOpenClick}
         >
           {openLabel}
-          <ExternalIcon
+          <ReaderIcon
             {...iconProps({
               title: openLabel,
               style: { border: 0, padding: "unset" },

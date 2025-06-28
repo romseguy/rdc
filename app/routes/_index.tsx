@@ -18,11 +18,13 @@ export const loader = async (props: Route.LoaderArgs) => {
   const isMobile = getSelectorsByUserAgent(
     props.request.headers.get("user-agent") || "",
   ).isMobile;
-  const { store } = createStore({
+  const initialState = {
     isMobile,
     locale: import.meta.env.VITE_PUBLIC_LOCALE,
     modal: {},
-  });
+    noCache: true,
+  };
+  const { store } = createStore(initialState);
   let data: RootData = {
     libs: seed,
     lib: seed[0] as Seed,

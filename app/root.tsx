@@ -99,13 +99,12 @@ export default function Root(props) {
   const [{ isMobile }] =
     typeof window === "object"
       ? useDeviceSelectors(props.userAgent)
-      : [{ isMobile: props.isMobile }];
+      : [{ isMobile: props.isMobile || false }];
   const initialState = {
     isMobile,
     locale: import.meta.env.VITE_PUBLIC_LOCALE,
     modal: { isOpen: false },
   };
-  //const { store, persistor } = createStore(initialState);
   const { store } = createStore(initialState);
 
   return (
@@ -113,12 +112,4 @@ export default function Root(props) {
       <Outlet />
     </Provider>
   );
-
-  // return (
-  //   <Provider store={store}>
-  //     <PersistGate persistor={persistor}>
-  //       <Outlet />
-  //     </PersistGate>
-  //   </Provider>
-  // );
 }

@@ -1,5 +1,5 @@
 import { ChatBubbleIcon } from "@radix-ui/react-icons";
-import { BookIcon, Flex } from "~/components";
+import { Book1Icon, BookIcon, Flex } from "~/components";
 import { localize } from "~/utils";
 
 export const BookTitle = ({ lib, book }) => {
@@ -9,16 +9,16 @@ export const BookTitle = ({ lib, book }) => {
         <>
           {book.is_conf ? (
             <>
-              <ChatBubbleIcon />
+              <ChatBubbleIcon width={30} height={30} />
               {localize("Conférence", "Talk show")}
+              <span> : </span>
             </>
           ) : (
             <>
-              <BookIcon />
-              {localize("Livre", "Book")}
+              <Book1Icon />
+              {/* {localize("Livre", "Book")} */}
             </>
           )}
-          <span> : </span>
           {book.title && <i>{book[localize("title")] || book.title}</i>}
         </>
       )}

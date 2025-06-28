@@ -21,7 +21,9 @@ export const seed: Seed[] = [
   {
     name: "Evolutionary Psychology",
     author: "Bernard de Montréal",
-    books: [{ title: "L'incapacité", title_en: "The powerlessness" }],
+    books: [
+      { is_conf: true, title: "L'incapacité", title_en: "The powerlessness" },
+    ],
   },
 ];
 

@@ -23,8 +23,12 @@ import { ENoteOrder, localize, toCss, type BookT, type NoteT } from "~/utils";
 
 export const Livre = (props) => {
   const { loaderData } = props;
-  const state = useSelector(getState);
-  const { auth, isMobile, lib = loaderData.lib, locale } = state;
+  const {
+    auth,
+    isMobile,
+    lib = loaderData.lib,
+    locale,
+  } = useSelector(getState);
   const defaultLocale = import.meta.env.VITE_PUBLIC_LOCALE;
   const user = auth?.user;
 

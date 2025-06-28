@@ -1,27 +1,24 @@
 import { css } from "@emotion/react";
-import { DoubleArrowRightIcon } from "@radix-ui/react-icons";
-import { Select } from "@radix-ui/themes";
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router";
-import { Flex } from "~/components";
-import { getState, setState } from "~/store";
+import { Book1Icon, Flex, LibTitle } from "~/components";
+import { getState } from "~/store";
 import { localize } from "~/utils";
 import { BookTitle } from "./BookTitle";
 
 export const Header = (props) => {
   const { loaderData } = props;
-  const { isMobile, lib = loaderData.lib } = useSelector(getState);
+  const { lib = loaderData.lib } = useSelector(getState);
   const navigate = useNavigate();
 
   return (
-    <Flex direction="column" gap="3" {...(isMobile ? { align: "start" } : {})}>
+    <Flex
+      direction="column"
+      gap="3"
+      {...(loaderData.isMobile ? { align: "start" } : {})}
+    >
       <Flex width="100%" pl="1">
-        <DoubleArrowRightIcon />
-        <h3>
-          {localize("Bibliothèque", "Library")} :{" "}
-          <i>{lib[localize("name")] || lib.name}</i>
-        </h3>
+        <LibTitle lib={lib} />
       </Flex>
 
       {loaderData.book && (
@@ -57,7 +54,10 @@ export const Header = (props) => {
                 navigate(to);
               }}
             >
-              <Link to={to}>{b[localize("title")] || b.title}</Link>
+              <Flex direction="column">
+                <Book1Icon width={b.src ? "20em" : "50em"} />
+                <Link to={to}>{b[localize("title")] || b.title}</Link>
+              </Flex>
             </div>
           );
         })}

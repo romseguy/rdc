@@ -1,8 +1,10 @@
 import { Button } from "@radix-ui/themes";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { getState, setState } from "~/store";
+import { getState } from "~/store";
 import { localize } from "~/utils";
+import l1 from "/l1.svg";
+import b1 from "/b1.svg";
 
 export const iconProps = (props) => {
   const { title, style, onClick } = props;
@@ -334,3 +336,6 @@ export const EmailIcon = (props) => (
     ></path>
   </svg>
 );
+
+export const Book1Icon = (props) => <img src={b1} width="30em" {...props} />;
+export const BooksIcon = (props) => <img src={l1} width="30em" {...props} />;

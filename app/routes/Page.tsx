@@ -78,6 +78,7 @@ const Page = (props) => {
     dispatch(
       setState({
         isLoaded: true,
+        isMobile: props.loaderData.isMobile,
         locale,
         auth: { bearer, token, user },
       }),
