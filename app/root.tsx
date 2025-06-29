@@ -1,13 +1,7 @@
 import React from "react";
-import {
-  getSelectorsByUserAgent,
-  useDeviceSelectors,
-} from "react-device-detect";
-import { Provider } from "react-redux";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import type { Route } from "./+types/root";
 import "./root.scss";
-import { createStore } from "./store";
 
 export { ErrorBoundary } from "~/components";
 
@@ -84,32 +78,6 @@ export const links: Route.LinksFunction = () => [
   //{ rel: "apple-touch-startup-image", href: "/splash/" },
 ];
 
-export const loader = async (props: Route.LoaderArgs) => {
-  const userAgent = props.request.headers.get("user-agent") || "";
-  const isMobile = getSelectorsByUserAgent(userAgent).isMobile;
-
-  const data = {
-    userAgent,
-    isMobile,
-  };
-  return data;
-};
-
 export default function Root(props) {
-  const [{ isMobile }] =
-    typeof window === "object"
-      ? useDeviceSelectors(props.userAgent)
-      : [{ isMobile: props.isMobile || false }];
-  const initialState = {
-    isMobile,
-    locale: import.meta.env.VITE_PUBLIC_LOCALE,
-    modal: { isOpen: false },
-  };
-  const { store } = createStore(initialState);
-
-  return (
-    <Provider store={store}>
-      <Outlet />
-    </Provider>
-  );
+  return <Outlet />;
 }

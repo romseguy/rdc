@@ -12,9 +12,15 @@ export function Home(props) {
       id="home-page"
       css={isMobile ? { padding: "12px" } : { padding: "48px" }}
     >
-      <Flex>
+      {/* <Flex
+        {...(isMobile
+          ? {
+              direction: "column",
+            }
+          : { ml: "6" })}
+      >
         <LibTitle lib={lib} />
-      </Flex>
+      </Flex> */}
       <ul>
         <li>
           <b>{localize("Auteur", "Author")} : </b>

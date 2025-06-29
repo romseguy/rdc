@@ -3,7 +3,9 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { getState } from "~/store";
 import { linkButton, localize, toCssString } from "~/utils";
+//import add from "/add.svg";
 import l1 from "/l1.svg";
+import { default as LOL } from "/l2.svg";
 import b1 from "/b1.svg";
 import { css } from "@emotion/react";
 
@@ -97,20 +99,28 @@ export const PageSwitch = ({
   setPage,
   note,
   onClick,
+  ...props
 }) => {
   return (
     <div>
       {!isPageEdit ? (
-        <Button type="button" onClick={() => setIsPageEdit(true)}>
-          p.{note.page}
+        <Button
+          type="button"
+          variant="soft"
+          className="with-icon"
+          onClick={() => setIsPageEdit(true)}
+          {...props}
+        >
           <EditIcon
             {...iconProps({
               title: "Modifier la page",
               style: {
                 border: "none",
+                padding: "unset",
               },
             })}
           />
+          p.{note.page}
         </Button>
       ) : (
         <div
@@ -174,8 +184,21 @@ export const iconProps = (props) => {
 
   return out;
 };
+//export const AddIcon = (props) => <img src={add} width="30em" {...props} />;
 export const Book1Icon = (props) => <img src={b1} width="30em" {...props} />;
-export const BooksIcon = (props) => <img src={l1} width="30em" {...props} />;
+//export const BooksIcon = (props) => <img src={l2} width="30em" {...props} />;
+export const BooksIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    xmlSpace="preserve"
+    width={800}
+    height={800}
+    viewBox="0 0 487.866 487.866"
+    {...props}
+  >
+    <path d="M482.866 243.444h-72.203c1.063-.471 1.946-1.279 2.467-2.333a5 5 0 0 0 .207-3.951L374.941 133.4a5 5 0 0 0-6.16-3.043l-24.386 7.502v-37.816a5 5 0 0 0-5-5h-21.837a5 5 0 0 0-5 5v13.369h-24.974v-13.369a5 5 0 0 0-5-5h-52.375a5 5 0 0 0-5 5v13.369h-11.837v-4.347a5 5 0 0 0-5-5h-32.454v-4.021a5 5 0 0 0-5-5h-52.375a5 5 0 0 0-5 5v23.933H79.219a5 5 0 0 0-5 5v114.469H5a5 5 0 0 0-5 5v39.835a5 5 0 0 0 5 5h54.733v94.545a5 5 0 0 0 5 5h39.822a5 5 0 0 0 5-5v-94.545h267.434v94.545a5 5 0 0 0 5 5h39.822a5 5 0 0 0 5-5v-94.545h56.055a5 5 0 0 0 5-5v-39.835a5 5 0 0 0-5-5.002m-115.663-102.14 34.919 94.368-21.464 6.603-34.919-94.368zm3.225 102.14h-26.033v-70.353zm-47.87-138.402h11.837v38.33a4.97 4.97 0 0 0 0 2.54v97.531h-11.837V105.042m-10 18.369v120.033h-24.974V123.411zm-77.349-18.369h42.375v138.402h-42.375V105.042m-10 18.369v120.033h-11.837V123.411zm-21.837-9.348v129.38h-27.454v-129.38zm-79.829-9.021h42.375v3.687c-.008.113-.034.22-.034.334v134.38h-42.341V105.042m-39.324 28.933h29.324v109.469H84.219zm-5 119.469h298.377l.013.001.013-.001h100.244v14.961H10v-14.961zm20.336 129.38H69.733v-89.545h9.911v4.95a5 5 0 0 0 10 0v-4.95h9.911zm317.256 0h-29.822v-89.545h9.911v4.95a5 5 0 0 0 10 0v-4.95h9.911zm5-99.545h-19.795c-.04-.001-.076-.012-.116-.012s-.077.011-.116.012H84.76c-.04-.001-.076-.012-.116-.012s-.077.011-.116.012H10v-4.874h467.866v4.874zM91.802 367.913a7.158 7.158 0 1 1-14.317 0 7.158 7.158 0 0 1 14.317 0m318.578 0a7.158 7.158 0 1 1-14.317 0 7.158 7.158 0 0 1 14.317 0M79.644 352.71v-34.468a5 5 0 0 1 10 0v34.468a5 5 0 0 1-10 0m317.256 0v-34.468a5 5 0 0 1 10 0v34.468a5 5 0 0 1-10 0" />
+  </svg>
+);
 //#endregion
 
 //#region svg icons

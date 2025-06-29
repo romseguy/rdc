@@ -1,8 +1,11 @@
 import { isbot } from "isbot";
+import { useDeviceSelectors } from "react-device-detect";
+import { Provider } from "react-redux";
 import { useRoutes } from "react-router";
 import { Sitemap } from "~/components";
 import { Livre } from "~/routes/Livre";
 import { Note } from "~/routes/Note";
+import { createStore } from "~/store";
 import { type BookT, type Note as NoteT, type RootData } from "~/utils";
 import { loader as rootLoader } from "./_index";
 import Page from "./Page";
@@ -66,24 +69,41 @@ export const loader = async (props) => {
 };
 
 export default function CatchAllRoute(props) {
-  if (isbot()) return <Sitemap {...props} />;
+  const {
+    loaderData: { initialState, userAgent },
+  } = props;
+  const [{ isMobile }] = useDeviceSelectors(userAgent);
+  const { store } = createStore(
+    {
+      ...initialState,
+      app: { ...initialState.app, isMobile },
+    },
+    typeof window === "undefined",
+    typeof window !== "undefined",
+  );
 
-  return useRoutes([
-    {
-      path: "livre/:id",
-      element: <Page element={Livre} locale="fr" {...props} />,
-    },
-    {
-      path: "book/:id",
-      element: <Page element={Livre} locale="en" {...props} />,
-    },
-    {
-      path: "c/:id",
-      element: <Page element={Note} locale="fr" simple {...props} />,
-    },
-    {
-      path: "q/:id",
-      element: <Page element={Note} locale="en" simple {...props} />,
-    },
-  ]);
+  const App = isbot() ? (
+    <Sitemap {...props} />
+  ) : (
+    useRoutes([
+      {
+        path: "livre/:id",
+        element: <Page element={Livre} locale="fr" {...props} />,
+      },
+      {
+        path: "book/:id",
+        element: <Page element={Livre} locale="en" {...props} />,
+      },
+      {
+        path: "c/:id",
+        element: <Page element={Note} locale="fr" simple {...props} />,
+      },
+      {
+        path: "q/:id",
+        element: <Page element={Note} locale="en" simple {...props} />,
+      },
+    ])
+  );
+
+  return <Provider store={store}>{App}</Provider>;
 }

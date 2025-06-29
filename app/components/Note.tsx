@@ -2,12 +2,14 @@ import { css } from "@emotion/react";
 import {
   ArrowRightIcon,
   ArrowUpIcon,
+  ChatBubbleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  PlusCircledIcon,
   ReaderIcon,
   Share1Icon,
 } from "@radix-ui/react-icons";
-import { Badge, Box, Button } from "@radix-ui/themes";
+import { Badge, Box, Button, IconButton } from "@radix-ui/themes";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate, useNavigation } from "react-router";
@@ -112,48 +114,55 @@ export const Note = (props: NoteP) => {
       <Flex
         direction={isMobile ? "column" : "row"}
         gap={isMobile ? "0" : "3"}
-        mt={isMobile ? "0" : "0"}
         {...props}
       >
-        <Flex>
-          <PageSwitch
-            isPageEdit={isPageEdit}
-            setIsPageEdit={setIsPageEdit}
-            page={page}
-            setPage={setPage}
-            note={note}
-            onClick={onEditPageClick}
-          />
-
-          {note.index !== 0 && (
-            <Button type="button">
-              <ChevronLeftIcon />
-              {localize("Précédente", "Previous")}
-            </Button>
-          )}
-
-          {note.index !== notes.length - 1 && (
-            <Button type="button">
-              {localize("Suivant", "Next")}
-              <ChevronRightIcon />
-            </Button>
-          )}
-        </Flex>
+        <LocaleSwitch
+          setLocale={(locale) =>
+            navigate(
+              locale === "fr"
+                ? location.pathname.replace("book", "livre")
+                : location.pathname.replace("livre", "book"),
+            )
+          }
+        />
+        <PageSwitch
+          variant="soft"
+          isPageEdit={isPageEdit}
+          setIsPageEdit={setIsPageEdit}
+          page={page}
+          setPage={setPage}
+          note={note}
+          onClick={onEditPageClick}
+        />
 
         <Button
           type="button"
+          variant="soft"
           className="with-icon"
-          variant="surface"
           onClick={onOpenClick}
         >
-          {openLabel}
           <ReaderIcon
             {...iconProps({
               title: openLabel,
               style: { border: 0, padding: "unset" },
             })}
           />
+          {openLabel}
         </Button>
+
+        {note.index !== 0 && (
+          <Button variant="soft" type="button">
+            <ChevronLeftIcon />
+            {localize("Précédent", "Previous")}
+          </Button>
+        )}
+
+        {note.index !== notes.length - 1 && (
+          <Button variant="soft" type="button">
+            {localize("Suivant", "Next")}
+            <ChevronRightIcon />
+          </Button>
+        )}
       </Flex>
     );
   };
@@ -193,88 +202,65 @@ export const Note = (props: NoteP) => {
     );
   };
 
+  const onUserBadgeClick = () =>
+    alert(
+      localize(
+        "Si vous souhaitez envoyer un message à cet utilisateur, demandez son e-mail à " +
+          import.meta.env.VITE_PUBLIC_EMAIL,
+        "If you want to message this user, ask their email to " +
+          import.meta.env.VITE_PUBLIC_EMAIL,
+      ),
+    );
+
   return (
     <section>
       {/* note header */}
       <header>
-        <div
-          css={toCss({
-            padding: "6px",
-            background: "purple",
-          })}
-        >
-          {isEditing && (
-            <div
-              css={toCss({
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              })}
-            >
-              {note.isNew
-                ? localize("Nouvelle citation", "New quote")
-                : localize("Modifiez cette citation", "Edit this quote")}
-              <LocaleSwitch
-                setLocale={(locale) => dispatch(setState({ locale }))}
-              />
-            </div>
-          )}
+        {isEditing && (
+          <Flex gap="3">
+            {note.isNew
+              ? localize("Nouvelle citation", "New quote")
+              : localize("Modifiez cette citation", "Edit this quote")}
+            <LocaleSwitch
+              setLocale={(locale) => dispatch(setState({ locale }))}
+            />
+          </Flex>
+        )}
 
-          {!isEditing && (
-            <>
-              {/* note header */}
-              {isMobile && (
-                <Flex
-                  direction="column"
-                  css={css`
-                    button {
-                      margin: 12px 0;
-                    }
-                    button:last-of-type {
-                      margin-top: 0;
-                    }
-                  `}
-                >
-                  <NoteHeaderLeft />
-                  <NoteHeaderRight />
-                </Flex>
-              )}
+        {!isEditing && (
+          <>
+            {/* note header */}
+            {isMobile && (
+              <Flex
+                direction="column"
+                css={css`
+                  button {
+                    margin-bottom: 12px;
+                  }
+                `}
+              >
+                <NoteHeaderLeft />
+                <NoteHeaderRight />
+              </Flex>
+            )}
 
-              {!isMobile && (
-                <Flex justify="between">
-                  <NoteHeaderLeft />
+            {!isMobile && (
+              <Flex justify="between">
+                <NoteHeaderLeft />
 
-                  <Flex>
-                    <LocaleSwitch
-                      setLocale={(locale) =>
-                        navigate(
-                          locale === "fr"
-                            ? location.pathname.replace("book", "livre")
-                            : location.pathname.replace("livre", "book"),
-                        )
-                      }
-                    />
-                    <Badge variant="solid">
-                      <UserIcon />
-                      {toUsername(note.note_email) ||
-                        localize("Anonyme", "Anonymous")}
-                    </Badge>
-                  </Flex>
+                <Flex>{/* CENTER */}</Flex>
 
-                  <NoteHeaderRight />
-                </Flex>
-              )}
-            </>
-          )}
-        </div>
+                <NoteHeaderRight />
+              </Flex>
+            )}
+          </>
+        )}
       </header>
 
       {/* note desc */}
       <main
         key={"note-" + note.id}
         css={css`
-          max-height: 250px;
-          line-height: 2;
           padding: ${isMobile ? "0px" : "6px"};
           ${isEditing ? "min-height: 250px;" : ""}
           ${!isEditing ? "overflow-y: scroll" : ""}
@@ -282,32 +268,26 @@ export const Note = (props: NoteP) => {
       >
         {isEditing && editor(locale)}
         {!isEditing && (
-          <div
-            dangerouslySetInnerHTML={{
-              __html: desc,
-            }}
-          />
+          <>
+            <Badge variant="surface" onClick={onUserBadgeClick}>
+              <UserIcon />
+              {toUsername(note.note_email) || localize("Anonyme", "Anonymous")}
+            </Badge>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: desc,
+              }}
+            />
+          </>
         )}
       </main>
 
       {/* comments */}
       {!note.isNew && (
-        <div
-          css={toCss({
-            background: "rgba(255, 255, 255, 0.1)",
-            marginBottom: "12px",
-          })}
-        >
+        <footer>
           {!note.isEditing && (
-            <div
-              css={toCss({
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "6px",
-                background: "purple",
-                cursor: "pointer",
-              })}
+            <Flex
+              p="1"
               onClick={async () => {
                 setIsShowComments(!isShowComments);
                 if (!isShowComments) {
@@ -317,58 +297,53 @@ export const Note = (props: NoteP) => {
                 }
               }}
             >
-              <div>
-                {Array.isArray(note.comments) && note.comments.length > 0 ? (
-                  <Flex>
-                    <Button>
-                      {note.comments.length +
-                        " " +
-                        localize("commentaire", "comment")}
-                      {note.comments.length > 1 && "s"}
-
-                      {isShowComments ? (
-                        <ArrowUpIcon
-                          {...iconProps({
-                            title: localize(
-                              "Ouvrir la zone des commentaires",
-                              "Open comments area",
-                            ),
-                          })}
-                        />
-                      ) : (
-                        <ArrowRightIcon
-                          {...iconProps({
-                            title: localize(
-                              "Fermer la zone des commentaires",
-                              "Close comments area",
-                            ),
-                          })}
-                        />
-                      )}
-                    </Button>
-                  </Flex>
-                ) : (
-                  localize("Pas de commentaires", "No comments")
-                )}
-              </div>
-
               {!isAddComment && (
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isAddComment) {
-                      setIsAddComment(true);
-                      //setIsShowComments(false);
-                      setTimeout(() => {
-                        executeScroll();
-                      }, 200);
-                    }
-                  }}
-                >
-                  {localize("Ajouter un commentaire", "Add a comment")}
+                <>
+                  <Button
+                    variant="soft"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!isAddComment) {
+                        setIsAddComment(true);
+                        //setIsShowComments(false);
+                        setTimeout(() => {
+                          executeScroll();
+                        }, 200);
+                      }
+                    }}
+                  >
+                    <PlusCircledIcon />
+                    {localize("Ajouter un commentaire", "Add a comment")}
+                  </Button>
+                </>
+              )}
+
+              {Array.isArray(note.comments) && note.comments.length > 0 && (
+                <Button>
+                  <ChatBubbleIcon />
+                  {note.comments.length}
+                  {isShowComments ? (
+                    <ArrowUpIcon
+                      {...iconProps({
+                        title: localize(
+                          "Ouvrir la zone des commentaires",
+                          "Open comments area",
+                        ),
+                      })}
+                    />
+                  ) : (
+                    <ArrowRightIcon
+                      {...iconProps({
+                        title: localize(
+                          "Fermer la zone des commentaires",
+                          "Close comments area",
+                        ),
+                      })}
+                    />
+                  )}
                 </Button>
               )}
-            </div>
+            </Flex>
           )}
 
           {isAddComment && (
@@ -411,9 +386,15 @@ export const Note = (props: NoteP) => {
 
           {!note.isNew && isShowComments && (
             <div css={toCss({ background: "rgba(255, 255, 255, 0.2)" })}>
-              {note.comments?.map((c) => {
+              {note.comments?.map((c, i) => {
                 return (
                   <Comment
+                    css={toCss({
+                      borderBottom:
+                        i !== (note.comments?.length || 0) - 1
+                          ? "1px solid white"
+                          : "",
+                    })}
                     comment={c}
                     onDeleteClick={() => onDeleteCommentClick(c)}
                   />
@@ -422,7 +403,7 @@ export const Note = (props: NoteP) => {
             </div>
           )}
           <div ref={elementToScrollRef} />
-        </div>
+        </footer>
       )}
     </section>
   );

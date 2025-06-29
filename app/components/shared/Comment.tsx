@@ -10,18 +10,10 @@ export const Comment = (props) => {
   const user = auth?.user;
 
   return (
-    <Flex
-      key={"comment-" + comment.id}
-      justify="between"
-      p="3"
-      css={toCss({
-        borderBottom: "1px solid white",
-      })}
-      {...p}
-    >
+    <Flex key={"comment-" + comment.id} justify="between" p="3" {...p}>
       {/* comment */}
       <Box>
-        <Badge size="3" mr="3">
+        <Badge size="3" mr="3" variant="surface">
           <UserIcon />
           {toUsername(comment.comment_email)}
         </Badge>

@@ -15,7 +15,7 @@ import type { Comment } from "~/utils";
 axios.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const { store } = createStore();
+      const { store } = createStore({ noCache: true });
       config.headers.common.authorization = `Bearer ${
         store.getState().app.auth?.bearer
       }`;

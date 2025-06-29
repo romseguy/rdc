@@ -1,8 +1,9 @@
 import { css } from "@emotion/react";
-import { Box, Button, Select, Separator, Spinner } from "@radix-ui/themes";
+import { PlusCircledIcon } from "@radix-ui/react-icons";
+import { Box, Button, IconButton, Select, Spinner } from "@radix-ui/themes";
 import { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useNavigation } from "react-router";
+import { useNavigate } from "react-router";
 import {
   BooksIcon,
   Flex,
@@ -12,7 +13,7 @@ import {
 } from "~/components";
 import { tokenKey } from "~/lib/supabase/tokenKey";
 import { getState, setState } from "~/store";
-import { localize, pageTitleStyle, type Lib } from "~/utils";
+import { localize, type Lib } from "~/utils";
 
 export const PageTitle = (props) => {
   const { loaderData } = props;
@@ -20,6 +21,7 @@ export const PageTitle = (props) => {
     auth,
     isMobile,
     isLoaded,
+    lib = loaderData.lib as Lib,
     libs = loaderData.libs as Lib[],
     locale,
   } = useSelector(getState);
@@ -70,15 +72,15 @@ export const PageTitle = (props) => {
 
   return (
     <Flex
+      id="page-title"
+      className="bg-purple-900/75"
       p="3"
       {...(isMobile
         ? { direction: "column", align: "start" }
         : { justify: "between" })}
     >
-      {/* {!isMobile && <Separator style={{ visibility: "hidden" }} />} */}
       <Flex {...(isMobile ? { justify: "between", width: "100%" } : {})}>
         <h1
-          style={pageTitleStyle(isMobile)}
           onClick={() => {
             navigate("/");
           }}
@@ -107,32 +109,9 @@ export const PageTitle = (props) => {
       >
         {isMobile && LoginButton}
 
-        {/* <Select.Root
-          defaultValue={item}
-          onOpenChange={(open) => {
-            if (open)
-              alert(
-                localize(
-                  `Si vous voulez avoir les bibliothèques classées par catégories, merci d'envoyer un mail à ${
-                    import.meta.env.VITE_PUBLIC_EMAIL
-                  } pour me le faire savoir.`,
-                  `If you are interested in having quotes grouped by categories, please send an email to ${
-                    import.meta.env.VITE_PUBLIC_EMAIL
-                  } to make me know.`,
-                ),
-              );
-          }}
-        >
-          <Select.Trigger variant="classic" />
-          <Select.Content>
-            <Select.Item value="0">
-              {localize("Catégories", "Categories")}
-            </Select.Item>
-          </Select.Content>
-        </Select.Root> */}
+        <Flex {...(isMobile ? { direction: "column", align: "start" } : {})}>
+          {!isMobile && <BooksIcon height="3em" width="3em" fill="white" />}
 
-        <Flex>
-          <BooksIcon />
           <Select.Root
             value={item}
             onValueChange={(value) => {
@@ -161,59 +140,78 @@ export const PageTitle = (props) => {
               </Select.Item>
             </Select.Content>
           </Select.Root>
-        </Flex>
 
-        {item === "0" && (
-          <Select.Root
-            //defaultValue={lib[localize("name")] || lib.name}
-            onValueChange={(value) => {
-              const newLib = libs.find(
-                (lib) => (lib[localize("name")] || lib.name) === value,
-              );
-              dispatch(
-                setState({
-                  lib: newLib,
-                }),
-              );
-              navigate("/");
-            }}
-          >
-            <Select.Trigger
-              placeholder={localize(
-                "Choisir une bibliothèque",
-                "Pick a library",
-              )}
-              variant="classic"
-            />
-            <Select.Content
-              css={css`
-                *  {
-                  margin: 0;
-                  padding: 3px;
-                }
-              `}
-            >
-              {Object.keys(libsGroupedByAuthor).map((author, i) => (
-                <Select.Group key={"author" + i}>
-                  <Select.Label>{author}</Select.Label>
-                  {(libsGroupedByAuthor[author] || []).map((l) => (
-                    <Select.Item
-                      key={"lib-" + l.id}
-                      value={l[localize("name")] || l.name}
-                    >
-                      <Box ml="3">{l[localize("name")] || l.name}</Box>
-                    </Select.Item>
+          <Flex>
+            {item === "0" && (
+              <Select.Root
+                defaultValue={lib[localize("name")] || lib.name}
+                onValueChange={(value) => {
+                  const newLib = libs.find(
+                    (lib) => (lib[localize("name")] || lib.name) === value,
+                  );
+                  dispatch(
+                    setState({
+                      lib: newLib,
+                    }),
+                  );
+                  navigate("/");
+                }}
+              >
+                <Select.Trigger
+                  placeholder={localize(
+                    "Choisir une bibliothèque",
+                    "Pick a library",
+                  )}
+                  variant="classic"
+                />
+                <Select.Content
+                  css={css`
+                    *  {
+                      margin: 0;
+                      padding: 3px;
+                    }
+                  `}
+                >
+                  {Object.keys(libsGroupedByAuthor).map((author, i) => (
+                    <Select.Group key={"author" + i}>
+                      <Select.Label>{author}</Select.Label>
+                      {(libsGroupedByAuthor[author] || []).map((l) => (
+                        <Select.Item
+                          key={"lib-" + l.id}
+                          value={l[localize("name")] || l.name}
+                        >
+                          {l[localize("name")] || l.name}
+                        </Select.Item>
+                      ))}
+                    </Select.Group>
                   ))}
-                </Select.Group>
-              ))}
-            </Select.Content>
-          </Select.Root>
-        )}
+                </Select.Content>
+              </Select.Root>
+            )}
+            <IconButton
+              onClick={() => {
+                alert(
+                  localize(
+                    "Pour ajouter une bibliothèque, envoyez un e-mail à " +
+                      import.meta.env.VITE_PUBLIC_EMAIL +
+                      "",
+                    "To add a library, send an email to" +
+                      import.meta.env.VITE_PUBLIC_EMAIL +
+                      "",
+                  ),
+                );
+              }}
+              variant="surface"
+            >
+              <PlusCircledIcon />
+            </IconButton>
+          </Flex>
+        </Flex>
       </Flex>
 
-      <Flex>
-        {!isMobile && LoginButton}
-        {!isMobile && (
+      {!isMobile && (
+        <Flex>
+          {LoginButton}
           <LocaleSwitch
             width={"2em"}
             height={"2em"}
@@ -226,8 +224,34 @@ export const PageTitle = (props) => {
               );
             }}
           />
-        )}
-      </Flex>
+        </Flex>
+      )}
     </Flex>
   );
 };
+
+{
+  /* <Select.Root
+          defaultValue={item}
+          onOpenChange={(open) => {
+            if (open)
+              alert(
+                localize(
+                  `Si vous voulez avoir les bibliothèques classées par catégories, merci d'envoyer un mail à ${
+                    import.meta.env.VITE_PUBLIC_EMAIL
+                  } pour me le faire savoir.`,
+                  `If you are interested in having quotes grouped by categories, please send an email to ${
+                    import.meta.env.VITE_PUBLIC_EMAIL
+                  } to make me know.`,
+                ),
+              );
+          }}
+        >
+          <Select.Trigger variant="classic" />
+          <Select.Content>
+            <Select.Item value="0">
+              {localize("Catégories", "Categories")}
+            </Select.Item>
+          </Select.Content>
+        </Select.Root> */
+}

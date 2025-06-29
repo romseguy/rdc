@@ -4,12 +4,10 @@ import {
   type PayloadAction,
 } from "@reduxjs/toolkit";
 import { api } from "~/api";
-import type { ModalProps, ToastProps } from "~/components";
-import type { Collections, Lib } from "~/utils";
+import type { AppState } from "~/utils";
 
 const reducer = (i) => {
-  console.log("🚀 ~ reducer ~ i:", i);
-  const app = (state = i, action: PayloadAction<any>) => {
+  const app = (state = i.app, action: PayloadAction<any>) => {
     //console.log(action.type);
     if (action.type === "app/setState") {
       const newState = {
@@ -32,37 +30,40 @@ const middleware = (getDefaultMiddleware) => {
   ]);
 };
 const makeStore = (i) => {
+  console.log("🚀 ~ makeStore ~ i:", i);
   return configureStore({
     reducer: reducer(i),
     middleware,
-    preloadedState: { app: i },
+    preloadedState: i,
   });
 };
 
 export let store;
-export const createStore: (i?: any) => {
+export const createStore: (
+  i?: any,
+  skipCache?: boolean,
+  shouldCache?: boolean,
+) => {
   store: AppStore;
-} = (i) => {
-  const noCache = (i || {}).noCache;
-  if (!store || (typeof noCache === "boolean" && i.noCache))
-    store = makeStore(i);
+} = (i = { app: {} }, skipCache = false, shouldCache = true) => {
+  if (!i.app.auth) i.app.auth = {};
+  if (!i.app.locale) i.app.locale = import.meta.env.VITE_PUBLIC_LOCALE;
+  if (!i.app.modal) i.app.modal = {};
 
-  return { store };
+  if (store && !skipCache) {
+    console.log("cached");
+    return { store };
+  }
+  if (shouldCache) {
+    console.log("caching");
+    store = makeStore(i);
+    return { store };
+  }
+  console.log("fresh");
+  return { store: makeStore(i) };
 };
 export const getState = (state) => {
-  return state.app as {
-    appearance: string;
-    auth: any;
-    collections: Collections;
-    isMobile: boolean;
-    isLoaded: boolean;
-    locale: string;
-    libs: Lib[];
-    lib: Lib;
-    modal: ModalProps;
-    screenWidth: number;
-    toast: ToastProps;
-  };
+  return state.app as AppState;
 };
 export const setState = (payload) => ({ type: "app/setState", payload });
 export type AppStore = ReturnType<typeof configureStore<any>>;

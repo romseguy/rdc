@@ -36,7 +36,7 @@ export const ErrorBoundary = (props: Route.ErrorBoundaryProps) => {
   if (!isLoaded) return null;
 
   return (
-    <Provider store={createStore({ noCache: true }).store}>
+    <Provider store={createStore().store}>
       <ErrorPage message={message} details={details} stack={stack} />
     </Provider>
   );

@@ -1,48 +1,30 @@
-import { useStorage } from "@charlietango/hooks/use-storage";
-import { css } from "@emotion/react";
-import {
-  ArrowUpIcon,
-  BellIcon,
-  HeartIcon,
-  MoonIcon,
-  SunIcon,
-} from "@radix-ui/react-icons";
-import { Toggle } from "@radix-ui/react-toggle";
 import { Theme } from "@radix-ui/themes";
-import type { ThemeOwnProps } from "@radix-ui/themes/components/theme.props";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "react-router";
 import {
-  Flex,
-  ToastsContainer,
   Config,
-  Header,
+  PageHeader,
   Modal,
   PageTitle,
   SpinnerOverlay,
-  useToggleModal,
+  ToastsContainer,
+  ToggleButtonsRight,
 } from "~/components";
 import { tokenKey } from "~/lib/supabase/tokenKey";
 import { getState, setState } from "~/store";
-import { length, toggleCss } from "~/utils";
+import { length } from "~/utils";
 
 const Page = (props) => {
   //#region state
   const { element, loaderData, noTheme, simple } = props;
   const state = useSelector(getState);
-  const { auth, isMobile, locale, modal, toast } = state;
-  const user = auth?.user;
-  const [appearance, setAppearance] = useStorage("color-mode", {
-    type: "local",
-    defaultValue: "dark",
-  });
+  const { appearance, isMobile, locale, modal, toast } = state;
   //#endregion
 
   //#region hooks
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const toggleModal = useToggleModal();
   useEffect(() => {
     if (navigation.state === "idle" && !length(state.collections))
       dispatch(
@@ -75,12 +57,12 @@ const Page = (props) => {
       localStorage.setItem(tokenKey, bearer);
     }
     const { user, ...token } = bearer ? JSON.parse(bearer) : {};
+
     dispatch(
       setState({
-        isLoaded: true,
-        isMobile: props.loaderData.isMobile,
-        locale,
         auth: { bearer, token, user },
+        isLoaded: true,
+        locale,
       }),
     );
   }, []);
@@ -92,92 +74,57 @@ const Page = (props) => {
   };
   const childProps = {
     ...props,
-    ...{ loaderData }, // ssr
-    ...{
-      appearance,
-      setAppearance,
-    },
+    //...{ loaderData },
   };
   //#endregion
-
-  const toggleButtonsRight = (
-    <div style={{ position: "fixed", bottom: 12, right: 12, zIndex: 999 }}>
-      <Flex gap="2">
-        <Toggle
-          css={css(toggleCss(appearance, isMobile))}
-          onPressedChange={() => {
-            toggleModal("heart-modal");
-          }}
-        >
-          <HeartIcon />
-        </Toggle>
-        <Toggle
-          css={css(toggleCss(appearance, isMobile))}
-          onPressedChange={() => {
-            toggleModal("notif-modal", {
-              email: user?.email,
-            });
-          }}
-        >
-          <BellIcon />
-        </Toggle>
-        <Toggle
-          css={css(toggleCss(appearance, isMobile))}
-          onPressedChange={() => {
-            setAppearance(appearance === "dark" ? "light" : "dark");
-          }}
-        >
-          {appearance === "dark" ? <SunIcon /> : <MoonIcon />}
-        </Toggle>
-        <Toggle
-          css={css(toggleCss(appearance, isMobile))}
-          onPressedChange={() =>
-            window.scrollTo({ top: 0, behavior: "smooth" })
-          }
-        >
-          <ArrowUpIcon />
-        </Toggle>
-      </Flex>
-    </div>
-  );
 
   if (noTheme)
     return <div id="page">{React.createElement(element, childProps)}</div>;
 
   if (simple)
     return (
-      <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
-        <Config />
-        <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
-        {modal.isOpen && <Modal {...childProps} />}
+      <Theme appearance={appearance}>
+        {navigation.state === "idle" && (
+          <>
+            <Config />
+            <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
+            <ToggleButtonsRight />
 
-        {!modal.isOpen && (
-          <div id="page">{React.createElement(element, childProps)}</div>
+            {modal.isOpen && <Modal {...childProps} />}
+
+            {!modal.isOpen && (
+              <div id="page">{React.createElement(element, childProps)}</div>
+            )}
+          </>
         )}
 
         {navigation.state === "loading" && <SpinnerOverlay />}
-
-        {toggleButtonsRight}
       </Theme>
     );
 
   return (
-    <Theme appearance={appearance as ThemeOwnProps["appearance"]}>
-      <Config />
-      <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
-      {modal.isOpen && <Modal {...childProps} />}
+    <Theme
+      className={isMobile ? "isMobile" : undefined}
+      appearance={appearance}
+    >
+      {navigation.state === "idle" && (
+        <>
+          <Config />
+          <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
+          {/* <ToggleButtonsLeft /> */}
+          <ToggleButtonsRight />
 
-      {!modal.isOpen && navigation.state === "idle" && (
-        <div id="page">
-          <header>
-            <PageTitle {...childProps} />
-            <Header {...childProps} />
-          </header>
+          {modal.isOpen && <Modal {...childProps} />}
 
-          {React.createElement(element, childProps)}
+          {!modal.isOpen && (
+            <div id="page">
+              <PageTitle {...childProps} />
+              <PageHeader {...childProps} />
 
-          {toggleButtonsRight}
-        </div>
+              {React.createElement(element, childProps)}
+            </div>
+          )}
+        </>
       )}
 
       {navigation.state === "loading" && <SpinnerOverlay />}

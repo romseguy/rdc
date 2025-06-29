@@ -12,7 +12,19 @@ export const collections: Seed = {
           title_en: "The Wave 1",
           src: "https://image.jimcdn.com/app/cms/image/transf/dimension=141x10000:format=png/path/sd7739c2374e37db5/image/id624acc08d96ca45/version/1456401001/image.png",
           notes: [
-            { page: 123, desc: "desc", desc_en: "en", note_email: "a@b.com" },
+            {
+              page: 123,
+              desc: "desc",
+              desc_en: "en",
+              note_email: "a@b.com",
+              comments: [
+                {
+                  html: "stuff",
+                  comment_email: import.meta.env.VITE_PUBLIC_EMAIL,
+                  created_at: new Date().toISOString(),
+                },
+              ],
+            },
             { page: 12, desc: "test" },
           ],
         },
@@ -22,7 +34,32 @@ export const collections: Seed = {
       name: "Evolutionary Psychology",
       author: "Bernard de Montréal",
       books: [
-        { is_conf: true, title: "L'incapacité", title_en: "The powerlessness" },
+        {
+          is_conf: true,
+          title: "L'incapacité",
+          title_en: "The powerlessness",
+          notes: [
+            {
+              page: 123,
+              desc: "desc",
+              desc_en: "en",
+              note_email: "a@b.com",
+              comments: [
+                {
+                  html: "stuff",
+                  comment_email: import.meta.env.VITE_PUBLIC_EMAIL,
+                  created_at: new Date().toISOString(),
+                },
+                {
+                  html: "stuff2",
+                  comment_email: import.meta.env.VITE_PUBLIC_EMAIL,
+                  created_at: new Date().toISOString(),
+                },
+              ],
+            },
+            { page: 12, desc: "test" },
+          ],
+        },
       ],
     },
   ],

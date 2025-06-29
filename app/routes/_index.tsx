@@ -1,36 +1,38 @@
+import type { ThemeOwnProps } from "@radix-ui/themes/components/theme.props";
 import { isbot } from "isbot";
+import {
+  getSelectorsByUserAgent,
+  useDeviceSelectors,
+} from "react-device-detect";
+import { Provider } from "react-redux";
 import { api, getCollections } from "~/api";
 import { Sitemap } from "~/components";
 import { Home } from "~/routes/Home";
+import { createStore } from "~/store";
 import {
-  collections as offlineCollections,
   length,
+  collections as offlineCollections,
   type Lib,
   type RootData,
   type Seed,
 } from "~/utils";
 import type { Route } from "../+types/root";
 import Page from "./Page";
-import { createStore } from "~/store";
-import { getSelectorsByUserAgent } from "react-device-detect";
 
 export const loader = async (props: Route.LoaderArgs) => {
-  const isMobile = getSelectorsByUserAgent(
-    props.request.headers.get("user-agent") || "",
-  ).isMobile;
-  const initialState = {
-    isMobile,
-    locale: import.meta.env.VITE_PUBLIC_LOCALE,
-    modal: {},
-    noCache: true,
-  };
-  const { store } = createStore(initialState);
+  const cookieHeader = props.request.headers.get("cookie");
+  const appearance = cookieHeader?.split("=")[1] || "dark";
+  const userAgent = props.request.headers.get("user-agent") || "";
+
   let data: RootData = {
     collections: offlineCollections,
-    isMobile,
+    appearance: appearance as ThemeOwnProps["appearance"],
     libs: [],
+    userAgent,
   };
 
+  const { isMobile } = getSelectorsByUserAgent(userAgent);
+  const { store } = createStore({ app: { appearance, isMobile } }, true, false);
   const { isSuccess, data: collections } = await store.dispatch(
     getCollections.initiate(""),
   );
@@ -77,6 +79,9 @@ export const loader = async (props: Route.LoaderArgs) => {
               ...note,
               id: Number(k + 1).toString(),
               book_id: bookId,
+              comments: note.comments?.filter(
+                (comment) => comment.note_id === note.id,
+              ),
             })),
           };
         }),
@@ -85,10 +90,30 @@ export const loader = async (props: Route.LoaderArgs) => {
   }
 
   data.lib = data.libs[0] as Seed | Lib;
+  data.initialState = store.getState();
+
   return data;
 };
 
 export default function IndexRoute(props) {
-  if (isbot()) return <Sitemap {...props} />;
-  return <Page element={Home} {...props} />;
+  const {
+    loaderData: { initialState, appearance, userAgent },
+  } = props;
+  const [{ isMobile }] = useDeviceSelectors(userAgent);
+  const { store } = createStore(
+    {
+      ...initialState,
+      app: { ...initialState.app, isMobile },
+    },
+    typeof window === "undefined",
+    typeof window !== "undefined",
+  );
+
+  const App = isbot() ? (
+    <Sitemap {...props} />
+  ) : (
+    <Page element={Home} {...props} />
+  );
+
+  return <Provider store={store}>{App}</Provider>;
 }

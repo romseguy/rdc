@@ -187,8 +187,12 @@ export const Modal = (props) => {
                   if (checked) {
                     alert(
                       localize(
-                        "Si vous trouvez cette fonctionnalité intéressante, merci d'envoyer un mail à contact@romseguy.com pour m'en parler.",
-                        "If you are intested in this improvement, please send an email to contact@romseguy.com to let me know.",
+                        "Si vous trouvez cette fonctionnalité intéressante, merci d'envoyer un mail à " +
+                          import.meta.env.VITE_PUBLIC_EMAIL +
+                          " pour m'en parler.",
+                        "If you are intested in this improvement, please send an email to " +
+                          import.meta.env.VITE_PUBLIC_EMAIL +
+                          " to let me know.",
                       ),
                     );
                   }
@@ -204,8 +208,12 @@ export const Modal = (props) => {
                   if (checked) {
                     alert(
                       localize(
-                        "Si vous trouvez cette fonctionnalité intéressante, merci d'envoyer un mail à contact@romseguy.com pour m'en parler.",
-                        "If you are intested in this improvement, please send an email to contact@romseguy.com to let me know.",
+                        "Si vous trouvez cette fonctionnalité intéressante, merci d'envoyer un mail à " +
+                          import.meta.env.VITE_PUBLIC_EMAIL +
+                          " pour m'en parler.",
+                        "If you are intested in this improvement, please send an email to " +
+                          import.meta.env.VITE_PUBLIC_EMAIL +
+                          " to let me know.",
                       ),
                     );
                   }

@@ -5,30 +5,38 @@ import { Book1Icon, Flex, LibTitle } from "~/components";
 import { getState } from "~/store";
 import { localize } from "~/utils";
 import { BookTitle } from "./BookTitle";
+import { Box, IconButton } from "@radix-ui/themes";
+import { DoubleArrowRightIcon, PlusCircledIcon } from "@radix-ui/react-icons";
 
-export const Header = (props) => {
+export const PageHeader = (props) => {
   const { loaderData } = props;
-  const { lib = loaderData.lib } = useSelector(getState);
+  const { isMobile, lib = loaderData.lib } = useSelector(getState);
   const navigate = useNavigate();
 
   return (
-    <Flex
-      direction="column"
-      gap="3"
-      {...(loaderData.isMobile ? { align: "start" } : {})}
-    >
-      <Flex width="100%" pl="1">
-        <LibTitle lib={lib} />
-      </Flex>
+    <div id="page-header">
+      {!isMobile && (
+        <Box ml="1">
+          <h1 className="text-lg">
+            <Flex>
+              <DoubleArrowRightIcon />
+              {localize("Votre sélection", "Your selection")} :
+            </Flex>
+          </h1>
+          <Flex>
+            <LibTitle lib={lib} />
+          </Flex>
+        </Box>
+      )}
 
-      {loaderData.book && (
-        <Flex width="100%" pl="1">
+      {!isMobile && loaderData.book && (
+        <Flex ml="2" mb="3">
           <BookTitle lib={lib} book={loaderData.book} />
         </Flex>
       )}
 
       {/* books list */}
-      <Flex gap="0" width="100%" overflowX="scroll">
+      <Flex gap="0" overflowX="scroll">
         {lib.books?.map((b, index) => {
           const to = "/" + localize("livre", "book") + "/" + b.id;
           return (
@@ -62,6 +70,6 @@ export const Header = (props) => {
           );
         })}
       </Flex>
-    </Flex>
+    </div>
   );
 };

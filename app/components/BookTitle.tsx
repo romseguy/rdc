@@ -4,9 +4,9 @@ import { localize } from "~/utils";
 
 export const BookTitle = ({ lib, book }) => {
   return (
-    <Flex>
+    <>
       {book.title && (
-        <>
+        <Flex>
           {book.is_conf ? (
             <>
               <ChatBubbleIcon width={30} height={30} />
@@ -19,12 +19,13 @@ export const BookTitle = ({ lib, book }) => {
               {/* {localize("Livre", "Book")} */}
             </>
           )}
+
           {book.title && <i>{book[localize("title")] || book.title}</i>}
-        </>
+        </Flex>
       )}
 
       {!book.title && (
-        <>
+        <Flex>
           {book.is_conf ? <ChatBubbleIcon /> : <BookIcon />}
           {book.index === 0
             ? localize("Premier", "First")
@@ -40,8 +41,8 @@ export const BookTitle = ({ lib, book }) => {
           <span> </span>
           {localize("de la bibliothèque", "in the library")} :<span> </span>
           <i>{lib[localize("name")] || lib.name}</i>
-        </>
+        </Flex>
       )}
-    </Flex>
+    </>
   );
 };
