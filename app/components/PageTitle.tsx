@@ -1,4 +1,5 @@
-import { Button, Select, Separator, Spinner } from "@radix-ui/themes";
+import { css } from "@emotion/react";
+import { Box, Button, Select, Separator, Spinner } from "@radix-ui/themes";
 import { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useNavigation } from "react-router";
@@ -19,7 +20,7 @@ export const PageTitle = (props) => {
     auth,
     isMobile,
     isLoaded,
-    libs = loaderData.libs,
+    libs = loaderData.libs as Lib[],
     locale,
   } = useSelector(getState);
   const user = auth?.user;
@@ -27,8 +28,9 @@ export const PageTitle = (props) => {
   const libsGroupedByAuthor = useMemo(() => {
     if (!libs) {
     }
+    const rows = [...libs].sort((a, b) => (a.author > b.author ? 1 : -1));
     let els: Record<string, Lib[]> = {};
-    for (const row of libs) {
+    for (const row of rows) {
       els[row.author] = (els[row.author] || []).concat([row]);
     }
     return els;
@@ -143,7 +145,7 @@ export const PageTitle = (props) => {
                     } pour me le faire savoir.`,
                     `If you are interested in having quotes grouped by topics, please send an email to ${
                       import.meta.env.VITE_PUBLIC_EMAIL
-                    } to make me know.`,
+                    } to let me know.`,
                   ),
                 );
               }
@@ -183,7 +185,14 @@ export const PageTitle = (props) => {
               )}
               variant="classic"
             />
-            <Select.Content>
+            <Select.Content
+              css={css`
+                *  {
+                  margin: 0;
+                  padding: 3px;
+                }
+              `}
+            >
               {Object.keys(libsGroupedByAuthor).map((author, i) => (
                 <Select.Group key={"author" + i}>
                   <Select.Label>{author}</Select.Label>
@@ -192,7 +201,7 @@ export const PageTitle = (props) => {
                       key={"lib-" + l.id}
                       value={l[localize("name")] || l.name}
                     >
-                      {l[localize("name")] || l.name}
+                      <Box ml="3">{l[localize("name")] || l.name}</Box>
                     </Select.Item>
                   ))}
                 </Select.Group>

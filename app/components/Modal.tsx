@@ -8,19 +8,38 @@ import { deleteComment, postComments } from "~/api";
 import {
   BackButton,
   Comment,
+  DonateButton,
   EmailIcon,
   Flex,
   Input,
   useToast,
 } from "~/components";
 import { getState, setState } from "~/store";
-import { linkButton, localize, toCss, toCssString } from "~/utils";
+import {
+  linkButton,
+  localize,
+  toCss,
+  toCssString,
+  type Book,
+  type NoteT,
+} from "~/utils";
 const Login = lazy(() => import("~/components/Login"));
+const sanitize = (str) => decode(str.replace(/(<([^>]+)>)/gi, ""));
+
+export type ModalProps = {
+  id: string;
+  isOpen: boolean;
+  book?: Book | null;
+  note?: NoteT | null;
+  email?: string | null;
+};
 
 export const Modal = (props) => {
   const { i18n } = props;
-  const { collections, modal } = useSelector(getState);
-  const comments = collections?.comments.filter(({ note_id }) => !note_id);
+  const { collections, isMobile, modal } = useSelector(getState);
+  const comments = collections.comments.filter(
+    ({ is_feedback }) => is_feedback,
+  );
   const { id, book, note } = modal;
   const [email, setEmail] = useState<string>("");
   const [message, setMessage] = useState<string>("");
@@ -63,9 +82,7 @@ export const Modal = (props) => {
                   ? " livre : " + book.title
                   : " livre de la bibliothèque : " + props.loaderData.lib.name
               } `}
-              //cc={["cc1@example.com", "cc2@example.com"]}
-              //bcc={["bcc@example.com"]}
-              //obfuscate
+              obfuscate
             >
               <MailToTrigger>
                 {localize("Envoyer par mail", "Send by email")}
@@ -74,7 +91,7 @@ export const Modal = (props) => {
                 - Citation du livre {""} :
                 <br />
                 <br />
-                {decode(note.desc.replace(/(<([^>]+)>)/gi, ""))}
+                {sanitize(note.desc)}
               </MailToBody>
             </MailTo>
 
@@ -106,8 +123,15 @@ export const Modal = (props) => {
       <div id="modal">
         <div id={id}>
           <Flex direction="column" justify="center" gap="3">
-            <h1>{localize("Vos", "Your")} notifications</h1>
+            <Flex>
+              <BackButton onClick={() => toggleModal(id)} />
+              <DonateButton />
+            </Flex>
+
+            <h1>Notifications</h1>
+
             <Flex
+              direction={isMobile ? "column" : "row"}
               css={css`
                 position: relative;
               `}
@@ -153,7 +177,8 @@ export const Modal = (props) => {
               )}
             </Flex>
 
-            <h2>{localize("Fréquence", "Frequency")}</h2>
+            <h2>{localize("Quand ?", "When?")}</h2>
+
             <Flex>
               <label>{localize("Quotidienne", "Daily")}</label>
               <Switch
@@ -162,8 +187,8 @@ export const Modal = (props) => {
                   if (checked) {
                     alert(
                       localize(
-                        "Si vous souhaitez bénéficier de cette fonctionnalité, merci d'envoyer un mail à contact@romseguy.com pour me le faire savoir",
-                        "If you want this functionality, please send an email to contact@romseguy.com to let me know",
+                        "Si vous trouvez cette fonctionnalité intéressante, merci d'envoyer un mail à contact@romseguy.com pour m'en parler.",
+                        "If you are intested in this improvement, please send an email to contact@romseguy.com to let me know.",
                       ),
                     );
                   }
@@ -179,16 +204,14 @@ export const Modal = (props) => {
                   if (checked) {
                     alert(
                       localize(
-                        "Si vous souhaitez bénéficier de cette fonctionnalité, merci d'envoyer un mail à contact@romseguy.com pour me le faire savoir",
-                        "If you want this functionality, please send an email to contact@romseguy.com to let me know",
+                        "Si vous trouvez cette fonctionnalité intéressante, merci d'envoyer un mail à contact@romseguy.com pour m'en parler.",
+                        "If you are intested in this improvement, please send an email to contact@romseguy.com to let me know.",
                       ),
                     );
                   }
                 }}
               />
             </Flex>
-
-            <BackButton onClick={() => toggleModal(id)} />
           </Flex>
         </div>
       </div>
@@ -208,66 +231,79 @@ export const Modal = (props) => {
       <div id="modal">
         <div id={id}>
           <Flex direction="column" justify="center" gap="3" p="3">
-            <Flex direction="column" gap="3">
-              <Flex>
-                <BackButton onClick={() => toggleModal(id)} />
-                <a
-                  target="_blank"
-                  href="https://romseguy.com"
-                  css={css(
-                    linkButton(
-                      toCssString({
-                        padding: "6px 12px",
-                        borderRadius: "var(--radius-2)",
-                        fontWeight: "normal",
-                        fontSize: "14px",
-                      }),
-                    ),
-                  )}
-                >
-                  {localize("Faire un don", "Donate")}
-                </a>
-              </Flex>
+            <Flex>
+              <BackButton onClick={() => toggleModal(id)} />
+              <DonateButton />
+            </Flex>
+
+            <Flex>
               <h1>
                 {localize(
-                  "Participez à la discussion ci-dessous pour suggérer des améliorations",
-                  "Engage in the discussion below to suggest improvements",
+                  "Écrivez un message pour suggérer des améliorations",
+                  "Write a message to suggest improvements",
                 )}
               </h1>
             </Flex>
+
             <TextArea
               autoFocus
               cols={80}
               placeholder={localize("Écrivez ici", "Write here")}
               onChange={(e) => setMessage(e.target.value)}
             />
-            <Button
-              onClick={async () => {
-                try {
-                  const { data, error } = await dispatch(
-                    //@ts-expect-error
-                    postComments.initiate({ comment: { html: message } }),
-                  );
-                  //@ts-expect-error
-                  if (data.error || error)
-                    //@ts-expect-error
-                    throw new Error(data.error || error);
 
-                  dispatch(
-                    setState({
-                      collections: {
-                        ...collections,
-                        comments: collections.comments.concat([data]),
-                      },
+            <Flex
+              css={css`
+                a {
+                  ${linkButton(
+                    toCssString({
+                      padding: "5px 12px 6px 12px",
+                      borderRadius: "max(var(--radius-2),var(--radius-full))",
+                      fontWeight: "normal",
+                      fontSize: "14px",
                     }),
-                  );
-                } catch (error) {
-                  showToast(error, true);
+                  )}
                 }
-              }}
+              `}
             >
-              {localize("Envoyer", "Send")}
-            </Button>
+              <Button
+                onClick={async () => {
+                  try {
+                    const { data, error } = await dispatch<any>(
+                      postComments.initiate({
+                        comment: { html: message, is_feedback: true },
+                      }),
+                    );
+                    if (error) throw error;
+
+                    dispatch(
+                      setState({
+                        collections: {
+                          ...collections,
+                          comments: collections.comments.concat([data]),
+                        },
+                      }),
+                    );
+                  } catch (error: any) {
+                    showToast(error.data, true);
+                  }
+                }}
+              >
+                {localize("Envoyer", "Send")}
+              </Button>
+
+              <MailTo
+                to={import.meta.env.VITE_PUBLIC_EMAIL}
+                subject={localize("Amélioration", "Improvement")}
+                obfuscate
+              >
+                <MailToTrigger>
+                  {localize("Envoyer par e-mail", "Send by email")}
+                </MailToTrigger>
+                <MailToBody>{sanitize(message)}</MailToBody>
+              </MailTo>
+            </Flex>
+
             <Flex direction="column" width="100%" justify="center">
               {comments.map((comment) => (
                 <Comment

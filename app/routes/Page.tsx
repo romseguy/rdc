@@ -31,7 +31,7 @@ const Page = (props) => {
   //#region state
   const { element, loaderData, noTheme, simple } = props;
   const state = useSelector(getState);
-  const { auth, locale, modal, toast } = state;
+  const { auth, isMobile, locale, modal, toast } = state;
   const user = auth?.user;
   const [appearance, setAppearance] = useStorage("color-mode", {
     type: "local",
@@ -104,7 +104,7 @@ const Page = (props) => {
     <div style={{ position: "fixed", bottom: 12, right: 12, zIndex: 999 }}>
       <Flex gap="2">
         <Toggle
-          css={css(toggleCss(appearance))}
+          css={css(toggleCss(appearance, isMobile))}
           onPressedChange={() => {
             toggleModal("heart-modal");
           }}
@@ -112,7 +112,7 @@ const Page = (props) => {
           <HeartIcon />
         </Toggle>
         <Toggle
-          css={css(toggleCss(appearance))}
+          css={css(toggleCss(appearance, isMobile))}
           onPressedChange={() => {
             toggleModal("notif-modal", {
               email: user?.email,
@@ -122,7 +122,7 @@ const Page = (props) => {
           <BellIcon />
         </Toggle>
         <Toggle
-          css={css(toggleCss(appearance))}
+          css={css(toggleCss(appearance, isMobile))}
           onPressedChange={() => {
             setAppearance(appearance === "dark" ? "light" : "dark");
           }}
@@ -130,7 +130,7 @@ const Page = (props) => {
           {appearance === "dark" ? <SunIcon /> : <MoonIcon />}
         </Toggle>
         <Toggle
-          css={css(toggleCss(appearance))}
+          css={css(toggleCss(appearance, isMobile))}
           onPressedChange={() =>
             window.scrollTo({ top: 0, behavior: "smooth" })
           }

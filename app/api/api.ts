@@ -10,6 +10,7 @@ import type { AxiosError, AxiosRequestConfig } from "axios";
 import axios from "axios";
 import { baseUrl } from "./baseUrl";
 import { createStore } from "~/store";
+import type { Comment } from "~/utils";
 
 axios.interceptors.request.use(
   (config) => {
@@ -60,6 +61,7 @@ const axiosBaseQuery =
         data: body,
         params,
         headers,
+        timeout: 5000,
       });
       return { data: result.data };
     } catch (axiosError) {
@@ -100,7 +102,7 @@ export const api = createApi({
     deleteComment: build.mutation({
       query: ({ url }) => ({ url, method: "DELETE" }),
     }),
-    postComments: build.mutation({
+    postComments: build.mutation<Comment, any>({
       query: (body) => ({ url: "/comments", method: "POST", body }),
     }),
   }),

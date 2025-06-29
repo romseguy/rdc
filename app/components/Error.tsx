@@ -48,8 +48,6 @@ export const Error = ({ message, details, stack }) => {
                 <MailTo
                   to={import.meta.env.VITE_PUBLIC_EMAIL}
                   subject="Rapport d'erreur"
-                  //cc={["cc1@example.com", "cc2@example.com"]}
-                  //bcc={["bcc@example.com"]}
                   obfuscate
                 >
                   <MailToTrigger>

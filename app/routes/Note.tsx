@@ -91,7 +91,7 @@ export const Note = (props) => {
               max={defaultWidth}
               step={1}
               onValueChange={(v) => {
-                setWidth(v[0]);
+                setWidth(Number(v[0]));
               }}
             />
           ) : (

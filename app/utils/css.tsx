@@ -15,12 +15,12 @@ export const linkButton = (str?: string) =>
   }
 ` + str;
 
-export const toggleCss = (appearance) => `
+export const toggleCss = (appearance, isMobile) => `
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 28px;
-    width: 28px;
+    height: ${isMobile ? "48px" : "28px"};
+    width: ${isMobile ? "48px" : "28px"};
     background-color: ${appearance === "dark" ? "black" : "white"};
     border: 1px solid ${appearance === "dark" ? "white" : "black"};
 

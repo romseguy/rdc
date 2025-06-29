@@ -14,6 +14,7 @@ export type Comment = {
   id: string;
   html: string;
   comment_email: string;
+  is_feedback: boolean;
   created_at: string;
 };
 export type NoteT = Note & {
@@ -49,29 +50,26 @@ export type Lib = {
   books?: Book[];
 };
 
-type SeedNote = Omit<Note, "id" | "book_id"> & { id?: string };
-type SeedBook = Omit<Book, "notes" | "id"> & {
-  id?: string;
-  notes?: SeedNote[];
-};
-export type Seed = Omit<Lib, "id"> & {
-  id?: string;
-  //books: SeedBook[];
-};
+export type Collections = {libraries: Lib[],comments: Comment[]}
+
+export type Seed = Record<
+  string,
+  (
+    | (Omit<Lib, "id" | "books"> & {
+        books: (Omit<Book, "id" | "notes"> & {
+          notes?: Omit<Note, "id" | "book_id">[];
+        })[];
+      })
+    | Comment
+  )[]
+>;
 
 export type RootData = {
-  collections?: Record<any, any>;
-  libs: Seed[] | Lib[];
-  lib: Seed | Lib;
+  collections: any;
+  libs: any;
+  lib?: any;
   isMobile: boolean;
 };
 
-export type ModalT = {
-  id: string;
-  isOpen: boolean;
-  book?: Book | null;
-  note?: NoteT | null;
-  email?: string | null;
-};
 
 export type SetState<T> = React.Dispatch<React.SetStateAction<T>>;

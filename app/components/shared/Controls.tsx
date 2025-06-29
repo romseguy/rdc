@@ -2,10 +2,149 @@ import { Button } from "@radix-ui/themes";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { getState } from "~/store";
-import { localize } from "~/utils";
+import { linkButton, localize, toCssString } from "~/utils";
 import l1 from "/l1.svg";
 import b1 from "/b1.svg";
+import { css } from "@emotion/react";
 
+//#region buttons
+export const AddNoteButton = ({ book, setBook, ...props }) => {
+  return (
+    <Button
+      disabled={!!book?.notes?.find(({ isNew }) => isNew)}
+      onClick={(e) => {
+        const b = {
+          ...book,
+          notes: (book.notes || []).concat([
+            {
+              isEditing: true,
+              isNew: true,
+            },
+          ]),
+        };
+        setBook(b);
+      }}
+      {...props}
+    >
+      {localize("Ajouter une citation", "Add a quote")}
+    </Button>
+  );
+};
+export const BackButton = (props) => {
+  const navigate = useNavigate();
+  const {
+    onClick = () => {
+      //@ts-expect-error
+      navigate(!!history && history.length > 1 ? -1 : "/");
+    },
+    label = localize("Retour", "Back"),
+  } = props;
+  return (
+    <Button type="button" className="back-btn" onClick={onClick} {...props}>
+      {"<"} {label}
+    </Button>
+  );
+};
+export const DonateButton = () => {
+  return (
+    <a
+      target="_blank"
+      href="https://romseguy.com"
+      css={css(
+        linkButton(
+          toCssString({
+            padding: "6px 12px",
+            borderRadius: "var(--radius-2)",
+            fontWeight: "normal",
+            fontSize: "14px",
+          }),
+        ),
+      )}
+    >
+      {localize("Faire un don", "Donate")}
+    </a>
+  );
+};
+export const LocaleSwitch = (props) => {
+  const { onClick, setLocale, ...p } = props;
+  const { locale } = useSelector(getState);
+
+  if (locale === "en")
+    return (
+      <FrIcon
+        onClick={(e) => {
+          if (setLocale) setLocale("fr");
+          else if (onClick) onClick(e);
+        }}
+        {...p}
+      />
+    );
+
+  return (
+    <EnIcon
+      onClick={(e) => {
+        if (setLocale) setLocale("en");
+        else if (onClick) onClick(e);
+      }}
+      {...p}
+    />
+  );
+};
+export const PageSwitch = ({
+  isPageEdit,
+  setIsPageEdit,
+  page,
+  setPage,
+  note,
+  onClick,
+}) => {
+  return (
+    <div>
+      {!isPageEdit ? (
+        <Button type="button" onClick={() => setIsPageEdit(true)}>
+          p.{note.page}
+          <EditIcon
+            {...iconProps({
+              title: "Modifier la page",
+              style: {
+                border: "none",
+              },
+            })}
+          />
+        </Button>
+      ) : (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
+          <input
+            autoFocus
+            type="number"
+            defaultValue={page}
+            onChange={(e) => {
+              const p = Number(e.target.value);
+              if (p < 10000) setPage(p);
+            }}
+          />
+          <Button
+            onClick={() => {
+              setIsPageEdit(false);
+              onClick(page);
+            }}
+          >
+            ok
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+//#endregion
+
+//#region icons
 export const iconProps = (props) => {
   const { title, style, onClick } = props;
   const { isMobile } = useSelector(getState);
@@ -35,46 +174,11 @@ export const iconProps = (props) => {
 
   return out;
 };
+export const Book1Icon = (props) => <img src={b1} width="30em" {...props} />;
+export const BooksIcon = (props) => <img src={l1} width="30em" {...props} />;
+//#endregion
 
-export const BackButton = (props) => {
-  const navigate = useNavigate();
-  const {
-    onClick = () => {
-      //@ts-expect-error
-      navigate(!!history && history.length > 1 ? -1 : "/");
-    },
-    label = localize("Retour", "Back"),
-  } = props;
-  return (
-    <Button type="button" className="back-btn" onClick={onClick} {...props}>
-      {"<"} {label}
-    </Button>
-  );
-};
-
-export const AddNoteButton = ({ book, setBook, ...props }) => {
-  return (
-    <Button
-      disabled={!!book?.notes?.find(({ isNew }) => isNew)}
-      onClick={(e) => {
-        const b = {
-          ...book,
-          notes: (book.notes || []).concat([
-            {
-              isEditing: true,
-              isNew: true,
-            },
-          ]),
-        };
-        setBook(b);
-      }}
-      {...props}
-    >
-      {localize("Ajouter une citation", "Add a quote")}
-    </Button>
-  );
-};
-
+//#region svg icons
 export const FrIcon = (props) => {
   return (
     <svg
@@ -133,7 +237,6 @@ export const FrIcon = (props) => {
     </svg>
   );
 };
-
 export const EnIcon = (props) => (
   <svg
     width="2em"
@@ -180,100 +283,17 @@ export const EnIcon = (props) => (
     </g>
   </svg>
 );
-
-export const LocaleSwitch = (props) => {
-  const { onClick, setLocale, ...p } = props;
-  const { locale } = useSelector(getState);
-
-  if (locale === "en")
-    return (
-      <FrIcon
-        onClick={(e) => {
-          if (setLocale) setLocale("fr");
-          else if (onClick) onClick(e);
-        }}
-        {...p}
-      />
-    );
-
-  return (
-    <EnIcon
-      onClick={(e) => {
-        if (setLocale) setLocale("en");
-        else if (onClick) onClick(e);
-      }}
-      {...p}
-    />
-  );
-};
-
-export const PageSwitch = ({
-  isPageEdit,
-  setIsPageEdit,
-  page,
-  setPage,
-  note,
-  onClick,
-}) => {
-  return (
-    <div>
-      {!isPageEdit ? (
-        <Button type="button" onClick={() => setIsPageEdit(true)}>
-          p.{note.page}
-          <EditIcon
-            {...iconProps({
-              title: "Modifier la page",
-              style: {
-                border: "none",
-              },
-            })}
-          />
-        </Button>
-      ) : (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          <input
-            autoFocus
-            type="number"
-            defaultValue={page}
-            onChange={(e) => {
-              const p = Number(e.target.value);
-              if (p < 10000) setPage(p);
-            }}
-          />
-          <Button
-            onClick={() => {
-              setIsPageEdit(false);
-              onClick(page);
-            }}
-          >
-            ok
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export const ExternalIcon = ({ ...props }) => (
-  <svg className="external-icon" viewBox="0 0 24 24" {...props}>
-    <g fill="none" strokeLinecap="round" strokeWidth={2}>
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-      <path d="M15 3h6v6"></path>
-      <path d="M10 14L21 3"></path>
-    </g>
-  </svg>
-);
-export const ShareIcon = ({ ...props }) => (
-  <svg className="share-icon" viewBox="0 0 512 512" {...props}>
-    <g stroke="currentColor">
-      <path d="M503.691 189.836L327.687 37.851C312.281 24.546 288 35.347 288 56.015v80.053C127.371 137.907 0 170.1 0 322.326c0 61.441 39.581 122.309 83.333 154.132 13.653 9.931 33.111-2.533 28.077-18.631C66.066 312.814 132.917 274.316 288 272.085V360c0 20.7 24.3 31.453 39.687 18.164l176.004-152c11.071-9.562 11.086-26.753 0-36.328z"></path>
-    </g>
+export const BookIcon = (props) => (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    strokeWidth="0"
+    viewBox="0 0 448 512"
+    height="1em"
+    width="1em"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M448 360V24c0-13.3-10.7-24-24-24H96C43 0 0 43 0 96v320c0 53 43 96 96 96h328c13.3 0 24-10.7 24-24v-16c0-7.5-3.5-14.3-8.9-18.7-4.2-15.4-4.2-59.3 0-74.7 5.4-4.3 8.9-11.1 8.9-18.6zM128 134c0-3.3 2.7-6 6-6h212c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H134c-3.3 0-6-2.7-6-6v-20zm0 64c0-3.3 2.7-6 6-6h212c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H134c-3.3 0-6-2.7-6-6v-20zm253.4 250H96c-17.7 0-32-14.3-32-32 0-17.6 14.4-32 32-32h285.4c-1.9 17.1-1.9 46.9 0 64z"></path>
   </svg>
 );
 export const DeleteIcon = ({ ...props }) => (
@@ -295,33 +315,6 @@ export const EditIcon = ({ ...props }) => (
     </g>
   </svg>
 );
-export const UserIcon = (props) => (
-  <svg
-    stroke="currentColor"
-    fill="currentColor"
-    strokeWidth="0"
-    viewBox="0 0 448 512"
-    height="1em"
-    width="1em"
-    {...props}
-  >
-    <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"></path>
-  </svg>
-);
-
-export const BookIcon = (props) => (
-  <svg
-    stroke="currentColor"
-    fill="currentColor"
-    strokeWidth="0"
-    viewBox="0 0 448 512"
-    height="1em"
-    width="1em"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M448 360V24c0-13.3-10.7-24-24-24H96C43 0 0 43 0 96v320c0 53 43 96 96 96h328c13.3 0 24-10.7 24-24v-16c0-7.5-3.5-14.3-8.9-18.7-4.2-15.4-4.2-59.3 0-74.7 5.4-4.3 8.9-11.1 8.9-18.6zM128 134c0-3.3 2.7-6 6-6h212c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H134c-3.3 0-6-2.7-6-6v-20zm0 64c0-3.3 2.7-6 6-6h212c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H134c-3.3 0-6-2.7-6-6v-20zm253.4 250H96c-17.7 0-32-14.3-32-32 0-17.6 14.4-32 32-32h285.4c-1.9 17.1-1.9 46.9 0 64z"></path>
-  </svg>
-);
 export const EmailIcon = (props) => (
   <svg
     viewBox="0 0 24 24"
@@ -336,6 +329,33 @@ export const EmailIcon = (props) => (
     ></path>
   </svg>
 );
-
-export const Book1Icon = (props) => <img src={b1} width="30em" {...props} />;
-export const BooksIcon = (props) => <img src={l1} width="30em" {...props} />;
+export const ExternalIcon = ({ ...props }) => (
+  <svg className="external-icon" viewBox="0 0 24 24" {...props}>
+    <g fill="none" strokeLinecap="round" strokeWidth={2}>
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+      <path d="M15 3h6v6"></path>
+      <path d="M10 14L21 3"></path>
+    </g>
+  </svg>
+);
+export const ShareIcon = ({ ...props }) => (
+  <svg className="share-icon" viewBox="0 0 512 512" {...props}>
+    <g stroke="currentColor">
+      <path d="M503.691 189.836L327.687 37.851C312.281 24.546 288 35.347 288 56.015v80.053C127.371 137.907 0 170.1 0 322.326c0 61.441 39.581 122.309 83.333 154.132 13.653 9.931 33.111-2.533 28.077-18.631C66.066 312.814 132.917 274.316 288 272.085V360c0 20.7 24.3 31.453 39.687 18.164l176.004-152c11.071-9.562 11.086-26.753 0-36.328z"></path>
+    </g>
+  </svg>
+);
+export const UserIcon = (props) => (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    strokeWidth="0"
+    viewBox="0 0 448 512"
+    height="1em"
+    width="1em"
+    {...props}
+  >
+    <path d="M224 256c70.7 0 128-57.3 128-128S294.7 0 224 0 96 57.3 96 128s57.3 128 128 128zm89.6 32h-16.7c-22.2 10.2-46.9 16-72.9 16s-50.6-5.8-72.9-16h-16.7C60.2 288 0 348.2 0 422.4V464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48v-41.6c0-74.2-60.2-134.4-134.4-134.4z"></path>
+  </svg>
+);
+//#endregion

@@ -4,7 +4,7 @@ import { Sitemap } from "~/components";
 import { Home } from "~/routes/Home";
 import {
   collections as offlineCollections,
-  seed,
+  length,
   type Lib,
   type RootData,
   type Seed,
@@ -26,9 +26,9 @@ export const loader = async (props: Route.LoaderArgs) => {
   };
   const { store } = createStore(initialState);
   let data: RootData = {
-    libs: seed,
-    lib: seed[0] as Seed,
+    collections: offlineCollections,
     isMobile,
+    libs: [],
   };
 
   const { isSuccess, data: collections } = await store.dispatch(
@@ -36,7 +36,8 @@ export const loader = async (props: Route.LoaderArgs) => {
   );
   await Promise.all(store.dispatch(api.util.getRunningQueriesThunk()));
 
-  if (isSuccess) {
+  if (isSuccess && length(collections.libraries) > 0) {
+    data.collections = collections;
     data.libs = collections.libraries.map((lib) => {
       return {
         ...lib,
@@ -60,7 +61,7 @@ export const loader = async (props: Route.LoaderArgs) => {
       };
     });
   } else {
-    data.libs = data.libs.map((lib, i) => {
+    data.libs = data.collections.libraries.map((lib, i) => {
       const id = Number(i + 1).toString();
       return {
         ...lib,
