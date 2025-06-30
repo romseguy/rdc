@@ -19,9 +19,22 @@ import {
 import type { Route } from "../+types/root";
 import Page from "./Page";
 
+const get_cookies = function (request) {
+  var cookies = {};
+  request.headers &&
+    request.headers
+      .get("cookie")
+      .split(";")
+      .forEach(function (cookie) {
+        var parts = cookie.match(/(.*?)=(.*)$/);
+        cookies[parts[1].trim()] = (parts[2] || "").trim();
+      });
+  return cookies;
+};
+
 export const loader = async (props: Route.LoaderArgs) => {
-  const cookieHeader = props.request.headers.get("cookie");
-  const appearance = cookieHeader?.split("=")[1] || "dark";
+  const cookie = get_cookies(props.request)["color-mode"];
+  const appearance = cookie || "dark";
   const userAgent = props.request.headers.get("user-agent") || "";
 
   let data: RootData = {

@@ -1,9 +1,16 @@
 import { css } from "@emotion/react";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
-import { Box, Button, IconButton, Select, Spinner } from "@radix-ui/themes";
+import {
+  Box,
+  Button,
+  Heading,
+  IconButton,
+  Select,
+  Spinner,
+} from "@radix-ui/themes";
 import { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import {
   BooksIcon,
   Flex,
@@ -40,6 +47,7 @@ export const PageTitle = (props) => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const toggleModal = useToggleModal();
 
   const LoginButton = (
@@ -73,42 +81,23 @@ export const PageTitle = (props) => {
   return (
     <Flex
       id="page-title"
-      className="bg-purple-900/75"
+      className="bg-purple-900/50"
+      direction="column"
+      gap={isMobile ? "3" : "0"}
       p="3"
-      {...(isMobile
-        ? { direction: "column", align: "start" }
-        : { justify: "between" })}
     >
-      <Flex {...(isMobile ? { justify: "between", width: "100%" } : {})}>
-        <h1
-          onClick={() => {
-            navigate("/");
-          }}
-        >
-          {localize("Recueil de citations", "Know my quotes")}
-        </h1>
-        {isMobile && (
-          <LocaleSwitch
-            width={"2em"}
-            height={"2em"}
-            onClick={(e) => {
-              e.stopPropagation();
-              window.location.replace(
-                locale === "en"
-                  ? "https://recueildecitations.fr"
-                  : "https://knowmyquotes.com",
-              );
-            }}
-          />
-        )}
-      </Flex>
+      <Heading
+        onClick={() => {
+          navigate("/");
+        }}
+      >
+        {localize("Recueil de citations", "Know my quotes")}
+      </Heading>
 
       <Flex
         align="start"
         {...(isMobile ? { direction: "column", gap: "3" } : {})}
       >
-        {isMobile && LoginButton}
-
         <Flex {...(isMobile ? { direction: "column", align: "start" } : {})}>
           {!isMobile && <BooksIcon height="3em" width="3em" fill="white" />}
 
@@ -151,10 +140,11 @@ export const PageTitle = (props) => {
                   );
                   dispatch(
                     setState({
+                      //book: null,
                       lib: newLib,
                     }),
                   );
-                  navigate("/");
+                  if (location.pathname !== "/") navigate("/");
                 }}
               >
                 <Select.Trigger
@@ -209,23 +199,21 @@ export const PageTitle = (props) => {
         </Flex>
       </Flex>
 
-      {!isMobile && (
-        <Flex>
-          {LoginButton}
-          <LocaleSwitch
-            width={"2em"}
-            height={"2em"}
-            onClick={(e) => {
-              e.stopPropagation();
-              window.location.replace(
-                locale === "en"
-                  ? "https://recueildecitations.fr"
-                  : "https://knowmyquotes.com",
-              );
-            }}
-          />
-        </Flex>
-      )}
+      <Flex>
+        {LoginButton}
+        <LocaleSwitch
+          width={"2em"}
+          height={"2em"}
+          onClick={(e) => {
+            e.stopPropagation();
+            window.location.replace(
+              locale === "en"
+                ? "https://recueildecitations.fr"
+                : "https://knowmyquotes.com",
+            );
+          }}
+        />
+      </Flex>
     </Flex>
   );
 };

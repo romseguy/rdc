@@ -117,13 +117,13 @@ export const Note = (props: NoteP) => {
         {...props}
       >
         <LocaleSwitch
-          setLocale={(locale) =>
+          setLocale={(locale) => {
             navigate(
               locale === "fr"
                 ? location.pathname.replace("book", "livre")
                 : location.pathname.replace("livre", "book"),
-            )
-          }
+            );
+          }}
         />
         <PageSwitch
           variant="soft"
@@ -287,7 +287,6 @@ export const Note = (props: NoteP) => {
         <footer>
           {!note.isEditing && (
             <Flex
-              p="1"
               onClick={async () => {
                 setIsShowComments(!isShowComments);
                 if (!isShowComments) {

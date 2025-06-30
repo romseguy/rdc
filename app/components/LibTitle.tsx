@@ -1,6 +1,6 @@
 import { localize } from "~/utils";
 import { BooksIcon, Flex } from "./shared";
-import { Button } from "@radix-ui/themes";
+import { Button, Heading } from "@radix-ui/themes";
 import { PlusCircledIcon } from "@radix-ui/react-icons";
 import { css } from "@emotion/react";
 
@@ -11,9 +11,9 @@ export const LibTitle = (props) => {
       <Flex>
         <BooksIcon height="3em" width="3em" fill="currentColor" />
 
-        <h1>
+        <Heading>
           <i>{lib[localize("name")] || lib.name}</i>
-        </h1>
+        </Heading>
       </Flex>
 
       <Button

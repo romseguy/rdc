@@ -17,23 +17,17 @@ export const PageHeader = (props) => {
     <div id="page-header">
       {!isMobile && (
         <Box ml="1">
-          <h1 className="text-lg">
-            <Flex>
-              <DoubleArrowRightIcon />
-              {localize("Votre sélection", "Your selection")} :
-            </Flex>
-          </h1>
           <Flex>
             <LibTitle lib={lib} />
           </Flex>
         </Box>
       )}
 
-      {!isMobile && loaderData.book && (
+      {/* {!isMobile && loaderData.book && (
         <Flex ml="2" mb="3">
           <BookTitle lib={lib} book={loaderData.book} />
         </Flex>
-      )}
+      )} */}
 
       {/* books list */}
       <Flex gap="0" overflowX="scroll">
@@ -42,30 +36,23 @@ export const PageHeader = (props) => {
           return (
             <div
               key={"book-" + index}
+              className="book"
               css={css`
                 ${b.src && "background: url(" + b.src + ");"}
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                height: 225px;
-                min-width: 140px;
-                width: 140px;
-                cursor: pointer;
-                user-select: none;
                 border: ${b.id === loaderData.book?.id
                   ? "1px solid yellow"
                   : "1px solid white"};
-                font-weight: bold;
               `}
               onClick={() => {
                 navigate(to);
               }}
             >
-              <Flex direction="column">
-                <Book1Icon width={b.src ? "20em" : "50em"} />
-                <Link to={to}>{b[localize("title")] || b.title}</Link>
-              </Flex>
+              {!b.src && (
+                <Flex direction="column">
+                  <Book1Icon />
+                  <Link to={to}>{b[localize("title")] || b.title}</Link>
+                </Flex>
+              )}
             </div>
           );
         })}

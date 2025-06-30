@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Box, Button, Select, Separator } from "@radix-ui/themes";
+import { Box, Button, Heading, Select, Separator } from "@radix-ui/themes";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
@@ -22,9 +22,11 @@ import { getState, setState } from "~/store";
 import { ENoteOrder, localize, toCss, type BookT, type NoteT } from "~/utils";
 
 export const Livre = (props) => {
+  //#region state
   const { loaderData } = props;
   const {
     auth,
+    book = loaderData.book,
     isMobile,
     lib = loaderData.lib,
     locale,
@@ -32,22 +34,12 @@ export const Livre = (props) => {
   const defaultLocale = import.meta.env.VITE_PUBLIC_LOCALE;
   const user = auth?.user;
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const showToast = useToast();
-
   const [isCommentLoading, setIsCommentLoading] = useState<
     Record<string, boolean>
   >({});
   const [isNoteLoading, setIsNoteLoading] = useState<Record<string, boolean>>(
     {},
   );
-  const [book, setBook] = useState<BookT>(props.loaderData.book);
-  useEffect(() => {
-    if (props.loaderData.book) {
-      if (book.id !== props.loaderData.book.id) setBook(props.loaderData.book);
-    }
-  }, [props.loaderData]);
   const hasEditing = useMemo(() => {
     if (!book || !book.notes) return false;
     return book.notes?.filter((n) => n.isEditing).length > 0;
@@ -77,8 +69,21 @@ export const Livre = (props) => {
     }
     return els;
   }, [book, order, locale]);
+  //#endregion
+
+  //#region hooks
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const showToast = useToast();
+  const setBook = (book) => dispatch(setState({ book }));
+  //#endregion
 
   //#region effects
+  useEffect(() => {
+    if (props.loaderData.book) {
+      if (book.id !== props.loaderData.book.id) setBook(props.loaderData.book);
+    }
+  }, [props.loaderData]);
   async function onEditSubmit(note) {
     try {
       let id;
@@ -254,7 +259,6 @@ export const Livre = (props) => {
           if (n.id === note.id) {
             return {
               ...n,
-              //@ts-expect-error
               comments: (n.comments || []).concat([data]),
             };
           }
@@ -353,9 +357,9 @@ export const Livre = (props) => {
       {!hasEditing && (
         <div id="book-header">
           <Flex justify="center" pl={isMobile ? "0" : "4"}>
-            <h1>
+            <Heading>
               <BookTitle lib={lib} book={book} />
-            </h1>
+            </Heading>
           </Flex>
         </div>
       )}

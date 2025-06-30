@@ -79,6 +79,7 @@ export type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
 export interface AppState {
   appearance: ThemeOwnProps["appearance"];
   auth: any;
+  book?: BookT;
   collections: Collections;
   isMobile: boolean;
   isLoaded: boolean;

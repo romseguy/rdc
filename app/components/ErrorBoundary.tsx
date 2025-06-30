@@ -10,7 +10,7 @@ export const ErrorBoundary = (props: Route.ErrorBoundaryProps) => {
   const routeError = useRouteError();
   const error = routeError || props.error;
 
-  let message = localize("Erreur", "Error");
+  let message = localize("Erreur !", "Error!");
   let details = localize(
     "Une erreur inconnue est survenue",
     "An unknown error occured",

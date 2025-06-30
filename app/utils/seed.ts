@@ -31,7 +31,7 @@ export const collections: Seed = {
       ],
     },
     {
-      name: "Evolutionary Psychology",
+      name: "Evolutionary Psychologyyyyyyyyyy",
       author: "Bernard de Montréal",
       books: [
         {
@@ -41,8 +41,8 @@ export const collections: Seed = {
           notes: [
             {
               page: 123,
-              desc: "desc",
-              desc_en: "en",
+              desc: "l'incapacité des moutons",
+              desc_en: "The powerlessness of the sheep",
               note_email: "a@b.com",
               comments: [
                 {
@@ -57,7 +57,7 @@ export const collections: Seed = {
                 },
               ],
             },
-            { page: 12, desc: "test" },
+            { page: 12, desc: "La domination du berger" },
           ],
         },
       ],

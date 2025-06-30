@@ -42,10 +42,14 @@ const Page = (props) => {
       dispatch(setState({ lib: loaderData.lib }));
   }, [navigation.state, loaderData.lib]);
   useEffect(() => {
+    if (navigation.state === "idle" && !length(state.book))
+      dispatch(setState({ book: loaderData.book }));
+  }, [navigation.state, loaderData.book]);
+  useEffect(() => {
     if (navigation.state === "idle") {
-      dispatch(setState({ locale }));
+      dispatch(setState({ locale: props.locale }));
     }
-  }, [navigation.state, locale]);
+  }, [navigation.state, props.locale]);
   useEffect(() => {
     let bearer = "";
     if (localStorage.getItem(tokenKey)) {
@@ -62,7 +66,6 @@ const Page = (props) => {
       setState({
         auth: { bearer, token, user },
         isLoaded: true,
-        locale,
       }),
     );
   }, []);

@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Badge, Button, Switch, TextArea } from "@radix-ui/themes";
+import { Badge, Button, Heading, Switch, TextArea } from "@radix-ui/themes";
 import { MailTo, MailToBody, MailToTrigger } from "@slalombuild/react-mailto";
 import { decode } from "html-entities";
 import { lazy, useState } from "react";
@@ -15,14 +15,7 @@ import {
   useToast,
 } from "~/components";
 import { getState, setState } from "~/store";
-import {
-  linkButton,
-  localize,
-  toCss,
-  toCssString,
-  type Book,
-  type NoteT,
-} from "~/utils";
+import { localize, toCss, toCssString, type Book, type NoteT } from "~/utils";
 const Login = lazy(() => import("~/components/Login"));
 const sanitize = (str) => decode(str.replace(/(<([^>]+)>)/gi, ""));
 
@@ -52,20 +45,11 @@ export const Modal = (props) => {
     return (
       <div id="modal">
         <div id={id}>
-          <Flex
-            direction="column"
-            justify="center"
-            gap="3"
-            css={css`
-              a {
-                ${linkButton()}
-              }
-            `}
-          >
-            <h1>
+          <Flex direction="column" justify="center" gap="3">
+            <Heading>
               {localize("Partager la citation", "Share the quote")}{" "}
               {note.page ? "p." + note.page : ""}
-            </h1>
+            </Heading>
 
             <MailTo
               to=""
@@ -128,7 +112,7 @@ export const Modal = (props) => {
               <DonateButton />
             </Flex>
 
-            <h1>Notifications</h1>
+            <Heading>Notifications</Heading>
 
             <Flex
               direction={isMobile ? "column" : "row"}
@@ -172,7 +156,7 @@ export const Modal = (props) => {
                     "Seront envoyées à votre adresse e-mail",
                     "Will be send to your email address",
                   )}{" "}
-                  : <Badge>{modal.email}</Badge>
+                  : <Badge variant="solid">{modal.email}</Badge>
                 </>
               )}
             </Flex>
@@ -238,19 +222,19 @@ export const Modal = (props) => {
     return (
       <div id="modal">
         <div id={id}>
-          <Flex direction="column" justify="center" gap="3" p="3">
+          <Flex direction="column" justify="center" gap="3">
             <Flex>
               <BackButton onClick={() => toggleModal(id)} />
               <DonateButton />
             </Flex>
 
             <Flex>
-              <h1>
+              <Heading>
                 {localize(
                   "Écrivez un message pour suggérer des améliorations",
                   "Write a message to suggest improvements",
                 )}
-              </h1>
+              </Heading>
             </Flex>
 
             <TextArea
@@ -260,20 +244,7 @@ export const Modal = (props) => {
               onChange={(e) => setMessage(e.target.value)}
             />
 
-            <Flex
-              css={css`
-                a {
-                  ${linkButton(
-                    toCssString({
-                      padding: "5px 12px 6px 12px",
-                      borderRadius: "max(var(--radius-2),var(--radius-full))",
-                      fontWeight: "normal",
-                      fontSize: "14px",
-                    }),
-                  )}
-                }
-              `}
-            >
+            <Flex>
               <Button
                 onClick={async () => {
                   try {
@@ -364,7 +335,7 @@ export const useToggleModal = () => {
       setState({
         modal: {
           id,
-          isOpen: !modal.isOpen,
+          isOpen: modal.id !== id ? true : !modal.isOpen,
           ...props,
         },
       }),

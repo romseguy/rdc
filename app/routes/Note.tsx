@@ -10,6 +10,7 @@ import { createLocalize, toCssString } from "~/utils";
 export const Note = (props) => {
   const { loaderData } = props;
   const { note } = loaderData;
+  console.log("🚀 ~ Note ~ note:", note);
   const state = useSelector(getState);
   const { locale, screenWidth } = state;
   const desc =

@@ -35,74 +35,74 @@
 }
 
 @layer components {
-  .rt-Badge {
-    cursor: var(--cursor-badge);
-  }
-  button {
-    &[type="button"] {
-      &.back-btn {
-        background-color: var(--color-red-700);
-        &:hover {
-          background-color: var(--color-red-600);
-        }
-      }
-
-      & > svg {
-        stroke: currentColor;
-      }
-    }
-  }
-  svg {
-    &.delete-icon {
-      fill: white;
-      stroke: red;
-    }
-    &.edit-icon {
-      stroke: var(--green-9);
-      fill: none;
-    }
-    &.external-icon {
-      stroke: white;
-    }
-    &.share-icon {
-      fill: white;
-    }
-  }
-}
-
-@layer utilities {
-  .prose {
-    --tw-prose-body: unset;
-  }
   .radix-themes {
+    --color-background: rgba(0, 0, 0, 0.5);
+    --cursor-badge: pointer;
+    --cursor-button: pointer;
+    --default-font-family: Inter, system-ui, Avenir, Helvetica, Arial,
+      sans-serif;
+    --default-letter-spacing: 0em;
     --width-sm: var(--breakpoint-sm);
     --width-md: var(--breakpoint-md);
     --width-lg: var(--breakpoint-lg);
     --width-xl: var(--breakpoint-xl);
     --width-2xl: var(--breakpoint-2xl);
 
-    --color-background: rgba(0, 0, 0, 0.5);
+    --color-modal-bg: rgba(0, 0, 0, 0.5);
+    --color-modal-content-bg: rgba(0, 0, 0, 0.5);
     --color-page-title: var(--color-purple-800);
     --color-page-header: rgba(0, 0, 0, 0.7);
     --color-note-header: var(--color-purple-900);
     --color-note-desc: var(--color-black);
     --color-note-footer: var(--color-black);
 
-    --cursor-badge: pointer;
-    --cursor-button: pointer;
-    --default-font-family: Inter, system-ui, Avenir, Helvetica, Arial,
-      sans-serif;
-    --secondary-font-family: Spectral, Georgia, ui-serif, serif;
-    --default-letter-spacing: 0em;
     --letter-spacing-1: 0.07em;
+    --secondary-font-family: Spectral, Georgia, ui-serif, serif;
 
     &.light {
-      --color-background: rgba(211, 211, 211, 0.2);
+      --color-background: rgba(211, 211, 211, 0.7);
+      --color-modal-content-bg: rgba(211, 211, 211, 1);
       --color-page-title: var(--color-purple-500);
       --color-page-header: rgba(211, 211, 211, 0.7);
       --color-note-header: var(--color-purple-300);
       --color-note-desc: var(--color-white);
       --color-note-footer: var(--color-white);
+    }
+
+    button {
+      &[type="button"] {
+        &.back-btn {
+          background-color: var(--color-red-700);
+          &:hover {
+            background-color: var(--color-red-600);
+          }
+        }
+
+        & > svg {
+          stroke: currentColor;
+        }
+      }
+    }
+
+    svg {
+      &.delete-icon {
+        fill: white;
+        stroke: red;
+      }
+      &.edit-icon {
+        stroke: var(--green-9);
+        fill: none;
+      }
+      &.external-icon {
+        stroke: white;
+      }
+      &.share-icon {
+        fill: white;
+      }
+    }
+
+    .rt-Badge {
+      cursor: var(--cursor-badge);
     }
 
     #page {
@@ -118,29 +118,57 @@
           font-family: Griffy;
           font-weight: normal;
           cursor: pointer;
-          letter-spacing: 2;
+          letter-spacing: var(--letter-spacing-1);
           text-align: center;
           font-size: 36px;
         }
       }
       #page-header {
         background-color: var(--color-page-header);
+        .book {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          height: 225px;
+          min-width: 140px;
+          width: 140px;
+          cursor: pointer;
+          user-select: none;
+          //font-weight: bold;
+          svg {
+            height: 2em;
+            width: 2em;
+          }
+        }
       }
 
       #error-page {
         height: 100%;
         background: var(--color-background);
         padding: 24px;
+        a {
+          color: white;
+          background: var(--accent-9);
+          font-size: var(--font-size-4);
+          border-radius: var(--radius-4);
+          text-decoration: none;
+          text-align: center;
+          padding: 6px 12px;
+          border-radius: var(--radius-2);
+          font-weight: normal;
+          font-size: 14px;
+          &:hover {
+            background: var(--accent-10);
+          }
+        }
       }
       #home-page {
         background: var(--color-background);
       }
       #book-page {
-        background: var(--color-background);
-
         #book-header {
           h1 {
-            color: var(--color-white);
             font-size: var(--text-xl);
           }
         }
@@ -172,6 +200,8 @@
               border-radius: var(--radius-sm);
               border-top-left-radius: 0;
               border-top-right-radius: 0;
+              padding: 12px;
+              padding-bottom: 6px;
             }
           }
         }
@@ -191,16 +221,38 @@
     }
 
     #modal {
-      background: var(--color-background);
+      background: var(--color-modal-bg);
       #login-modal,
+      #heart-modal,
       #notif-modal,
       #share-modal {
-        background: var(--color-background);
+        background: var(--color-modal-content-bg);
         padding: 24px;
       }
       #login-modal {
         a {
           font-size: smaller;
+        }
+      }
+      #heart-modal {
+        a {
+          @extend .link-button;
+          font-size: var(--font-size-2);
+          padding: 6px 12px 6px 12px;
+        }
+      }
+      #notif-modal {
+        a#donate-button {
+          @extend .link-button;
+          font-size: var(--font-size-2);
+          padding: 6px 12px;
+        }
+      }
+      #share-modal {
+        a {
+          @extend .link-button;
+          font-size: var(--font-size-4);
+          padding: 12px;
         }
       }
     }
@@ -234,6 +286,32 @@
           font-size: 32px;
         }
       }
+    }
+  }
+}
+
+@layer utilities {
+  .radix-themes {
+    .prose {
+      --tw-prose-body: unset;
+      --tw-prose-bold: white;
+    }
+    &.light {
+      .prose {
+        --tw-prose-body: unset;
+        --tw-prose-bold: black;
+      }
+    }
+  }
+  .link-button {
+    color: white;
+    background: var(--accent-9);
+    font-weight: var(--font-weight-medium);
+    border-radius: max(var(--radius-2), var(--radius-full));
+    text-decoration: none;
+    text-align: center;
+    &:hover {
+      background: var(--accent-10);
     }
   }
   .tox-tinymce {
