@@ -13,72 +13,24 @@ import {
 } from "~/components";
 import { tokenKey } from "~/lib/supabase/tokenKey";
 import { getState, setState } from "~/store";
-import { length } from "~/utils";
 
 const Page = (props) => {
   //#region state
-  const { element, loaderData, noTheme, simple } = props;
+  const { element, noTheme, simple } = props;
   const state = useSelector(getState);
-  const { appearance, isMobile, locale, modal, toast } = state;
+  const { appearance, isMobile, modal, toast } = state;
   //#endregion
 
   //#region hooks
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const navigation = useNavigation();
-  useEffect(() => {
-    if (navigation.state === "idle" && !length(state.collections))
-      dispatch(
-        setState({
-          collections: loaderData.collections,
-        }),
-      );
-  }, [navigation.state, loaderData.collections]);
-  useEffect(() => {
-    if (navigation.state === "idle" && !length(state.libs))
-      dispatch(setState({ libs: loaderData.libs }));
-  }, [navigation.state, loaderData.libs]);
-  useEffect(() => {
-    if (navigation.state === "idle" && !length(state.lib))
-      dispatch(setState({ lib: loaderData.lib }));
-  }, [navigation.state, loaderData.lib]);
-  useEffect(() => {
-    if (navigation.state === "idle" && !length(state.book))
-      dispatch(setState({ book: loaderData.book }));
-  }, [navigation.state, loaderData.book]);
-  useEffect(() => {
-    if (navigation.state === "idle") {
-      dispatch(setState({ locale: props.locale }));
-    }
-  }, [navigation.state, props.locale]);
-  useEffect(() => {
-    let bearer = "";
-    if (localStorage.getItem(tokenKey)) {
-      bearer = localStorage.getItem(tokenKey) || "";
-    } else if (process.env.NODE_ENV === "development") {
-      bearer = import.meta.env.VITE_PUBLIC_AUTH_TOKEN;
-    }
-    if (bearer) {
-      localStorage.setItem(tokenKey, bearer);
-    }
-    const { user, ...token } = bearer ? JSON.parse(bearer) : {};
-
-    dispatch(
-      setState({
-        auth: { bearer, token, user },
-        isLoaded: true,
-      }),
-    );
-  }, []);
   //#endregion
 
   //#region ui
   const onToastFinished = (id) => {
     dispatch(setState({ toast: undefined }));
   };
-  const childProps = {
-    ...props,
-    //...{ loaderData },
-  };
+  const childProps = { ...props };
   //#endregion
 
   if (noTheme)

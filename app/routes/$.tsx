@@ -1,7 +1,7 @@
 import { isbot } from "isbot";
 import { useDeviceSelectors } from "react-device-detect";
 import { Provider } from "react-redux";
-import { useRoutes } from "react-router";
+import { useLocation, useRoutes } from "react-router";
 import { Sitemap } from "~/components";
 import { Livre } from "~/routes/Livre";
 import { Note } from "~/routes/Note";
@@ -70,17 +70,27 @@ export const loader = async (props) => {
 
 export default function CatchAllRoute(props) {
   const {
-    loaderData: { initialState, userAgent },
+    loaderData: { collections, libs, lib, book, note, appearance, userAgent },
   } = props;
   const [{ isMobile }] = useDeviceSelectors(userAgent);
-  const { store } = createStore(
-    {
-      ...initialState,
-      app: { ...initialState.app, isMobile },
+  const location = useLocation();
+  const { store } = createStore({
+    app: {
+      collections,
+      libs,
+      lib,
+      book,
+      note,
+
+      appearance,
+      isMobile,
+      locale:
+        location.pathname.includes("/livre/") ||
+        location.pathname.includes("/c/")
+          ? "fr"
+          : "en",
     },
-    typeof window === "undefined",
-    typeof window !== "undefined",
-  );
+  });
 
   const App = isbot() ? (
     <Sitemap {...props} />
@@ -88,19 +98,19 @@ export default function CatchAllRoute(props) {
     useRoutes([
       {
         path: "livre/:id",
-        element: <Page element={Livre} locale="fr" {...props} />,
+        element: <Page element={Livre} />,
       },
       {
         path: "book/:id",
-        element: <Page element={Livre} locale="en" {...props} />,
+        element: <Page element={Livre} />,
       },
       {
         path: "c/:id",
-        element: <Page element={Note} locale="fr" simple {...props} />,
+        element: <Page element={Note} simple />,
       },
       {
         path: "q/:id",
-        element: <Page element={Note} locale="en" simple {...props} />,
+        element: <Page element={Note} simple />,
       },
     ])
   );

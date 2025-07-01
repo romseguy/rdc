@@ -18,7 +18,7 @@ export const ToggleButtonsRight = (props) => {
     ...state
   } = useSelector(getState);
   const [appearance, setAppearance] = useCookie("color-mode", state.appearance);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const toggleModal = useToggleModal();
 
   return (

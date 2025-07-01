@@ -1,10 +1,13 @@
-import { Button } from "@radix-ui/themes";
+import { Button, IconButton } from "@radix-ui/themes";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { getState } from "~/store";
 import { localize } from "~/utils";
 //import add from "/add.svg";
 import b1 from "/b1.svg";
+import { Flex } from "./Containers";
+import { Input } from "../ui";
+import { CheckIcon } from "@radix-ui/react-icons";
 
 //#region buttons
 export const AddNoteButton = ({ book, setBook, ...props }) => {
@@ -57,6 +60,7 @@ export const LocaleSwitch = (props) => {
   if (locale === "en")
     return (
       <FrIcon
+        className="fr-icon"
         onClick={(e) => {
           if (setLocale) setLocale("fr");
           else if (onClick) onClick(e);
@@ -67,6 +71,7 @@ export const LocaleSwitch = (props) => {
 
   return (
     <EnIcon
+      className="en-icon"
       onClick={(e) => {
         if (setLocale) setLocale("en");
         else if (onClick) onClick(e);
@@ -106,31 +111,26 @@ export const PageSwitch = ({
           p.{note.page}
         </Button>
       ) : (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          <input
+        <Flex gap="2">
+          <Input
             autoFocus
             type="number"
             defaultValue={page}
+            style={{ width: "80px" }}
             onChange={(e) => {
               const p = Number(e.target.value);
               if (p < 10000) setPage(p);
             }}
           />
-          <Button
+          <IconButton
             onClick={() => {
               setIsPageEdit(false);
               onClick(page);
             }}
           >
-            ok
-          </Button>
-        </div>
+            <CheckIcon />
+          </IconButton>
+        </Flex>
       )}
     </div>
   );
@@ -144,8 +144,8 @@ export const iconProps = (props) => {
 
   const out: Record<string, any> = {
     "aria-label": title,
-    height: "2em",
-    width: "2em",
+    height: undefined,
+    width: undefined,
     style: {
       cursor: "pointer",
       ...(isMobile
@@ -153,7 +153,7 @@ export const iconProps = (props) => {
             padding: "6px",
             border: "1px solid white",
           }
-        : { height: "1.5em", width: "1.5em" }),
+        : {}),
       ...style,
     },
   };
@@ -172,8 +172,6 @@ export const iconProps = (props) => {
 export const Book1Icon = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width={800}
-    height={800}
     fill="currentColor"
     viewBox="0 -960 960 960"
     {...props}
@@ -186,22 +184,15 @@ export const BooksIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlSpace="preserve"
-    width={800}
-    height={800}
     viewBox="0 0 487.866 487.866"
     {...props}
   >
     <path d="M482.866 243.444h-72.203c1.063-.471 1.946-1.279 2.467-2.333a5 5 0 0 0 .207-3.951L374.941 133.4a5 5 0 0 0-6.16-3.043l-24.386 7.502v-37.816a5 5 0 0 0-5-5h-21.837a5 5 0 0 0-5 5v13.369h-24.974v-13.369a5 5 0 0 0-5-5h-52.375a5 5 0 0 0-5 5v13.369h-11.837v-4.347a5 5 0 0 0-5-5h-32.454v-4.021a5 5 0 0 0-5-5h-52.375a5 5 0 0 0-5 5v23.933H79.219a5 5 0 0 0-5 5v114.469H5a5 5 0 0 0-5 5v39.835a5 5 0 0 0 5 5h54.733v94.545a5 5 0 0 0 5 5h39.822a5 5 0 0 0 5-5v-94.545h267.434v94.545a5 5 0 0 0 5 5h39.822a5 5 0 0 0 5-5v-94.545h56.055a5 5 0 0 0 5-5v-39.835a5 5 0 0 0-5-5.002m-115.663-102.14 34.919 94.368-21.464 6.603-34.919-94.368zm3.225 102.14h-26.033v-70.353zm-47.87-138.402h11.837v38.33a4.97 4.97 0 0 0 0 2.54v97.531h-11.837V105.042m-10 18.369v120.033h-24.974V123.411zm-77.349-18.369h42.375v138.402h-42.375V105.042m-10 18.369v120.033h-11.837V123.411zm-21.837-9.348v129.38h-27.454v-129.38zm-79.829-9.021h42.375v3.687c-.008.113-.034.22-.034.334v134.38h-42.341V105.042m-39.324 28.933h29.324v109.469H84.219zm-5 119.469h298.377l.013.001.013-.001h100.244v14.961H10v-14.961zm20.336 129.38H69.733v-89.545h9.911v4.95a5 5 0 0 0 10 0v-4.95h9.911zm317.256 0h-29.822v-89.545h9.911v4.95a5 5 0 0 0 10 0v-4.95h9.911zm5-99.545h-19.795c-.04-.001-.076-.012-.116-.012s-.077.011-.116.012H84.76c-.04-.001-.076-.012-.116-.012s-.077.011-.116.012H10v-4.874h467.866v4.874zM91.802 367.913a7.158 7.158 0 1 1-14.317 0 7.158 7.158 0 0 1 14.317 0m318.578 0a7.158 7.158 0 1 1-14.317 0 7.158 7.158 0 0 1 14.317 0M79.644 352.71v-34.468a5 5 0 0 1 10 0v34.468a5 5 0 0 1-10 0m317.256 0v-34.468a5 5 0 0 1 10 0v34.468a5 5 0 0 1-10 0" />
   </svg>
 );
-//#endregion
-
-//#region svg icons
 export const FrIcon = (props) => {
   return (
     <svg
-      width="2em"
-      height="2em"
       cursor="pointer"
       viewBox="0 0 30 30.000001"
       preserveAspectRatio="xMidYMid meet"
@@ -257,8 +248,6 @@ export const FrIcon = (props) => {
 };
 export const EnIcon = (props) => (
   <svg
-    width="2em"
-    height="2em"
     cursor="pointer"
     viewBox="0 0 30 30.000001"
     preserveAspectRatio="xMidYMid meet"

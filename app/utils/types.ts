@@ -77,15 +77,17 @@ export type RootData = {
 export type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
 
 export interface AppState {
+  collections: Collections;
+  libs: Lib[];
+  lib: Lib;
+  book: BookT;
+  note: NoteT;
+
   appearance: ThemeOwnProps["appearance"];
   auth: any;
-  book?: BookT;
-  collections: Collections;
   isMobile: boolean;
   isLoaded: boolean;
   locale: string;
-  libs: Lib[];
-  lib: Lib;
   modal: ModalProps;
   screenWidth: number;
   toast: ToastProps;

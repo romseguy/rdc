@@ -30,7 +30,6 @@ const middleware = (getDefaultMiddleware) => {
   ]);
 };
 const makeStore = (i) => {
-  console.log("🚀 ~ makeStore ~ i:", i);
   return configureStore({
     reducer: reducer(i),
     middleware,
@@ -45,21 +44,22 @@ export const createStore: (
   shouldCache?: boolean,
 ) => {
   store: AppStore;
-} = (i = { app: {} }, skipCache = false, shouldCache = true) => {
+} = (i = { app: {} }, skipCache = true, shouldCache = false) => {
+  if (!i.app) i.app = {};
   if (!i.app.auth) i.app.auth = {};
   if (!i.app.locale) i.app.locale = import.meta.env.VITE_PUBLIC_LOCALE;
   if (!i.app.modal) i.app.modal = {};
 
   if (store && !skipCache) {
-    console.log("cached");
+    //console.log("cached", typeof window, i);
     return { store };
   }
   if (shouldCache) {
-    console.log("caching");
+    //console.log("caching", typeof window, i);
     store = makeStore(i);
     return { store };
   }
-  console.log("fresh");
+  //console.log("fresh", typeof window, i);
   return { store: makeStore(i) };
 };
 export const getState = (state) => {

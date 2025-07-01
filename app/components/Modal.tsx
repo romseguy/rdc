@@ -37,7 +37,7 @@ export const Modal = (props) => {
   const [email, setEmail] = useState<string>("");
   const [message, setMessage] = useState<string>("");
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const showToast = useToast();
   const toggleModal = useToggleModal();
 
@@ -248,7 +248,7 @@ export const Modal = (props) => {
               <Button
                 onClick={async () => {
                   try {
-                    const { data, error } = await dispatch<any>(
+                    const { data, error } = await dispatch(
                       postComments.initiate({
                         comment: { html: message, is_feedback: true },
                       }),
@@ -292,15 +292,11 @@ export const Modal = (props) => {
                   onDeleteClick={async (comment) => {
                     try {
                       const { data, error } = await dispatch(
-                        //@ts-expect-error
                         deleteComment.initiate({
                           url: "/comment?id=" + comment.id,
                         }),
                       );
-                      //@ts-expect-error
-                      if (data.error || error)
-                        //@ts-expect-error
-                        throw data.error || error;
+                      if (data.error || error) throw data.error || error;
 
                       dispatch(
                         setState({
@@ -328,7 +324,7 @@ export const Modal = (props) => {
 };
 
 export const useToggleModal = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const { modal } = useSelector(getState);
   return (id = "login-modal", props = {}) =>
     dispatch(

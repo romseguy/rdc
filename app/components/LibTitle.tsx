@@ -1,8 +1,7 @@
+import { PlusCircledIcon } from "@radix-ui/react-icons";
+import { Button, Heading } from "@radix-ui/themes";
 import { localize } from "~/utils";
 import { BooksIcon, Flex } from "./shared";
-import { Button, Heading } from "@radix-ui/themes";
-import { PlusCircledIcon } from "@radix-ui/react-icons";
-import { css } from "@emotion/react";
 
 export const LibTitle = (props) => {
   const { lib } = props;

@@ -11,7 +11,20 @@ export default defineConfig({
   // ssr: {
   //   noExternal: ["date-fns"],
   // },
-  plugins: [reactRouter(), tsconfigPaths()],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        //@ts-expect-error
+        api: "modern-compiler",
+        silenceDeprecations: ["import"],
+      },
+    },
+  },
+  plugins: [
+    reactRouter(),
+    //@ts-expect-error
+    tsconfigPaths(),
+  ],
   server: { port: 3000 },
   preview: { port: 5000 },
 });

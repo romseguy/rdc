@@ -1,16 +1,13 @@
 import { css } from "@emotion/react";
+import { Box } from "@radix-ui/themes";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router";
 import { Book1Icon, Flex, LibTitle } from "~/components";
 import { getState } from "~/store";
 import { localize } from "~/utils";
-import { BookTitle } from "./BookTitle";
-import { Box, IconButton } from "@radix-ui/themes";
-import { DoubleArrowRightIcon, PlusCircledIcon } from "@radix-ui/react-icons";
 
 export const PageHeader = (props) => {
-  const { loaderData } = props;
-  const { isMobile, lib = loaderData.lib } = useSelector(getState);
+  const { isMobile, book, lib } = useSelector(getState);
   const navigate = useNavigate();
 
   return (
@@ -23,9 +20,9 @@ export const PageHeader = (props) => {
         </Box>
       )}
 
-      {/* {!isMobile && loaderData.book && (
+      {/* {!isMobile && book && (
         <Flex ml="2" mb="3">
-          <BookTitle lib={lib} book={loaderData.book} />
+          <BookTitle lib={lib} book={book} />
         </Flex>
       )} */}
 
@@ -39,7 +36,7 @@ export const PageHeader = (props) => {
               className="book"
               css={css`
                 ${b.src && "background: url(" + b.src + ");"}
-                border: ${b.id === loaderData.book?.id
+                border: ${b.id === book?.id
                   ? "1px solid yellow"
                   : "1px solid white"};
               `}

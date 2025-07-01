@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Box, Button, Heading, Select, Separator } from "@radix-ui/themes";
+import { Button, Heading, Select } from "@radix-ui/themes";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
@@ -19,19 +19,11 @@ import {
   useToast,
 } from "~/components";
 import { getState, setState } from "~/store";
-import { ENoteOrder, localize, toCss, type BookT, type NoteT } from "~/utils";
+import { ENoteOrder, localize, toCss, type NoteT } from "~/utils";
 
 export const Livre = (props) => {
   //#region state
-  const { loaderData } = props;
-  const {
-    auth,
-    book = loaderData.book,
-    isMobile,
-    lib = loaderData.lib,
-    locale,
-  } = useSelector(getState);
-  const defaultLocale = import.meta.env.VITE_PUBLIC_LOCALE;
+  const { lib, book, auth, isMobile, locale } = useSelector(getState);
   const user = auth?.user;
 
   const [isCommentLoading, setIsCommentLoading] = useState<
@@ -72,18 +64,13 @@ export const Livre = (props) => {
   //#endregion
 
   //#region hooks
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const navigate = useNavigate();
   const showToast = useToast();
   const setBook = (book) => dispatch(setState({ book }));
   //#endregion
 
   //#region effects
-  useEffect(() => {
-    if (props.loaderData.book) {
-      if (book.id !== props.loaderData.book.id) setBook(props.loaderData.book);
-    }
-  }, [props.loaderData]);
   async function onEditSubmit(note) {
     try {
       let id;
@@ -94,7 +81,6 @@ export const Livre = (props) => {
 
       if (!note.id) {
         const { data, error } = await dispatch(
-          //@ts-expect-error
           postNotes.initiate({
             note: {
               book_id: book.id,
@@ -103,15 +89,10 @@ export const Livre = (props) => {
             },
           }),
         );
-        //@ts-expect-error
-        if (data.error || error)
-          //@ts-expect-error
-          data.error || error;
-        //@ts-expect-error
+        if (data.error || error) throw data.error || error;
         id = data.id;
       } else {
         const { data, error } = await dispatch(
-          //@ts-expect-error
           editNote.initiate({
             note: {
               id: note.id,
@@ -121,10 +102,7 @@ export const Livre = (props) => {
             },
           }),
         );
-        //@ts-expect-error
-        if (data.error || error)
-          //@ts-expect-error
-          throw data.error || error;
+        if (data.error || error) throw data.error || error;
       }
 
       setBook({
@@ -162,16 +140,12 @@ export const Livre = (props) => {
           [note.id]: true,
         });
         const { data, error } = await dispatch(
-          //@ts-expect-error
           deleteNote.initiate({
             url: "/note?id=" + note.id,
           }),
         );
 
-        //@ts-expect-error
-        if (data.error || error)
-          //@ts-expect-error
-          throw data.error || error;
+        if (data.error || error) throw data.error || error;
 
         setBook({
           ...book,
@@ -193,15 +167,11 @@ export const Livre = (props) => {
   async function onEditPageClick(note: NoteT) {
     try {
       const { data, error } = await dispatch(
-        //@ts-expect-error
         editNote.initiate({
           note,
         }),
       );
-      //@ts-expect-error
-      if (data.error || error)
-        //@ts-expect-error
-        data.error || error;
+      if (data.error || error) data.error || error;
 
       setBook({
         ...book,
@@ -217,7 +187,6 @@ export const Livre = (props) => {
   async function onSubmitCommentClick(note, comment) {
     try {
       const { data, error } = await dispatch(
-        //@ts-expect-error
         postComments.initiate({
           comment: {
             ...comment,
@@ -226,10 +195,7 @@ export const Livre = (props) => {
         }),
       );
 
-      //@ts-expect-error
-      if (data.error || error)
-        //@ts-expect-error
-        throw data.error || error;
+      if (data.error || error) throw data.error || error;
 
       // if (data.error) {
       //   if (process.env.NODE_ENV === "development") {
@@ -283,16 +249,12 @@ export const Livre = (props) => {
           [comment.id]: true,
         });
         const { data, error } = await dispatch(
-          //@ts-expect-error
           deleteComment.initiate({
             url: "/comment?id=" + comment.id,
           }),
         );
 
-        //@ts-expect-error
-        if (data.error || error)
-          //@ts-expect-error
-          throw data.error || error;
+        if (data.error || error) throw data.error || error;
 
         // if (data.error) {
         //   setIsCommentLoading({

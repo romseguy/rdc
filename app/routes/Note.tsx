@@ -7,12 +7,15 @@ import { Flex, NoteTitle } from "~/components";
 import { getState } from "~/store";
 import { createLocalize, toCssString } from "~/utils";
 
-export const Note = (props) => {
-  const { loaderData } = props;
-  const { note } = loaderData;
-  console.log("🚀 ~ Note ~ note:", note);
-  const state = useSelector(getState);
-  const { locale, screenWidth } = state;
+export const Note = () => {
+  //#region state
+  const { lib, book, note, locale, screenWidth } = useSelector(getState);
+  const localize = createLocalize(locale);
+  const [lineHeight, setLineHeight] = useState(2);
+  const [size, setSize] = useState(16);
+  const [width, setWidth] = useState(screenWidth);
+  const [isLoaded, setIsLoaded] = useState(false);
+
   const desc =
     (locale === "en" ? note.desc_en : note.desc) ||
     `<i>${
@@ -22,12 +25,8 @@ export const Note = (props) => {
           : "Empty quote"
         : "Aucun texte"
     }</i>`;
-  const localize = createLocalize(locale);
-  const defaultWidth = screenWidth > 1000 ? 1000 : screenWidth;
-  const [lineHeight, setLineHeight] = useState(2);
-  const [size, setSize] = useState(16);
-  const [width, setWidth] = useState(defaultWidth);
-  const [isLoaded, setIsLoaded] = useState(false);
+  //#endregion
+
   useEffect(() => {
     setIsLoaded(true);
   }, []);
@@ -35,7 +34,7 @@ export const Note = (props) => {
   return (
     <div id="note-page">
       <header>
-        <NoteTitle {...loaderData} />
+        <NoteTitle lib={lib} book={book} note={note} />
 
         {/* sliders */}
         <Flex
@@ -87,9 +86,9 @@ export const Note = (props) => {
           </Flex>
           {isLoaded ? (
             <Slider
-              defaultValue={[defaultWidth]}
-              min={defaultWidth / 3}
-              max={defaultWidth}
+              defaultValue={[screenWidth]}
+              min={screenWidth / 3}
+              max={screenWidth}
               step={1}
               onValueChange={(v) => {
                 setWidth(Number(v[0]));
@@ -122,17 +121,11 @@ export const Note = (props) => {
       <main
         className="prose"
         css={css`
-          ${toCssString({
-            fontSize: size + "px",
-            lineHeight,
-            margin: "0 auto",
-            width: width > screenWidth ? screenWidth : width + "px",
-            maxWidth: screenWidth + "px",
-            textAlign: "justify",
-          })}
-          a {
-            color: var(--accent-a11);
-          }
+          font-size: ${size}px;
+          line-height: ${lineHeight};
+          width: ${width > screenWidth ? screenWidth : width}px;
+          max-width: ${screenWidth}px;
+          text-align: justify;
         `}
       >
         <div

@@ -22,16 +22,8 @@ import { tokenKey } from "~/lib/supabase/tokenKey";
 import { getState, setState } from "~/store";
 import { localize, type Lib } from "~/utils";
 
-export const PageTitle = (props) => {
-  const { loaderData } = props;
-  const {
-    auth,
-    isMobile,
-    isLoaded,
-    lib = loaderData.lib as Lib,
-    libs = loaderData.libs as Lib[],
-    locale,
-  } = useSelector(getState);
+export const PageTitle = () => {
+  const { auth, isMobile, isLoaded, lib, libs, locale } = useSelector(getState);
   const user = auth?.user;
   const [item, setItem] = useState("0");
   const libsGroupedByAuthor = useMemo(() => {
@@ -45,7 +37,7 @@ export const PageTitle = (props) => {
     return els;
   }, [libs]);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const navigate = useNavigate();
   const location = useLocation();
   const toggleModal = useToggleModal();
@@ -83,8 +75,9 @@ export const PageTitle = (props) => {
       id="page-title"
       className="bg-purple-900/50"
       direction="column"
-      gap={isMobile ? "3" : "0"}
-      p="3"
+      gap="1"
+      pt="3"
+      pb={isMobile ? "3" : "1"}
     >
       <Heading
         onClick={() => {
@@ -94,108 +87,104 @@ export const PageTitle = (props) => {
         {localize("Recueil de citations", "Know my quotes")}
       </Heading>
 
-      <Flex
-        align="start"
-        {...(isMobile ? { direction: "column", gap: "3" } : {})}
-      >
-        <Flex {...(isMobile ? { direction: "column", align: "start" } : {})}>
-          {!isMobile && <BooksIcon height="3em" width="3em" fill="white" />}
+      <Flex direction={isMobile ? "column" : "row"}>
+        {!isMobile && <BooksIcon className="books-icon" fill="white" />}
 
-          <Select.Root
-            value={item}
-            onValueChange={(value) => {
-              //setItem(value);
-              if (value === "1") {
-                alert(
-                  localize(
-                    `Si vous voulez accéder à des citations classées par thématiques, merci d'envoyer un mail à ${
-                      import.meta.env.VITE_PUBLIC_EMAIL
-                    } pour me le faire savoir.`,
-                    `If you are interested in having quotes grouped by topics, please send an email to ${
-                      import.meta.env.VITE_PUBLIC_EMAIL
-                    } to let me know.`,
-                  ),
-                );
-              }
-            }}
-          >
-            <Select.Trigger variant="classic" />
-            <Select.Content>
-              <Select.Item value="0">
-                {localize("Bibliothèques", "Libraries")}
-              </Select.Item>
-              <Select.Item value="1">
-                {localize("Thématiques", "Topics")}
-              </Select.Item>
-            </Select.Content>
-          </Select.Root>
+        <Select.Root
+          value={item}
+          onValueChange={(value) => {
+            //setItem(value);
+            if (value === "1") {
+              alert(
+                localize(
+                  `Si vous voulez accéder à des citations classées par thématiques, merci d'envoyer un mail à ${
+                    import.meta.env.VITE_PUBLIC_EMAIL
+                  } pour me le faire savoir.`,
+                  `If you are interested in having quotes grouped by topics, please send an email to ${
+                    import.meta.env.VITE_PUBLIC_EMAIL
+                  } to let me know.`,
+                ),
+              );
+            }
+          }}
+        >
+          <Select.Trigger variant="classic" />
+          <Select.Content>
+            <Select.Item value="0">
+              {localize("Bibliothèques", "Libraries")}
+            </Select.Item>
+            <Select.Item value="1">
+              {localize("Thématiques", "Topics")}
+            </Select.Item>
+          </Select.Content>
+        </Select.Root>
 
-          <Flex>
-            {item === "0" && (
-              <Select.Root
-                defaultValue={lib[localize("name")] || lib.name}
-                onValueChange={(value) => {
-                  const newLib = libs.find(
-                    (lib) => (lib[localize("name")] || lib.name) === value,
-                  );
-                  dispatch(
-                    setState({
-                      //book: null,
-                      lib: newLib,
-                    }),
-                  );
-                  if (location.pathname !== "/") navigate("/");
-                }}
-              >
-                <Select.Trigger
-                  placeholder={localize(
-                    "Choisir une bibliothèque",
-                    "Pick a library",
-                  )}
-                  variant="classic"
-                />
-                <Select.Content
-                  css={css`
-                    *  {
-                      margin: 0;
-                      padding: 3px;
-                    }
-                  `}
-                >
-                  {Object.keys(libsGroupedByAuthor).map((author, i) => (
-                    <Select.Group key={"author" + i}>
-                      <Select.Label>{author}</Select.Label>
-                      {(libsGroupedByAuthor[author] || []).map((l) => (
-                        <Select.Item
-                          key={"lib-" + l.id}
-                          value={l[localize("name")] || l.name}
-                        >
-                          {l[localize("name")] || l.name}
-                        </Select.Item>
-                      ))}
-                    </Select.Group>
-                  ))}
-                </Select.Content>
-              </Select.Root>
-            )}
-            <IconButton
-              onClick={() => {
-                alert(
-                  localize(
-                    "Pour ajouter une bibliothèque, envoyez un e-mail à " +
-                      import.meta.env.VITE_PUBLIC_EMAIL +
-                      "",
-                    "To add a library, send an email to" +
-                      import.meta.env.VITE_PUBLIC_EMAIL +
-                      "",
-                  ),
+        <Flex>
+          {item === "0" && (
+            <Select.Root
+              defaultValue={lib[localize("name")] || lib.name}
+              onValueChange={(value) => {
+                const newLib = libs.find(
+                  (lib) => (lib[localize("name")] || lib.name) === value,
                 );
+                dispatch(
+                  setState({
+                    //book: null,
+                    lib: newLib,
+                  }),
+                );
+                if (location.pathname !== "/") navigate("/");
               }}
-              variant="surface"
             >
-              <PlusCircledIcon />
-            </IconButton>
-          </Flex>
+              <Select.Trigger
+                placeholder={localize(
+                  "Choisir une bibliothèque",
+                  "Pick a library",
+                )}
+                variant="classic"
+              />
+              <Select.Content
+                css={css`
+                  *  {
+                    margin: 0;
+                    padding: 3px;
+                  }
+                `}
+              >
+                {Object.keys(libsGroupedByAuthor).map((author, i) => (
+                  <Select.Group key={"author" + i}>
+                    <Select.Label>{author}</Select.Label>
+                    {(libsGroupedByAuthor[author] || []).map((l) => (
+                      <Select.Item
+                        key={"lib-" + l.id}
+                        value={l[localize("name")] || l.name}
+                      >
+                        {l[localize("name")] || l.name}
+                      </Select.Item>
+                    ))}
+                  </Select.Group>
+                ))}
+              </Select.Content>
+            </Select.Root>
+          )}
+
+          <IconButton
+            onClick={() => {
+              alert(
+                localize(
+                  "Pour ajouter une bibliothèque, envoyez un e-mail à " +
+                    import.meta.env.VITE_PUBLIC_EMAIL +
+                    "",
+                  "To add a library, send an email to" +
+                    import.meta.env.VITE_PUBLIC_EMAIL +
+                    "",
+                ),
+              );
+            }}
+            variant="surface"
+          >
+            <PlusCircledIcon />
+          </IconButton>
         </Flex>
       </Flex>
 

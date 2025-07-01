@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { postIp } from "~/api";
 import { getState, setState } from "~/store";
 import { splash } from "~/lib/ios/splash";
+import { useNavigation } from "react-router";
+import { tokenKey } from "~/lib/supabase/tokenKey";
 
 const controller = new AbortController();
 const signal = controller.signal;
@@ -12,7 +14,9 @@ const signal = controller.signal;
 export const Config = () => {
   const { screenWidth } = useSelector(getState);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
+  const navigation = useNavigation();
+
   // useScript("https://unpkg.com/pwacompat", {
   //   attributes: { async: "true", crossOrigin: "anonymous" },
   // });
@@ -26,13 +30,9 @@ export const Config = () => {
         if (process.env.NODE_ENV === "production") {
           const res = await fetch("https://api.ipify.org?format=json");
           const data = await res.json();
-          if (data.ip)
-            //@ts-expect-error
-            dispatch(postIp.initiate({ ip: data.ip }));
+          if (data.ip) dispatch(postIp.initiate({ ip: data.ip }));
         }
-      } catch (error) {
-        console.log("🚀 ~ error:", error);
-      }
+      } catch (error) {}
     })();
 
     function updateScreenWidth() {
@@ -41,6 +41,7 @@ export const Config = () => {
         dispatch(setState({ screenWidth: newScreenWidth }));
       }
     }
+
     updateScreenWidth();
 
     if (!isMobile) {
@@ -53,6 +54,28 @@ export const Config = () => {
       };
     }
   }, []);
+
+  useEffect(() => {
+    if (navigation.state === "idle") {
+      let bearer = "";
+      if (localStorage.getItem(tokenKey)) {
+        bearer = localStorage.getItem(tokenKey) || "";
+      } else if (process.env.NODE_ENV === "development") {
+        bearer = import.meta.env.VITE_PUBLIC_AUTH_TOKEN;
+      }
+      if (bearer) {
+        localStorage.setItem(tokenKey, bearer);
+      }
+      const { user, ...token } = bearer ? JSON.parse(bearer) : {};
+
+      dispatch(
+        setState({
+          auth: { bearer, token, user },
+          isLoaded: true,
+        }),
+      );
+    }
+  }, [navigation.state]);
 
   return null;
 };

@@ -19,21 +19,23 @@ import {
 import type { Route } from "../+types/root";
 import Page from "./Page";
 
-const get_cookies = function (request) {
-  var cookies = {};
-  request.headers &&
+const cookies = (request) => {
+  let cookies = {};
+
+  if (request.headers && request.headers.get("cookie"))
     request.headers
       .get("cookie")
       .split(";")
       .forEach(function (cookie) {
-        var parts = cookie.match(/(.*?)=(.*)$/);
+        const parts = cookie.match(/(.*?)=(.*)$/);
         cookies[parts[1].trim()] = (parts[2] || "").trim();
       });
+
   return cookies;
 };
 
 export const loader = async (props: Route.LoaderArgs) => {
-  const cookie = get_cookies(props.request)["color-mode"];
+  const cookie = cookies(props.request)["color-mode"];
   const appearance = cookie || "dark";
   const userAgent = props.request.headers.get("user-agent") || "";
 
@@ -103,23 +105,28 @@ export const loader = async (props: Route.LoaderArgs) => {
   }
 
   data.lib = data.libs[0] as Seed | Lib;
-  data.initialState = store.getState();
 
   return data;
 };
 
 export default function IndexRoute(props) {
   const {
-    loaderData: { initialState, appearance, userAgent },
+    loaderData: { collections, libs, lib, appearance, userAgent },
   } = props;
   const [{ isMobile }] = useDeviceSelectors(userAgent);
   const { store } = createStore(
     {
-      ...initialState,
-      app: { ...initialState.app, isMobile },
+      app: {
+        collections,
+        libs,
+        lib,
+
+        appearance,
+        isMobile,
+      },
     },
-    typeof window === "undefined",
-    typeof window !== "undefined",
+    false,
+    true,
   );
 
   const App = isbot() ? (

@@ -15,7 +15,7 @@ import type { Comment } from "~/utils";
 axios.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const { store } = createStore({ noCache: true });
+      const { store } = createStore();
       config.headers.common.authorization = `Bearer ${
         store.getState().app.auth?.bearer
       }`;
@@ -65,12 +65,12 @@ const axiosBaseQuery =
       });
       return { data: result.data };
     } catch (axiosError) {
-      //console.log("~ axiosError:", axiosError);
       const err = axiosError as AxiosError;
       return {
         error: {
           status: err.response?.status,
           data: err.response?.data || err.message,
+          error: err.toJSON(),
         },
       };
     }
@@ -81,7 +81,7 @@ export const api = createApi({
     baseUrl,
   }),
   endpoints: (build) => ({
-    getCollections: build.query<any, any>({
+    getCollections: build.query({
       query: () => {
         console.log("GET /");
         return { url: "/" };
@@ -102,7 +102,7 @@ export const api = createApi({
     deleteComment: build.mutation({
       query: ({ url }) => ({ url, method: "DELETE" }),
     }),
-    postComments: build.mutation<Comment, any>({
+    postComments: build.mutation({
       query: (body) => ({ url: "/comments", method: "POST", body }),
     }),
   }),

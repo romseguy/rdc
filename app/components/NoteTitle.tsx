@@ -5,19 +5,10 @@ import { getState } from "~/store";
 import { createLocalize } from "~/utils";
 
 export const NoteTitle = (props) => {
-  const { note } = props;
-  const { book, locale, ...state } = useSelector(getState);
-  const lib = state.lib || props.lib;
+  const { lib, book, note } = props;
+  const { locale } = useSelector(getState);
   const localize = createLocalize(locale);
   const navigate = useNavigate();
-
-  if (!book)
-    return (
-      <BackButton
-        label={localize("Retour", "Back")}
-        onClick={() => navigate("/")}
-      />
-    );
 
   return (
     <Flex p="3">

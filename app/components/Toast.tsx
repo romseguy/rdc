@@ -50,7 +50,7 @@ export const ToastsContainer = ({ toast, onToastFinished }) => {
 };
 
 export const useToast = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   return (message, isError?: boolean) => {
     const toast = {
       message: typeof message === "string" ? message : message.message,

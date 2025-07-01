@@ -90,7 +90,7 @@ export const Note = (props: NoteP) => {
   const [comment, setComment] = useState<{ html: string }>();
   const [isShowComments, setIsShowComments] = useState(false);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const navigate = useNavigate();
   const location = useLocation();
   const [executeScroll, elementToScrollRef] = useScroll<HTMLDivElement>();
@@ -116,15 +116,6 @@ export const Note = (props: NoteP) => {
         gap={isMobile ? "0" : "3"}
         {...props}
       >
-        <LocaleSwitch
-          setLocale={(locale) => {
-            navigate(
-              locale === "fr"
-                ? location.pathname.replace("book", "livre")
-                : location.pathname.replace("livre", "book"),
-            );
-          }}
-        />
         <PageSwitch
           variant="soft"
           isPageEdit={isPageEdit}
@@ -142,6 +133,7 @@ export const Note = (props: NoteP) => {
           onClick={onOpenClick}
         >
           <ReaderIcon
+            className="reader-icon"
             {...iconProps({
               title: openLabel,
               style: { border: 0, padding: "unset" },
@@ -172,7 +164,17 @@ export const Note = (props: NoteP) => {
       <Box {...props}>
         {!isLoading && (
           <Flex gap="3">
+            <LocaleSwitch
+              setLocale={(locale) => {
+                navigate(
+                  locale === "fr"
+                    ? location.pathname.replace("book", "livre")
+                    : location.pathname.replace("livre", "book"),
+                );
+              }}
+            />
             <Share1Icon
+              className="share-icon"
               color="var(--color-blue-500)"
               {...iconProps({
                 title: localize("Partager la citation", "Share the quote"),
@@ -311,7 +313,15 @@ export const Note = (props: NoteP) => {
                       }
                     }}
                   >
-                    <PlusCircledIcon />
+                    <PlusCircledIcon
+                      className="add-icon"
+                      {...iconProps({
+                        title: localize(
+                          "Ajouter un commentaire",
+                          "Add a comment",
+                        ),
+                      })}
+                    />
                     {localize("Ajouter un commentaire", "Add a comment")}
                   </Button>
                 </>
@@ -319,10 +329,11 @@ export const Note = (props: NoteP) => {
 
               {Array.isArray(note.comments) && note.comments.length > 0 && (
                 <Button>
-                  <ChatBubbleIcon />
+                  <ChatBubbleIcon className="chat-icon" />
                   {note.comments.length}
                   {isShowComments ? (
                     <ArrowUpIcon
+                      className="icon"
                       {...iconProps({
                         title: localize(
                           "Ouvrir la zone des commentaires",
@@ -332,6 +343,7 @@ export const Note = (props: NoteP) => {
                     />
                   ) : (
                     <ArrowRightIcon
+                      className="icon"
                       {...iconProps({
                         title: localize(
                           "Fermer la zone des commentaires",

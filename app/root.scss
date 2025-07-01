@@ -32,6 +32,37 @@
     background-repeat: repeat;
     margin: 0 auto;
   }
+
+  svg {
+    &.icon,
+    &.en-icon,
+    &.fr-icon,
+    &.add-icon,
+    &.chat-icon,
+    &.books-icon,
+    &.delete-icon,
+    &.edit-icon,
+    &.external-icon,
+    &.reader-icon,
+    &.share-icon {
+      width: 2em;
+      height: 2em;
+    }
+    &.delete-icon {
+      fill: white;
+      stroke: red;
+    }
+    &.edit-icon {
+      stroke: var(--green-9);
+      fill: none;
+    }
+    &.external-icon {
+      stroke: white;
+    }
+    &.share-icon {
+      fill: white;
+    }
+  }
 }
 
 @layer components {
@@ -39,6 +70,7 @@
     --color-background: rgba(0, 0, 0, 0.5);
     --cursor-badge: pointer;
     --cursor-button: pointer;
+    --default-font-color: white;
     --default-font-family: Inter, system-ui, Avenir, Helvetica, Arial,
       sans-serif;
     --default-letter-spacing: 0em;
@@ -60,6 +92,7 @@
     --secondary-font-family: Spectral, Georgia, ui-serif, serif;
 
     &.light {
+      --default-font-color: black;
       --color-background: rgba(211, 211, 211, 0.7);
       --color-modal-content-bg: rgba(211, 211, 211, 1);
       --color-page-title: var(--color-purple-500);
@@ -68,6 +101,8 @@
       --color-note-desc: var(--color-white);
       --color-note-footer: var(--color-white);
     }
+
+    color: var(--default-font-color);
 
     button {
       &[type="button"] {
@@ -81,23 +116,6 @@
         & > svg {
           stroke: currentColor;
         }
-      }
-    }
-
-    svg {
-      &.delete-icon {
-        fill: white;
-        stroke: red;
-      }
-      &.edit-icon {
-        stroke: var(--green-9);
-        fill: none;
-      }
-      &.external-icon {
-        stroke: white;
-      }
-      &.share-icon {
-        fill: white;
       }
     }
 
@@ -170,6 +188,7 @@
         #book-header {
           h1 {
             font-size: var(--text-xl);
+            text-align: center;
           }
         }
 
@@ -216,6 +235,7 @@
           padding: 6px 12px;
           font-family: var(--secondary-font-family);
           letter-spacing: var(--letter-spacing-1);
+          margin: 0 auto;
         }
       }
     }
@@ -295,6 +315,12 @@
     .prose {
       --tw-prose-body: unset;
       --tw-prose-bold: white;
+      a {
+        color: var(--accent-a11);
+      }
+      p {
+        margin: 0;
+      }
     }
     &.light {
       .prose {
