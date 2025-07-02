@@ -64,10 +64,10 @@ export function splash(icon, color = "white") {
     const imageDataURL = canvas.toDataURL("image/png");
     const imageDataURL2 = canvas2.toDataURL("image/png");
 
-    // Add apple-mobile-web-app-capable if not already present
-    if (!document.querySelector('meta[name="apple-mobile-web-app-capable"]')) {
+    // Add mobile-web-app-capable if not already present
+    if (!document.querySelector('meta[name="mobile-web-app-capable"]')) {
       const metaTag = document.createElement("meta");
-      metaTag.setAttribute("name", "apple-mobile-web-app-capable");
+      metaTag.setAttribute("name", "mobile-web-app-capable");
       metaTag.setAttribute("content", "yes");
       document.head.appendChild(metaTag);
     }

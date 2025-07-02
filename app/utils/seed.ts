@@ -31,13 +31,37 @@ export const collections: Seed = {
       ],
     },
     {
-      name: "Evolutionary Psychologyyyyyyyyyy",
+      name: "Evolutionary Psychology y y y y y y y y y y y y y y",
       author: "Bernard de Montréal",
       books: [
         {
           is_conf: true,
-          title: "L'incapacité",
+          title: "L'incapacité é é é é é é é é é é é é é é é é é é é é é é é é",
           title_en: "The powerlessness",
+          notes: [
+            {
+              page: 123,
+              desc: "l'incapacité des moutons",
+              desc_en: "The powerlessness of the sheep",
+              note_email: "a@b.com",
+              comments: [
+                {
+                  html: "stuff",
+                  comment_email: import.meta.env.VITE_PUBLIC_EMAIL,
+                  created_at: new Date().toISOString(),
+                },
+                {
+                  html: "stuff2",
+                  comment_email: import.meta.env.VITE_PUBLIC_EMAIL,
+                  created_at: new Date().toISOString(),
+                },
+              ],
+            },
+            { page: 12, desc: "La domination du berger" },
+          ],
+        },
+        {
+          is_conf: true,
           notes: [
             {
               page: 123,

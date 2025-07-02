@@ -318,11 +318,7 @@ export const Livre = (props) => {
       {/* book header */}
       {!hasEditing && (
         <div id="book-header">
-          <Flex justify="center" pl={isMobile ? "0" : "4"}>
-            <Heading>
-              <BookTitle lib={lib} book={book} />
-            </Heading>
-          </Flex>
+          <BookTitle lib={lib} book={book} />
         </div>
       )}
 

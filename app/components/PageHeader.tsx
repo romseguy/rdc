@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import { Box } from "@radix-ui/themes";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router";
-import { Book1Icon, Flex, LibTitle } from "~/components";
+import { Book1Icon, bookTitle, Flex, LibTitle } from "~/components";
 import { getState } from "~/store";
 import { localize } from "~/utils";
 
@@ -19,12 +19,6 @@ export const PageHeader = (props) => {
           </Flex>
         </Box>
       )}
-
-      {/* {!isMobile && book && (
-        <Flex ml="2" mb="3">
-          <BookTitle lib={lib} book={book} />
-        </Flex>
-      )} */}
 
       {/* books list */}
       <Flex gap="0" overflowX="scroll">
@@ -47,7 +41,9 @@ export const PageHeader = (props) => {
               {!b.src && (
                 <Flex direction="column">
                   <Book1Icon />
-                  <Link to={to}>{b[localize("title")] || b.title}</Link>
+                  <Link to={to}>
+                    {b.title ? b[localize("title")] || b.title : bookTitle(b)}
+                  </Link>
                 </Flex>
               )}
             </div>

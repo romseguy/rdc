@@ -1,14 +1,16 @@
 import { isbot } from "isbot";
-import { useDeviceSelectors } from "react-device-detect";
 import { Provider } from "react-redux";
 import { useLocation, useRoutes } from "react-router";
 import { Sitemap } from "~/components";
 import { Livre } from "~/routes/Livre";
 import { Note } from "~/routes/Note";
 import { createStore } from "~/store";
-import { type BookT, type Note as NoteT, type RootData } from "~/utils";
+import { type AppState } from "~/utils";
 import { loader as rootLoader } from "./_index";
 import Page from "./Page";
+import previousLocation from "./previousLocation";
+
+let isserver = typeof window === "undefined";
 
 export const loader = async (props) => {
   const [, entity, id] = new URL(props.request.url).pathname.split("/");
@@ -24,73 +26,68 @@ export const loader = async (props) => {
       statusText: "La page n'a pas été trouvée",
     });
 
-  const data: RootData & { book?: BookT; note?: NoteT } = await rootLoader(
-    props,
-  );
+  const app: AppState = await rootLoader(props);
 
   if (["livre", "book"].includes(entity)) {
-    for (const lib of data.libs) {
+    for (const lib of app.libs) {
       let index = 0;
       for (const b of lib.books || []) {
         if (b.id === id) {
-          data.lib = lib;
-          data.book = { ...b, index };
+          app.lib = lib;
+          app.book = { ...b, index };
         }
         index++;
       }
     }
-    if (!data.book)
+    if (!app.book)
       throw new Response("", {
         status: 404,
         statusText: "Le livre n'a pas été trouvé",
       });
   } else if (["c", "q"].includes(entity)) {
-    for (const lib of data.libs) {
+    for (const lib of app.libs) {
       let index = 0;
       for (const b of lib.books || []) {
         for (const n of b.notes || []) {
           if (n.id === id) {
-            data.lib = lib;
-            data.book = { ...b, index };
-            data.note = n;
+            app.lib = lib;
+            app.book = { ...b, index };
+            app.note = n;
           }
         }
         index++;
       }
     }
-    if (!data.note)
+    if (!app.note)
       throw new Response("", {
         status: 404,
         statusText: "La citation n'a pas été trouvée",
       });
   }
 
-  return data;
+  return app;
 };
 
 export default function CatchAllRoute(props) {
-  const {
-    loaderData: { collections, libs, lib, book, note, appearance, userAgent },
-  } = props;
-  const [{ isMobile }] = useDeviceSelectors(userAgent);
+  const { loaderData } = props;
   const location = useLocation();
-  const { store } = createStore({
-    app: {
-      collections,
-      libs,
-      lib,
-      book,
-      note,
-
-      appearance,
-      isMobile,
-      locale:
-        location.pathname.includes("/livre/") ||
-        location.pathname.includes("/c/")
-          ? "fr"
-          : "en",
+  const p = previousLocation();
+  const skipCache = isserver || p !== location.pathname;
+  previousLocation(location.pathname);
+  const { store } = createStore(
+    {
+      app: {
+        ...loaderData,
+        locale:
+          location.pathname.includes("/livre/") ||
+          location.pathname.includes("/c/")
+            ? "fr"
+            : "en",
+      },
     },
-  });
+    skipCache,
+    typeof window !== "undefined",
+  );
 
   const App = isbot() ? (
     <Sitemap {...props} />

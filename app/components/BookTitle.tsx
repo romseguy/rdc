@@ -1,47 +1,60 @@
 import { ChatBubbleIcon } from "@radix-ui/react-icons";
-import { Book1Icon, BookIcon, Flex } from "~/components";
-import { localize } from "~/utils";
+import { useSelector } from "react-redux";
+import { BookIcon } from "~/components";
+import { getState } from "~/store";
+import { localize, type BookT } from "~/utils";
 
-export const BookTitle = ({ lib, book }) => {
+export const bookTitle = (book: BookT) => `
+  ${
+    book.index === 0
+      ? localize("Premier", "First")
+      : book.index === 1
+      ? `${book.index + 1}${localize("ème", "nd")}`
+      : book.index === 2
+      ? book.index + localize("ème", "rd")
+      : book.index + localize("ème", "th")
+  }
+  ${
+    book.is_conf
+      ? " " + localize("conférence", "talk show")
+      : " " + localize("livre", "book")
+  }`;
+
+export const BookTitle = (props) => {
+  const { lib, book, isMobile } = useSelector(getState);
   return (
     <>
       {book.title && (
-        <Flex>
+        <>
           {book.is_conf ? (
-            <>
+            <h1>
               <ChatBubbleIcon width={30} height={30} />
               {localize("Conférence", "Talk show")}
-              <span> : </span>
-            </>
+              {!isMobile && <span> : </span>}
+            </h1>
           ) : (
-            <>
-              <Book1Icon />
-              {/* {localize("Livre", "Book")} */}
-            </>
+            <BookIcon />
           )}
 
-          {book.title && <i>{book[localize("title")] || book.title}</i>}
-        </Flex>
+          {book.title && (
+            <h2>
+              <i>{book[localize("title")] || book.title}</i>
+            </h2>
+          )}
+        </>
       )}
 
       {!book.title && (
-        <Flex>
-          {book.is_conf ? <ChatBubbleIcon /> : <BookIcon />}
-          {book.index === 0
-            ? localize("Premier", "First")
-            : book.index === 1
-            ? `${book.index + 1}${localize("ème", "nd")}`
-            : book.index === 2
-            ? book.index + localize("ème", "rd")
-            : book.index + localize("ème", "th")}
-          <span> </span>
-          {book.is_conf
-            ? localize("conférence", "talk show")
-            : localize("livre", "book")}
-          <span> </span>
-          {localize("de la bibliothèque", "in the library")} :<span> </span>
-          <i>{lib[localize("name")] || lib.name}</i>
-        </Flex>
+        <>
+          <h2>
+            {book.is_conf ? <ChatBubbleIcon /> : <BookIcon />}
+            {bookTitle(book)}
+            {" " + localize("de la bibliothèque", "in the library")} :
+          </h2>
+          <h1>
+            <i>{lib[localize("name")] || lib.name}</i>
+          </h1>
+        </>
       )}
     </>
   );

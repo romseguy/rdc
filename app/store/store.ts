@@ -3,6 +3,7 @@ import {
   configureStore,
   type PayloadAction,
 } from "@reduxjs/toolkit";
+import { getSelectorsByUserAgent } from "react-device-detect";
 import { api } from "~/api";
 import type { AppState } from "~/utils";
 
@@ -45,13 +46,20 @@ export const createStore: (
 ) => {
   store: AppStore;
 } = (i = { app: {} }, skipCache = true, shouldCache = false) => {
+  let isMobile = false;
+  if (i.app.userAgent)
+    isMobile = getSelectorsByUserAgent(i.app.userAgent).isMobile;
+  if (typeof i.app.isMobile === "undefined" || i.app.isMobile !== isMobile)
+    i.app.isMobile = isMobile;
+
   if (!i.app) i.app = {};
   if (!i.app.auth) i.app.auth = {};
+
   if (!i.app.locale) i.app.locale = import.meta.env.VITE_PUBLIC_LOCALE;
   if (!i.app.modal) i.app.modal = {};
 
   if (store && !skipCache) {
-    //console.log("cached", typeof window, i);
+    //console.log("cached", typeof window, store.getState().app);
     return { store };
   }
   if (shouldCache) {

@@ -46,7 +46,7 @@ export type Lib = {
   name_en?: string;
   author: string;
   author_url?: string;
-  books?: Book[];
+  books?: BookT[];
 };
 
 export type Collections = { libraries: Lib[]; comments: Comment[] };
@@ -91,4 +91,5 @@ export interface AppState {
   modal: ModalProps;
   screenWidth: number;
   toast: ToastProps;
+  userAgent: string;
 }

@@ -11,7 +11,8 @@ import {
 import { getState } from "~/store";
 import { localize } from "~/utils";
 
-export const Error = ({ message, details, stack }) => {
+export const Error = (props) => {
+  const { message, details, stack } = props;
   const { appearance, screenWidth } = useSelector(getState);
 
   return (
@@ -27,7 +28,18 @@ export const Error = ({ message, details, stack }) => {
             <BackButton />
             <Heading className="text-xl">{message}</Heading>
 
-            {details && <pre>{details}.</pre>}
+            {details && (
+              <pre>
+                <code
+                  style={{
+                    fontSize: "x-small",
+                    whiteSpace: "break-spaces",
+                  }}
+                >
+                  {details}.
+                </code>
+              </pre>
+            )}
 
             {message !== "404" && (
               <MailTo

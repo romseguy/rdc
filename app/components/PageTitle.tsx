@@ -76,8 +76,6 @@ export const PageTitle = () => {
       className="bg-purple-900/50"
       direction="column"
       gap="1"
-      pt="3"
-      pb={isMobile ? "3" : "1"}
     >
       <Heading
         onClick={() => {
@@ -137,6 +135,7 @@ export const PageTitle = () => {
               }}
             >
               <Select.Trigger
+                className="lib-select"
                 placeholder={localize(
                   "Choisir une bibliothèque",
                   "Pick a library",

@@ -137,6 +137,7 @@
           font-weight: normal;
           cursor: pointer;
           letter-spacing: var(--letter-spacing-1);
+          line-height: var(--line-height-8);
           text-align: center;
           font-size: 36px;
         }
@@ -186,9 +187,21 @@
       }
       #book-page {
         #book-header {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--space-2);
           h1 {
-            font-size: var(--text-xl);
-            text-align: center;
+            display: flex;
+            align-items: center;
+            font-size: var(--font-size-5);
+            gap: var(--space-2);
+          }
+          h2 {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: var(--font-size-4);
           }
         }
 
@@ -300,10 +313,24 @@
     }
 
     &.isMobile {
+      #page {
+        padding-bottom: 72px;
+
+        #book-page {
+          #book-header {
+            flex-direction: column;
+            padding: var(--space-2);
+            text-align: center;
+          }
+        }
+      }
       #page-title {
         h1 {
           padding-left: 3px;
           font-size: 32px;
+        }
+        .lib-select {
+          max-width: calc(100vw - 72px);
         }
       }
     }

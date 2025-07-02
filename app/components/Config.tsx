@@ -1,6 +1,5 @@
 import { useScript } from "@charlietango/hooks/use-script";
 import { useEffect } from "react";
-import { isMobile } from "react-device-detect";
 import { useDispatch, useSelector } from "react-redux";
 import { postIp } from "~/api";
 import { getState, setState } from "~/store";
@@ -12,14 +11,13 @@ const controller = new AbortController();
 const signal = controller.signal;
 
 export const Config = () => {
-  const { screenWidth } = useSelector(getState);
-
+  const { isMobile, screenWidth } = useSelector(getState);
   const dispatch = useDispatch<any>();
   const navigation = useNavigation();
 
-  // useScript("https://unpkg.com/pwacompat", {
-  //   attributes: { async: "true", crossOrigin: "anonymous" },
-  // });
+  useScript("https://unpkg.com/pwacompat", {
+    attributes: { async: "true", crossOrigin: "anonymous" },
+  });
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production")

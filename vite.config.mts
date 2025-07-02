@@ -20,11 +20,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [
-    reactRouter(),
-    //@ts-expect-error
-    tsconfigPaths(),
-  ],
+  plugins: [reactRouter(), tsconfigPaths()],
   server: { port: 3000 },
   preview: { port: 5000 },
 });

@@ -15,7 +15,7 @@ import type { Comment } from "~/utils";
 axios.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const { store } = createStore();
+      const { store } = createStore(undefined, false);
       config.headers.common.authorization = `Bearer ${
         store.getState().app.auth?.bearer
       }`;
@@ -83,7 +83,6 @@ export const api = createApi({
   endpoints: (build) => ({
     getCollections: build.query({
       query: () => {
-        console.log("GET /");
         return { url: "/" };
       },
     }),

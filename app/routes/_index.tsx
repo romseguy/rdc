@@ -39,23 +39,26 @@ export const loader = async (props: Route.LoaderArgs) => {
   const appearance = cookie || "dark";
   const userAgent = props.request.headers.get("user-agent") || "";
 
-  let data: RootData = {
+  let app: RootData = {
     collections: offlineCollections,
     appearance: appearance as ThemeOwnProps["appearance"],
     libs: [],
     userAgent,
   };
 
-  const { isMobile } = getSelectorsByUserAgent(userAgent);
-  const { store } = createStore({ app: { appearance, isMobile } }, true, false);
+  const { store } = createStore(
+    { app: { appearance, userAgent } },
+    true,
+    false,
+  );
   const { isSuccess, data: collections } = await store.dispatch(
     getCollections.initiate(""),
   );
   await Promise.all(store.dispatch(api.util.getRunningQueriesThunk()));
 
   if (isSuccess && length(collections.libraries) > 0) {
-    data.collections = collections;
-    data.libs = collections.libraries.map((lib) => {
+    app.collections = collections;
+    app.libs = collections.libraries.map((lib) => {
       return {
         ...lib,
         books: collections.books
@@ -78,7 +81,7 @@ export const loader = async (props: Route.LoaderArgs) => {
       };
     });
   } else {
-    data.libs = data.collections.libraries.map((lib, i) => {
+    app.libs = app.collections.libraries.map((lib, i) => {
       const id = Number(i + 1).toString();
       return {
         ...lib,
@@ -104,16 +107,16 @@ export const loader = async (props: Route.LoaderArgs) => {
     });
   }
 
-  data.lib = data.libs[0] as Seed | Lib;
+  app.lib = app.libs[0] as Seed | Lib;
 
-  return data;
+  const initialState = store.getState();
+  return { ...initialState.app, ...app };
 };
 
 export default function IndexRoute(props) {
   const {
     loaderData: { collections, libs, lib, appearance, userAgent },
   } = props;
-  const [{ isMobile }] = useDeviceSelectors(userAgent);
   const { store } = createStore(
     {
       app: {
@@ -122,11 +125,11 @@ export default function IndexRoute(props) {
         lib,
 
         appearance,
-        isMobile,
+        userAgent,
       },
     },
-    false,
-    true,
+    typeof window === "undefined",
+    typeof window !== "undefined",
   );
 
   const App = isbot() ? (

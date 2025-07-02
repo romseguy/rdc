@@ -38,7 +38,10 @@ const Page = (props) => {
 
   if (simple)
     return (
-      <Theme appearance={appearance}>
+      <Theme
+        className={isMobile ? "isMobile" : undefined}
+        appearance={appearance}
+      >
         {navigation.state === "idle" && (
           <>
             <Config />
