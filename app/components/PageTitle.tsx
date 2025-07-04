@@ -52,7 +52,12 @@ export const PageTitle = () => {
             e.stopPropagation();
 
             if (user) {
-              const ok = confirm("Êtes-vous sûr de vouloir vous déconnecter?");
+              const ok = confirm(
+                localize(
+                  "Êtes-vous sûr de vouloir vous déconnecter?",
+                  "Do you really want to log out?",
+                ),
+              );
               if (ok) {
                 dispatch(setState({ auth: undefined }));
                 localStorage.removeItem(tokenKey);

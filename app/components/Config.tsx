@@ -15,9 +15,9 @@ export const Config = () => {
   const dispatch = useDispatch<any>();
   const navigation = useNavigation();
 
-  useScript("https://unpkg.com/pwacompat", {
-    attributes: { async: "true", crossOrigin: "anonymous" },
-  });
+  // useScript("https://unpkg.com/pwacompat", {
+  //   attributes: { async: "true", crossOrigin: "anonymous" },
+  // });
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production")

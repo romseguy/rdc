@@ -1,9 +1,5 @@
 import type { ThemeOwnProps } from "@radix-ui/themes/components/theme.props";
 import { isbot } from "isbot";
-import {
-  getSelectorsByUserAgent,
-  useDeviceSelectors,
-} from "react-device-detect";
 import { Provider } from "react-redux";
 import { api, getCollections } from "~/api";
 import { Sitemap } from "~/components";
@@ -63,14 +59,16 @@ export const loader = async (props: Route.LoaderArgs) => {
         ...lib,
         books: collections.books
           .filter((book) => book.library_id === lib.id)
-          .map((book) => {
+          .map((book, i) => {
             return {
               ...book,
+              index: i,
               notes: collections.notes
                 ?.filter((note) => note.book_id === book.id)
-                .map((note) => {
+                .map((note, j) => {
                   return {
                     ...note,
+                    index: j,
                     comments: collections.comments.filter(
                       (comment) => comment.note_id === note.id,
                     ),

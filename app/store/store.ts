@@ -15,7 +15,7 @@ const reducer = (i) => {
         ...state,
         ...action.payload,
       };
-      //console.log(action, newState);
+      console.log(action, newState);
       return newState;
     }
     return state;

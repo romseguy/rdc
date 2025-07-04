@@ -1,17 +1,18 @@
 import { Theme } from "@radix-ui/themes";
-import React, { useEffect } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "react-router";
 import {
   Config,
-  PageHeader,
   Modal,
+  PageHeader,
   PageTitle,
   SpinnerOverlay,
   ToastsContainer,
-  ToggleButtonsRight,
+  ToggleButtons,
+  ToggleButtonsBottomRight,
+  ToggleButtonsTopRight,
 } from "~/components";
-import { tokenKey } from "~/lib/supabase/tokenKey";
 import { getState, setState } from "~/store";
 
 const Page = (props) => {
@@ -46,7 +47,8 @@ const Page = (props) => {
           <>
             <Config />
             <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
-            <ToggleButtonsRight />
+            <ToggleButtonsTopRight />
+            <ToggleButtonsBottomRight />
 
             {modal.isOpen && <Modal {...childProps} />}
 
@@ -69,8 +71,8 @@ const Page = (props) => {
         <>
           <Config />
           <ToastsContainer toast={toast} onToastFinished={onToastFinished} />
-          {/* <ToggleButtonsLeft /> */}
-          <ToggleButtonsRight />
+          <ToggleButtonsTopRight />
+          <ToggleButtonsBottomRight />
 
           {modal.isOpen && <Modal {...childProps} />}
 

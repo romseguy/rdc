@@ -87,6 +87,7 @@ export interface AppState {
   auth: any;
   isMobile: boolean;
   isLoaded: boolean;
+  keyword?: string;
   locale: string;
   modal: ModalProps;
   screenWidth: number;

@@ -1,12 +1,20 @@
 import { css } from "@emotion/react";
-import { Badge, Button, Heading, Switch, TextArea } from "@radix-ui/themes";
+import {
+  Badge,
+  Box,
+  Button,
+  Heading,
+  Switch,
+  TextArea,
+} from "@radix-ui/themes";
 import { MailTo, MailToBody, MailToTrigger } from "@slalombuild/react-mailto";
 import { decode } from "html-entities";
-import { lazy, useState } from "react";
+import { lazy, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteComment, postComments } from "~/api";
 import {
   BackButton,
+  bookTitle,
   Comment,
   DonateButton,
   EmailIcon,
@@ -15,9 +23,170 @@ import {
   useToast,
 } from "~/components";
 import { getState, setState } from "~/store";
-import { localize, toCss, toCssString, type Book, type NoteT } from "~/utils";
+import { localize, type Book, type BookT, type Lib, type NoteT } from "~/utils";
+
 const Login = lazy(() => import("~/components/Login"));
+type Match = { bookIds?: string[]; notes?: { id: string; desc: string }[] };
+type Matches = Record<string, Match>;
 const sanitize = (str) => decode(str.replace(/(<([^>]+)>)/gi, ""));
+
+const SearchModal = () => {
+  const { libs, keyword, locale } = useSelector(getState);
+  const matches = useMemo(() => {
+    //let matches: Match[] = [];
+    let map: Matches = {};
+
+    if (keyword) {
+      for (const lib of libs) {
+        if ((lib[localize("name")] || lib.name).includes(keyword))
+          map = { ...map, [lib.id]: {} };
+
+        for (const book of lib.books || []) {
+          if ((book[localize("title")] || book.title || "").includes(keyword))
+            map = {
+              ...map,
+              [lib.id]: {
+                ...map[lib.id],
+                bookIds: (map[lib.id]?.bookIds || []).concat([book.id]),
+              },
+            };
+
+          for (const note of book.notes || []) {
+            const desc = sanitize(note[localize("desc")] || note.desc);
+            if (desc.includes(keyword)) {
+              map = {
+                ...map,
+                [lib.id]: {
+                  ...map[lib.id],
+                  notes: (map[lib.id]?.notes || []).concat([
+                    { id: note.id, desc },
+                  ]),
+                },
+              };
+
+              if (!(map[lib.id]?.bookIds || []).includes(note.book_id))
+                map = {
+                  ...map,
+                  [lib.id]: {
+                    ...map[lib.id],
+                    bookIds: (map[lib.id]?.bookIds || []).concat([
+                      note.book_id,
+                    ]),
+                  },
+                };
+            }
+          }
+        }
+      }
+    }
+
+    return map;
+  }, [keyword]);
+  if (!keyword) return null;
+  console.log("🚀 ~ matches ~ matches:", matches);
+  return (
+    <div id="modal">
+      <Box
+        css={css`
+          text-align: center;
+        `}
+      >
+        <Heading>
+          {localize(
+            `Résultats de la recherche pour le mot-clé : `,
+            `Search results for the keyword : `,
+          )}
+          <i>{keyword}</i>
+        </Heading>
+
+        <Flex direction="column">
+          {Object.keys(matches).map((key) => {
+            const match = matches[key] as Match;
+            const matchedLib = libs.find(({ id }) => id === key) || ({} as Lib);
+            let out = (
+              <>{matchedLib[localize("name")] || matchedLib.name || ""}</>
+            );
+
+            if (match.bookIds) {
+              out = (
+                <>
+                  <Flex>
+                    In the library : <i>{out}</i>
+                  </Flex>
+
+                  <Flex direction="column">
+                    {match.bookIds.map((bookId) => {
+                      const matchedBook =
+                        matchedLib?.books?.find(({ id }) => id === bookId) ||
+                        ({} as BookT);
+                      const book_title =
+                        matchedBook[localize("title")] || matchedBook.title;
+
+                      return (
+                        <Flex direction="column">
+                          <Flex>
+                            {book_title ? (
+                              <>
+                                {localize("Dans le livre : ", "In the book : ")}
+                                <i>{book_title}</i>
+                              </>
+                            ) : (
+                              <i>{`In the ${bookTitle(
+                                matchedBook,
+                              ).toLowerCase()}`}</i>
+                            )}
+                          </Flex>
+
+                          {match.notes?.map((note) => {
+                            const matchedNote = matchedBook.notes?.find(
+                              ({ id }) => id === note.id,
+                            );
+                            if (matchedNote) {
+                              const keywordIndex = note.desc.indexOf(keyword);
+                              const start = keywordIndex - 20;
+                              const end = keywordIndex + 20;
+                              let __html = note.desc
+                                .substring(
+                                  start < 0 ? 0 : start,
+                                  end > note.desc.length
+                                    ? note.desc.length
+                                    : end,
+                                )
+                                .replace(
+                                  keyword,
+                                  `<b><a href="${
+                                    locale === "fr" ? "/c/" : "/q/"
+                                  }${note.id}">${keyword}</a></b>`,
+                                );
+                              __html =
+                                start > 1
+                                  ? "..." + __html
+                                  : end < note.desc.length
+                                  ? __html + "..."
+                                  : __html;
+
+                              return (
+                                <div
+                                  className="prose"
+                                  dangerouslySetInnerHTML={{ __html }}
+                                />
+                              );
+                            }
+                          })}
+                        </Flex>
+                      );
+                    })}
+                  </Flex>
+                </>
+              );
+            }
+            return <>{out}</>;
+          })}
+        </Flex>
+      </Box>
+    </div>
+  );
+};
 
 export type ModalProps = {
   id: string;
@@ -29,7 +198,7 @@ export type ModalProps = {
 
 export const Modal = (props) => {
   const { i18n } = props;
-  const { collections, isMobile, modal } = useSelector(getState);
+  const { collections, libs, isMobile, keyword, modal } = useSelector(getState);
   const comments = collections.comments.filter(
     ({ is_feedback }) => is_feedback,
   );
@@ -41,7 +210,9 @@ export const Modal = (props) => {
   const showToast = useToast();
   const toggleModal = useToggleModal();
 
-  if (id === "share-modal" && book && note)
+  if (keyword) {
+    return <SearchModal />;
+  } else if (id === "share-modal" && book && note)
     return (
       <div id="modal">
         <div id={id}>
@@ -101,8 +272,7 @@ export const Modal = (props) => {
         </div>
       </div>
     );
-
-  if (id === "notif-modal")
+  else if (id === "notif-modal")
     return (
       <div id="modal">
         <div id={id}>
@@ -208,8 +378,7 @@ export const Modal = (props) => {
         </div>
       </div>
     );
-
-  if (id === "login-modal")
+  else if (id === "login-modal")
     return (
       <div id="modal">
         <div id={id}>
@@ -217,8 +386,7 @@ export const Modal = (props) => {
         </div>
       </div>
     );
-
-  if (id === "heart-modal")
+  else if (id === "heart-modal")
     return (
       <div id="modal">
         <div id={id}>
@@ -240,6 +408,7 @@ export const Modal = (props) => {
             <TextArea
               autoFocus
               cols={80}
+              value={message}
               placeholder={localize("Écrivez ici", "Write here")}
               onChange={(e) => setMessage(e.target.value)}
             />
@@ -248,12 +417,16 @@ export const Modal = (props) => {
               <Button
                 onClick={async () => {
                   try {
-                    const { data, error } = await dispatch(
+                    const comment = { html: message, is_feedback: true };
+                    const { data } = await dispatch(
                       postComments.initiate({
-                        comment: { html: message, is_feedback: true },
+                        comment,
                       }),
                     );
-                    if (error) throw error;
+
+                    if (data.error) throw new Error(data.error);
+
+                    setMessage("");
 
                     dispatch(
                       setState({
@@ -264,7 +437,7 @@ export const Modal = (props) => {
                       }),
                     );
                   } catch (error: any) {
-                    showToast(error.data, true);
+                    showToast(error.message, true);
                   }
                 }}
               >
@@ -291,12 +464,20 @@ export const Modal = (props) => {
                   comment={comment}
                   onDeleteClick={async (comment) => {
                     try {
+                      const ok = confirm(
+                        localize(
+                          "Êtes-vous sûr de vouloir supprimer ce commentaire ?",
+                          "Do you really want to delete this comment?",
+                        ),
+                      );
+                      if (!ok) return;
+
                       const { data, error } = await dispatch(
                         deleteComment.initiate({
                           url: "/comment?id=" + comment.id,
                         }),
                       );
-                      if (data.error || error) throw data.error || error;
+                      if (data.error) throw new Error(data.error);
 
                       dispatch(
                         setState({

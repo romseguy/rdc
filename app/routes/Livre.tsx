@@ -89,7 +89,7 @@ export const Livre = (props) => {
             },
           }),
         );
-        if (data.error || error) throw data.error || error;
+        if (data.error) throw new Error(data.error);
         id = data.id;
       } else {
         const { data, error } = await dispatch(
@@ -102,7 +102,7 @@ export const Livre = (props) => {
             },
           }),
         );
-        if (data.error || error) throw data.error || error;
+        if (data.error) throw new Error(data.error);
       }
 
       setBook({
@@ -133,29 +133,34 @@ export const Livre = (props) => {
   }
   async function onDeleteClick(note) {
     try {
-      const ok = confirm("Êtes-vous sûr de vouloir supprimer cette citation ?");
-      if (ok) {
-        setIsNoteLoading({
-          ...isNoteLoading,
-          [note.id]: true,
-        });
-        const { data, error } = await dispatch(
-          deleteNote.initiate({
-            url: "/note?id=" + note.id,
-          }),
-        );
+      const ok = confirm(
+        localize(
+          "Êtes-vous sûr de vouloir supprimer cette citation ?",
+          "Do you really want to delete this quote?",
+        ),
+      );
+      if (!ok) return;
 
-        if (data.error || error) throw data.error || error;
+      setIsNoteLoading({
+        ...isNoteLoading,
+        [note.id]: true,
+      });
+      const { data, error } = await dispatch(
+        deleteNote.initiate({
+          url: "/note?id=" + note.id,
+        }),
+      );
 
-        setBook({
-          ...book,
-          notes: book.notes?.filter((n) => n.id !== note.id),
-        });
-        setIsNoteLoading({
-          ...isNoteLoading,
-          [note.id]: false,
-        });
-      }
+      if (data.error) throw new Error(data.error);
+
+      setBook({
+        ...book,
+        notes: book.notes?.filter((n) => n.id !== note.id),
+      });
+      setIsNoteLoading({
+        ...isNoteLoading,
+        [note.id]: false,
+      });
     } catch (error) {
       showToast(error, true);
       setIsNoteLoading({
@@ -195,7 +200,7 @@ export const Livre = (props) => {
         }),
       );
 
-      if (data.error || error) throw data.error || error;
+      if (data.error) throw new Error(data.error);
 
       // if (data.error) {
       //   if (process.env.NODE_ENV === "development") {
@@ -242,46 +247,45 @@ export const Livre = (props) => {
   async function onDeleteCommentClick(note, comment) {
     try {
       const ok = confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?");
+      if (!ok) return;
 
-      if (ok) {
-        setIsCommentLoading({
-          ...isCommentLoading,
-          [comment.id]: true,
-        });
-        const { data, error } = await dispatch(
-          deleteComment.initiate({
-            url: "/comment?id=" + comment.id,
-          }),
-        );
+      setIsCommentLoading({
+        ...isCommentLoading,
+        [comment.id]: true,
+      });
+      const { data, error } = await dispatch(
+        deleteComment.initiate({
+          url: "/comment?id=" + comment.id,
+        }),
+      );
 
-        if (data.error || error) throw data.error || error;
+      if (data.error) throw new Error(data.error);
 
-        // if (data.error) {
-        //   setIsCommentLoading({
-        //     ...isCommentLoading,
-        //     [comment.id]: false,
-        //   });
+      // if (data.error) {
+      //   setIsCommentLoading({
+      //     ...isCommentLoading,
+      //     [comment.id]: false,
+      //   });
 
-        //   if (process.env.NODE_ENV === "development") {
-        //   } else {
-        //     showToast(data.message);
-        //     return;
-        //   }
-        // }
+      //   if (process.env.NODE_ENV === "development") {
+      //   } else {
+      //     showToast(data.message);
+      //     return;
+      //   }
+      // }
 
-        setBook({
-          ...book,
-          notes: (book.notes || []).map((n) => {
-            if (n.id === note.id) {
-              return {
-                ...n,
-                comments: (n.comments || []).filter((c) => c.id !== comment.id),
-              };
-            }
-            return n;
-          }),
-        });
-      }
+      setBook({
+        ...book,
+        notes: (book.notes || []).map((n) => {
+          if (n.id === note.id) {
+            return {
+              ...n,
+              comments: (n.comments || []).filter((c) => c.id !== comment.id),
+            };
+          }
+          return n;
+        }),
+      });
     } catch (error) {
       showToast(error, true);
       setIsCommentLoading({
