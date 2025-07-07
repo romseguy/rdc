@@ -1,5 +1,13 @@
 import { localize } from "./utils";
 
+export const user_badge_click = localize(
+  "Si vous souhaitez envoyer un message à cet utilisateur, demandez son e-mail à " +
+    import.meta.env.VITE_PUBLIC_EMAIL,
+  "If you want to message this user, ask their email to " +
+    import.meta.env.VITE_PUBLIC_EMAIL,
+);
+
+// auth
 const variables = {
   email_label: localize("Adresse e-mail", "Email address"),
   password_label: localize("Mot de passe", "Password"),

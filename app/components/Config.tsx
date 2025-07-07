@@ -58,9 +58,10 @@ export const Config = () => {
       let bearer = "";
       if (localStorage.getItem(tokenKey)) {
         bearer = localStorage.getItem(tokenKey) || "";
-      } else if (process.env.NODE_ENV === "development") {
-        bearer = import.meta.env.VITE_PUBLIC_AUTH_TOKEN;
       }
+      // else if (process.env.NODE_ENV === "development") {
+      //   bearer = import.meta.env.VITE_PUBLIC_AUTH_TOKEN;
+      // }
       if (bearer) {
         localStorage.setItem(tokenKey, bearer);
       }

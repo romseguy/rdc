@@ -437,7 +437,7 @@ export const Modal = (props) => {
                       }),
                     );
                   } catch (error: any) {
-                    showToast(error.message, true);
+                    showToast(error, true);
                   }
                 }}
               >
@@ -464,14 +464,6 @@ export const Modal = (props) => {
                   comment={comment}
                   onDeleteClick={async (comment) => {
                     try {
-                      const ok = confirm(
-                        localize(
-                          "Êtes-vous sûr de vouloir supprimer ce commentaire ?",
-                          "Do you really want to delete this comment?",
-                        ),
-                      );
-                      if (!ok) return;
-
                       const { data, error } = await dispatch(
                         deleteComment.initiate({
                           url: "/comment?id=" + comment.id,

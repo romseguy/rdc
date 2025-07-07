@@ -24,10 +24,8 @@
   }
 
   body {
-    max-width: var(--breakpoint-lg);
     background-image: url("/bg.jpg");
     background-repeat: repeat;
-    margin: 0 auto;
   }
 
   svg {
@@ -126,12 +124,16 @@
     }
 
     #page {
+      max-width: var(--breakpoint-lg);
+      margin: 0 auto;
       padding-bottom: 36px;
 
       #page-title {
         background-color: var(--color-page-title);
+        padding-bottom: 16px;
         padding-left: 16px;
         padding-right: 12px;
+        padding-top: 8px;
 
         h1 {
           color: white;
@@ -356,6 +358,9 @@
             padding: var(--space-2);
             text-align: center;
           }
+          & > main {
+            margin: 0 12px;
+          }
         }
       }
 
@@ -375,6 +380,9 @@
 
 @layer utilities {
   .radix-themes {
+    .bg-border {
+      background-color: white;
+    }
     .prose {
       --tw-prose-body: unset;
       --tw-prose-bold: white;
@@ -389,6 +397,9 @@
     }
 
     &.light {
+      .bg-border {
+        background-color: black;
+      }
       .prose {
         --tw-prose-body: unset;
         --tw-prose-bold: black;
@@ -412,6 +423,22 @@
   .tox-tinymce {
     border-radius: 0 !important;
   }
+}
+
+@keyframes caret-blink {
+  0%,
+  70%,
+  100% {
+    opacity: 1;
+  }
+
+  20%,
+  50% {
+    opacity: 0;
+  }
+}
+.caret-blink {
+  animation: caret-blink 1.2s ease-out infinite;
 }
 
 /* #region spinner */

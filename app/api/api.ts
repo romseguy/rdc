@@ -10,7 +10,6 @@ import type { AxiosError, AxiosRequestConfig } from "axios";
 import axios from "axios";
 import { baseUrl } from "./baseUrl";
 import { createStore } from "~/store";
-import type { Comment } from "~/utils";
 
 axios.interceptors.request.use(
   (config) => {
@@ -26,12 +25,16 @@ axios.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-axios.interceptors.response.use(
-  (config) => {
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
+// axios.interceptors.response.use(
+//   (config) => {
+//     return config;
+//   },
+//   (error) => {
+//     if (error && error.message) return Promise.reject(error);
+
+//     return Promise.reject({ message: "??" });
+//   },
+// );
 
 const createApi = buildCreateApi(
   coreModule(),
@@ -70,7 +73,7 @@ const axiosBaseQuery =
         error: {
           status: err.response?.status,
           data: err.response?.data || err.message,
-          error: err.toJSON(),
+          error: typeof err.toJSON === "function" ? err.toJSON() : err,
         },
       };
     }

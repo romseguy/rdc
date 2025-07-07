@@ -8,8 +8,11 @@ import {
   useToggleModal,
 } from "~/components";
 import client from "~/lib/supabase/client";
-import { useLocation, useNavigate } from "react-router";
-import { i18n } from "~/utils";
+import { i18n, localize } from "~/utils";
+import { FakeDash, Slot } from "./ui/slot";
+import { useDispatch } from "react-redux";
+import { setState } from "~/store";
+import { OTPInput } from "input-otp";
 
 function ForgottenPassword({
   i18n,
@@ -119,8 +122,8 @@ function EmailAuth({
     if (message) showToast(message);
   }, [message]);
   useEffect(() => {
-    setEmail(defaultEmail);
     setPassword(defaultPassword);
+    if (authView !== "code") setEmail(defaultEmail);
   }, [authView]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -128,12 +131,13 @@ function EmailAuth({
     setLoading(true);
     switch (authView) {
       case "sign_in":
-        const { error: signInError } = await client().auth.signInWithPassword({
+        const res = await client().auth.signInWithPassword({
           email,
           password,
         });
+        const { data: signInData, error: signInError } = res;
         if (signInError) setError("Identifiants incorrects");
-        else onSuccess();
+        else onSuccess(signInData);
         break;
       case "sign_up":
         if (passwordLimit && password.length > 72) {
@@ -148,20 +152,31 @@ function EmailAuth({
         if (additionalData) {
           options.data = additionalData;
         }
-        const {
-          data: { user: signUpUser, session: signUpSession },
-          error: signUpError,
-        } = await client().auth.signUp({
-          email,
-          password,
-          options,
-        });
+        const { data: signUpData, error: signUpError } =
+          await client().auth.signUp({
+            email,
+            password,
+            options,
+          });
         if (signUpError) setError(signUpError.message);
+        else onSuccess(signUpData);
         // Check if session is null -> email confirmation setting is turned on
-        else if (signUpUser && !signUpSession)
-          setMessage(i18n?.sign_up?.confirmation_text as string);
+        // else if (signUpUser && !signUpSession)
+        //   setMessage(i18n?.sign_up?.confirmation_text as string);
         break;
       case "magic_link":
+        const { error } = await client().auth.signInWithOtp({ email });
+        if (error) setError(error.message);
+        else {
+          setAuthView("code");
+          // setMessage(
+          //   localize(
+          //     "Vérifiez votre e-mail pour vous connecter au site",
+          //     "Check your email for the login link",
+          //   ),
+          // );
+          // onSuccess();
+        }
         break;
     }
     setLoading(false);
@@ -174,50 +189,92 @@ function EmailAuth({
       autoComplete={"on"}
     >
       <Flex direction="column" gap="3">
-        <Flex>
-          <BackButton
-            onClick={(e) => {
-              e.preventDefault();
-              if (authView === "sign_in") onBackClick();
-              else {
-                setAuthView("sign_in");
-              }
-            }}
-          />
-        </Flex>
+        <BackButton
+          onClick={(e) => {
+            e.preventDefault();
+            if (authView === "sign_in") onBackClick();
+            else {
+              setAuthView("sign_in");
+            }
+          }}
+        />
 
-        <Flex direction="column" gap="3">
-          {/* email */}
-          <Input
-            autoFocus
-            id="email"
-            type="email"
-            name="email"
-            value={email}
-            placeholder={labels?.email_input_placeholder}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-          />
+        {authView === "code" ? (
+          <>
+            {localize(
+              "Veuillez saisir le code qui vous a été envoyé par e-mail (vérifiez votre spam)",
+              "Please input the code sent to you by email (check your spam)",
+            )}
+            <OTPInput
+              maxLength={6}
+              containerClassName="group flex items-center has-[:disabled]:opacity-30"
+              onComplete={async (value) => {
+                try {
+                  const { data, error } = await client().auth.verifyOtp({
+                    email,
+                    type: "magiclink",
+                    token: value,
+                  });
+                  if (!error) {
+                    onSuccess(data);
+                  }
+                } catch (error) {}
+              }}
+              render={({ slots }) => {
+                return (
+                  <>
+                    <Flex>
+                      {slots.slice(0, 3).map((slot, idx) => (
+                        <Slot key={idx} {...slot} />
+                      ))}
+                    </Flex>
 
-          {/* password */}
-          {["sign_in", "sign_up"].includes(authView) && (
-            <Input
-              id="password"
-              type="password"
-              name="password"
-              placeholder={labels?.password_input_placeholder}
-              defaultValue={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete={
-                authView === "sign_in" ? "current-password" : "new-password"
-              }
+                    <FakeDash />
+
+                    <Flex>
+                      {slots.slice(3).map((slot, idx) => (
+                        <Slot key={idx} {...slot} />
+                      ))}
+                    </Flex>
+                  </>
+                );
+              }}
             />
-          )}
-        </Flex>
+          </>
+        ) : (
+          <>
+            <Flex direction="column" gap="3">
+              <Input
+                autoFocus
+                id="email"
+                type="email"
+                name="email"
+                value={email}
+                placeholder={labels?.email_input_placeholder}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+              />
 
-        <Button>
-          {loading ? labels?.loading_button_label : labels?.button_label}
-        </Button>
+              {["sign_in", "sign_up"].includes(authView) && (
+                <Input
+                  id="password"
+                  type="password"
+                  name="password"
+                  placeholder={labels?.password_input_placeholder}
+                  defaultValue={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete={
+                    authView === "sign_in" ? "current-password" : "new-password"
+                  }
+                />
+              )}
+            </Flex>
+
+            <Button>
+              {loading ? labels?.loading_button_label : labels?.button_label}
+            </Button>
+          </>
+        )}
 
         {authView === "sign_in" && (
           <Button
@@ -260,15 +317,13 @@ function EmailAuth({
 }
 
 const Login = (props) => {
-  const { showToast } = props;
+  const dispatch = useDispatch();
   const toggleModal = useToggleModal();
-  const [view, setView] = useState<string>();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [view, setView] = useState<string>("sign_in");
 
-  if (view === "forgotten_password")
-    return (
-      <div id="login-page">
+  return (
+    <div id="login-page">
+      {view === "forgotten_password" ? (
         <ForgottenPassword
           i18n={i18n}
           setAuthView={(viewName) => setView(viewName)}
@@ -276,20 +331,25 @@ const Login = (props) => {
             toggleModal();
           }}
         />
-      </div>
-    );
-
-  return (
-    <div id="login-page">
-      <EmailAuth
-        authView={view}
-        setAuthView={(viewName) => setView(viewName)}
-        i18n={i18n}
-        onBackClick={() => toggleModal()}
-        onSuccess={() => {
-          window.location.reload();
-        }}
-      />
+      ) : (
+        <EmailAuth
+          authView={view}
+          setAuthView={(viewName) => setView(viewName)}
+          i18n={i18n}
+          onBackClick={() => toggleModal()}
+          onSuccess={(data) => {
+            if (view === "sign_in" || view === "code" || view === "sign_up") {
+              const { user, ...token } = data.session;
+              dispatch(
+                setState({
+                  auth: { bearer: JSON.stringify(token), token, user },
+                  modal: { isOpen: false },
+                }),
+              );
+            } else toggleModal();
+          }}
+        />
+      )}
     </div>
   );
 };

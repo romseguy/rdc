@@ -10,8 +10,6 @@ import { loader as rootLoader } from "./_index";
 import Page from "./Page";
 import previousLocation from "./previousLocation";
 
-let isserver = typeof window === "undefined";
-
 export const loader = async (props) => {
   const [, entity, id] = new URL(props.request.url).pathname.split("/");
 
@@ -72,7 +70,7 @@ export default function CatchAllRoute(props) {
   const { loaderData } = props;
   const location = useLocation();
   const p = previousLocation();
-  const skipCache = isserver || p !== location.pathname;
+  const skipCache = typeof window === "undefined" || p !== location.pathname;
   previousLocation(location.pathname);
   const { store } = createStore(
     {

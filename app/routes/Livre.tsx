@@ -25,10 +25,6 @@ export const Livre = (props) => {
   //#region state
   const { lib, book, auth, isMobile, locale } = useSelector(getState);
   const user = auth?.user;
-
-  const [isCommentLoading, setIsCommentLoading] = useState<
-    Record<string, boolean>
-  >({});
   const [isNoteLoading, setIsNoteLoading] = useState<Record<string, boolean>>(
     {},
   );
@@ -37,6 +33,26 @@ export const Livre = (props) => {
     return book.notes?.filter((n) => n.isEditing).length > 0;
   }, [book]);
   const [order, setOrder] = useState<ENoteOrder>();
+  const SelectOrder =
+    book.notes && book.notes.length > 0 ? (
+      <Select.Root
+        defaultValue={ENoteOrder.ID}
+        onValueChange={(value) => setOrder(value as unknown as ENoteOrder)}
+      >
+        <Select.Trigger variant="classic" />
+        <Select.Content>
+          <Select.Item value={ENoteOrder.ID}>
+            {localize(
+              "Citations plus récentes en premier",
+              "Most recent quotes first",
+            )}
+          </Select.Item>
+          <Select.Item value={ENoteOrder.PAGE}>
+            {localize("Dans l'ordre des pages", "By page order")}
+          </Select.Item>
+        </Select.Content>
+      </Select.Root>
+    ) : null;
   const notesGrid = useMemo(() => {
     if (!book || !book.notes) return [[]];
     const rows: NoteT[] = [...book.notes].sort((a, b) => {
@@ -67,7 +83,7 @@ export const Livre = (props) => {
   const dispatch = useDispatch<any>();
   const navigate = useNavigate();
   const showToast = useToast();
-  const setBook = (book) => dispatch(setState({ book }));
+  const setBook = (b) => dispatch(setState({ book: b }));
   //#endregion
 
   //#region effects
@@ -244,78 +260,7 @@ export const Livre = (props) => {
       });
     }
   }
-  async function onDeleteCommentClick(note, comment) {
-    try {
-      const ok = confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?");
-      if (!ok) return;
-
-      setIsCommentLoading({
-        ...isCommentLoading,
-        [comment.id]: true,
-      });
-      const { data, error } = await dispatch(
-        deleteComment.initiate({
-          url: "/comment?id=" + comment.id,
-        }),
-      );
-
-      if (data.error) throw new Error(data.error);
-
-      // if (data.error) {
-      //   setIsCommentLoading({
-      //     ...isCommentLoading,
-      //     [comment.id]: false,
-      //   });
-
-      //   if (process.env.NODE_ENV === "development") {
-      //   } else {
-      //     showToast(data.message);
-      //     return;
-      //   }
-      // }
-
-      setBook({
-        ...book,
-        notes: (book.notes || []).map((n) => {
-          if (n.id === note.id) {
-            return {
-              ...n,
-              comments: (n.comments || []).filter((c) => c.id !== comment.id),
-            };
-          }
-          return n;
-        }),
-      });
-    } catch (error) {
-      showToast(error, true);
-      setIsCommentLoading({
-        ...isCommentLoading,
-        [comment.id]: false,
-      });
-    }
-  }
   //#endregion
-
-  const SelectOrder =
-    book.notes && book.notes.length > 0 ? (
-      <Select.Root
-        defaultValue={ENoteOrder.ID}
-        onValueChange={(value) => setOrder(value as unknown as ENoteOrder)}
-      >
-        <Select.Trigger variant="classic" />
-        <Select.Content>
-          <Select.Item value={ENoteOrder.ID}>
-            {localize(
-              "Citations plus récentes en premier",
-              "Most recent quotes first",
-            )}
-          </Select.Item>
-          <Select.Item value={ENoteOrder.PAGE}>
-            {localize("Dans l'ordre des pages", "By page order")}
-          </Select.Item>
-        </Select.Content>
-      </Select.Root>
-    ) : null;
 
   return (
     <div id="book-page">
@@ -326,172 +271,164 @@ export const Livre = (props) => {
         </div>
       )}
 
-      <div
-        css={css`
-          ${isMobile ? "margin: 0 12px;" : ""}
-        `}
-      >
-        <main>
-          {/* order & add note button */}
-          {!hasEditing && (
-            <>
-              {isMobile && (
-                <Flex
-                  direction="column"
-                  css={css`
-                    button {
-                      margin: 12px 0;
-                    }
-                    button:last-of-type {
-                      margin-top: 0;
-                    }
-                  `}
-                >
-                  <AddNoteButton book={book} setBook={setBook} />
-                  {SelectOrder}
-                </Flex>
-              )}
+      <main>
+        {/* order & add note button */}
+        {!hasEditing && (
+          <>
+            {isMobile && (
+              <Flex
+                direction="column"
+                css={css`
+                  button {
+                    margin: 12px 0;
+                  }
+                  button:last-of-type {
+                    margin-top: 0;
+                  }
+                `}
+              >
+                <AddNoteButton book={book} setBook={setBook} />
+                {SelectOrder}
+              </Flex>
+            )}
 
-              {!isMobile && (
-                <Flex direction="column">
-                  <AddNoteButton book={book} setBook={setBook} my="3" />
-                  {SelectOrder}
-                </Flex>
-              )}
-            </>
-          )}
+            {!isMobile && (
+              <Flex direction="column">
+                <AddNoteButton book={book} setBook={setBook} my="3" />
+                {SelectOrder}
+              </Flex>
+            )}
+          </>
+        )}
 
-          {/* editable notes */}
-          {notesGrid.map((row, index) => {
-            return (
-              <div key={"row-" + index}>
-                {row
-                  .filter((note) => note.isEditing)
-                  .map((note) => {
-                    return (
-                      <div key={"note-" + note.id}>
-                        <Note notes={book.notes || []} note={note} isEditing />
+        {/* editable notes */}
+        {notesGrid.map((row, index) => {
+          return (
+            <div key={"row-" + index}>
+              {row
+                .filter((note) => note.isEditing)
+                .map((note) => {
+                  return (
+                    <div key={"note-" + note.id}>
+                      <Note notes={book.notes || []} note={note} isEditing />
 
-                        <div
-                          css={toCss({
-                            display: "flex",
-                            justifyContent: "space-between",
-                            background: "rgba(255,255,255,0.1)",
-                            marginBottom: "12px",
-                            padding: "6px",
-                          })}
-                        >
-                          {!isNoteLoading[note.id] && (
-                            <BackButton
-                              onClick={() => {
-                                setBook({
-                                  ...book,
-                                  notes: book.notes
-                                    ?.filter((n) => {
-                                      if (!note.isNew) return true;
-                                      return n.id !== note.id;
-                                    })
-                                    .map((n) => ({
-                                      ...n,
-                                      isEditing: false,
-                                    })),
-                                });
-                              }}
-                            >
-                              Annuler
-                            </BackButton>
-                          )}
+                      <div
+                        css={toCss({
+                          display: "flex",
+                          justifyContent: "space-between",
+                          background: "rgba(255,255,255,0.1)",
+                          marginBottom: "12px",
+                          padding: "6px",
+                        })}
+                      >
+                        {!isNoteLoading[note.id] && (
+                          <BackButton
+                            onClick={() => {
+                              setBook({
+                                ...book,
+                                notes: book.notes
+                                  ?.filter((n) => {
+                                    if (!note.isNew) return true;
+                                    return n.id !== note.id;
+                                  })
+                                  .map((n) => ({
+                                    ...n,
+                                    isEditing: false,
+                                  })),
+                              });
+                            }}
+                          >
+                            Annuler
+                          </BackButton>
+                        )}
 
-                          <Button onClick={() => onEditSubmit(note)}>
-                            {isNoteLoading[note.id]
-                              ? "Veuillez patienter..."
-                              : "Valider"}
-                          </Button>
-                        </div>
+                        <Button onClick={() => onEditSubmit(note)}>
+                          {isNoteLoading[note.id]
+                            ? "Veuillez patienter..."
+                            : "Valider"}
+                        </Button>
                       </div>
+                    </div>
+                  );
+                })}
+            </div>
+          );
+        })}
+
+        {/* readonly notes */}
+        {!hasEditing &&
+          notesGrid.map((row, index) => {
+            return (
+              <div key={"note-" + index}>
+                {row
+                  .filter((note) => !note.isEditing)
+                  .map((note, index) => {
+                    return (
+                      <Note
+                        key={"note-" + index + note.id}
+                        notes={book.notes || []}
+                        note={{ ...note, index }}
+                        isLoading={isNoteLoading[note.id]}
+                        onOpenClick={() => {
+                          navigate(
+                            `/${locale === "en" ? "q" : "c"}/${note.id}`,
+                          );
+                          //setNote(note);
+                        }}
+                        onEditClick={() => {
+                          setIsNoteLoading({
+                            ...isNoteLoading,
+                            [note.id]: true,
+                          });
+                          setBook({
+                            ...book,
+                            notes: book.notes?.map((n) => {
+                              if (n.id === note.id)
+                                return { ...n, isEditing: true };
+                              return n;
+                            }),
+                          });
+                          setIsNoteLoading({
+                            ...isNoteLoading,
+                            [note.id]: false,
+                          });
+                        }}
+                        onShareClick={() => {
+                          dispatch(
+                            setState({
+                              modal: {
+                                id: "share-modal",
+                                isOpen: true,
+                                book,
+                                note,
+                              },
+                            }),
+                          );
+                        }}
+                        onEditPageClick={(page) =>
+                          onEditPageClick({ ...note, page })
+                        }
+                        onDeleteClick={() => onDeleteClick(note)}
+                        onSubmitCommentClick={(comment) =>
+                          onSubmitCommentClick(note, comment)
+                        }
+                        onDeleteCommentClick={(comment) =>
+                          onDeleteCommentClick(note, comment)
+                        }
+                      />
                     );
                   })}
               </div>
             );
           })}
 
-          {/* readonly notes */}
-          {!hasEditing &&
-            notesGrid.map((row, index) => {
-              return (
-                <div key={"note-" + index}>
-                  {row
-                    .filter((note) => !note.isEditing)
-                    .map((note, index) => {
-                      return (
-                        <Note
-                          key={"note-" + index + note.id}
-                          notes={book.notes || []}
-                          note={{ ...note, index }}
-                          isLoading={isNoteLoading[note.id]}
-                          onOpenClick={() => {
-                            navigate(
-                              `/${locale === "en" ? "q" : "c"}/${note.id}`,
-                            );
-                            //setNote(note);
-                          }}
-                          onEditClick={() => {
-                            setIsNoteLoading({
-                              ...isNoteLoading,
-                              [note.id]: true,
-                            });
-                            setBook({
-                              ...book,
-                              notes: book.notes?.map((n) => {
-                                if (n.id === note.id)
-                                  return { ...n, isEditing: true };
-                                return n;
-                              }),
-                            });
-                            setIsNoteLoading({
-                              ...isNoteLoading,
-                              [note.id]: false,
-                            });
-                          }}
-                          onShareClick={() => {
-                            dispatch(
-                              setState({
-                                modal: {
-                                  id: "share-modal",
-                                  isOpen: true,
-                                  book,
-                                  note,
-                                },
-                              }),
-                            );
-                          }}
-                          onEditPageClick={(page) =>
-                            onEditPageClick({ ...note, page })
-                          }
-                          onDeleteClick={() => onDeleteClick(note)}
-                          onSubmitCommentClick={(comment) =>
-                            onSubmitCommentClick(note, comment)
-                          }
-                          onDeleteCommentClick={(comment) =>
-                            onDeleteCommentClick(note, comment)
-                          }
-                        />
-                      );
-                    })}
-                </div>
-              );
-            })}
-
-          {/* add note button */}
-          {!hasEditing &&
-            Array.isArray(book.notes) &&
-            book.notes.length > 1 && (
-              <div style={{ textAlign: "center" }}>
-                <AddNoteButton book={book} setBook={setBook} />
-              </div>
-            )}
-        </main>
-      </div>
+        {/* add note button */}
+        {!hasEditing && Array.isArray(book.notes) && book.notes.length > 1 && (
+          <div style={{ textAlign: "center" }}>
+            <AddNoteButton book={book} setBook={setBook} />
+          </div>
+        )}
+      </main>
     </div>
   );
 };

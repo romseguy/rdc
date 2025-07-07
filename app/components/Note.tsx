@@ -13,6 +13,7 @@ import { Badge, Box, Button, IconButton } from "@radix-ui/themes";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate, useNavigation } from "react-router";
+import { deleteComment } from "~/api";
 import {
   BackButton,
   Comment,
@@ -25,12 +26,14 @@ import {
   RTEditor,
   UserIcon,
   iconProps,
+  useToast,
 } from "~/components";
 import { getState, setState } from "~/store";
 import {
   localize,
   toCss,
   toUsername,
+  user_badge_click,
   useScroll,
   type NoteT,
   type User,
@@ -48,7 +51,6 @@ interface NoteP {
   onDeleteClick?: any;
   onShareClick?: any;
   onSubmitCommentClick?: any;
-  onDeleteCommentClick?: any;
 }
 
 export const Note = (props: NoteP) => {
@@ -63,9 +65,8 @@ export const Note = (props: NoteP) => {
     onShareClick,
     onDeleteClick,
     onSubmitCommentClick,
-    onDeleteCommentClick,
   } = props;
-  const { isMobile, locale } = useSelector(getState);
+  const { book, isMobile, locale } = useSelector(getState);
 
   const desc =
     (locale === "en" ? note.desc_en : note.desc) ||
@@ -86,15 +87,17 @@ export const Note = (props: NoteP) => {
 
   const [isPageEdit, setIsPageEdit] = useState(false);
   const [page, setPage] = useState<number | undefined>(note.page);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  //const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [comment, setComment] = useState<{ html: string }>();
   const [isShowComments, setIsShowComments] = useState(false);
 
   const dispatch = useDispatch<any>();
   const navigate = useNavigate();
   const location = useLocation();
-  const [executeScroll, elementToScrollRef] = useScroll<HTMLDivElement>();
+  //const [executeScroll, elementToScrollRef] = useScroll<HTMLDivElement>();
   const [isAddComment, setIsAddComment] = useState(false);
+
+  const showToast = useToast();
 
   const editor = (locale: string) => {
     return (
@@ -204,15 +207,63 @@ export const Note = (props: NoteP) => {
     );
   };
 
-  const onUserBadgeClick = () =>
-    alert(
-      localize(
-        "Si vous souhaitez envoyer un message à cet utilisateur, demandez son e-mail à " +
-          import.meta.env.VITE_PUBLIC_EMAIL,
-        "If you want to message this user, ask their email to " +
-          import.meta.env.VITE_PUBLIC_EMAIL,
-      ),
-    );
+  async function onDeleteCommentClick(comment) {
+    try {
+      alert(
+        localize(
+          "Cette fonctionnalité n'est pas encore disponible",
+          "This function is not yet available",
+        ),
+      );
+      // setIsCommentLoading({
+      //   ...isCommentLoading,
+      //   [comment.id]: true,
+      // });
+      // const { error } = await dispatch(
+      //   deleteComment.initiate({
+      //     url: "/comment?id=" + comment.id,
+      //   }),
+      // );
+
+      // if (data.error) {
+      //   setIsCommentLoading({
+      //     ...isCommentLoading,
+      //     [comment.id]: false,
+      //   });
+
+      //   if (process.env.NODE_ENV === "development") {
+      //   } else {
+      //     showToast(data.message);
+      //     return;
+      //   }
+      // }
+
+      // dispatch(
+      //   setState({
+      //     book: {
+      //       ...book,
+      //       notes: (book.notes || []).map((n) => {
+      //         if (n.id === note.id) {
+      //           return {
+      //             ...n,
+      //             comments: (n.comments || []).filter(
+      //               (c) => c.id !== comment.id,
+      //             ),
+      //           };
+      //         }
+      //         return n;
+      //       }),
+      //     },
+      //   }),
+      // );
+    } catch (error) {
+      showToast(error, true);
+      // setIsCommentLoading({
+      //   ...isCommentLoading,
+      //   [comment.id]: false,
+      // });
+    }
+  }
 
   return (
     <section>
@@ -271,7 +322,7 @@ export const Note = (props: NoteP) => {
         {isEditing && editor(locale)}
         {!isEditing && (
           <>
-            <Badge variant="surface" onClick={onUserBadgeClick}>
+            <Badge variant="surface" onClick={() => alert(user_badge_click)}>
               <UserIcon />
               {toUsername(note.note_email) || localize("Anonyme", "Anonymous")}
             </Badge>
@@ -292,9 +343,9 @@ export const Note = (props: NoteP) => {
               onClick={async () => {
                 setIsShowComments(!isShowComments);
                 if (!isShowComments) {
-                  setTimeout(() => {
-                    executeScroll();
-                  }, 100);
+                  // setTimeout(() => {
+                  //   executeScroll();
+                  // }, 100);
                 }
               }}
             >
@@ -400,6 +451,7 @@ export const Note = (props: NoteP) => {
               {note.comments?.map((c, i) => {
                 return (
                   <Comment
+                    key={c.id}
                     css={toCss({
                       borderBottom:
                         i !== (note.comments?.length || 0) - 1
@@ -407,13 +459,13 @@ export const Note = (props: NoteP) => {
                           : "",
                     })}
                     comment={c}
-                    onDeleteClick={() => onDeleteCommentClick(c)}
+                    onDeleteClick={onDeleteCommentClick}
                   />
                 );
               })}
             </div>
           )}
-          <div ref={elementToScrollRef} />
+          {/* <div ref={elementToScrollRef} /> */}
         </footer>
       )}
     </section>

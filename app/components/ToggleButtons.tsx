@@ -64,11 +64,8 @@ export const ToggleButtonsTopRight = (props) => {
 };
 
 export const ToggleButtonsBottomRight = (props) => {
-  const {
-    auth: { user },
-    isMobile,
-    ...state
-  } = useSelector(getState);
+  const { auth, isMobile, ...state } = useSelector(getState);
+  const user = auth?.user;
   const [appearance, setAppearance] = useCookie("color-mode", state.appearance);
   const dispatch = useDispatch<any>();
   const toggleModal = useToggleModal();

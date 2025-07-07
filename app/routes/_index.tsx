@@ -91,14 +91,18 @@ export const loader = async (props: Route.LoaderArgs) => {
             id: bookId,
             index: j,
             src: undefined,
-            notes: book.notes?.map((note, k) => ({
-              ...note,
-              id: Number(k + 1).toString(),
-              book_id: bookId,
-              comments: note.comments?.filter(
-                (comment) => comment.note_id === note.id,
-              ),
-            })),
+            notes: book.notes?.map((note, k) => {
+              const noteId = `${bookId}${k + 1}`;
+              return {
+                ...note,
+                id: noteId,
+                book_id: bookId,
+                comments: note.comments?.map((comment, l) => ({
+                  ...comment,
+                  id: `${noteId}${l + 1}`,
+                })),
+              };
+            }),
           };
         }),
       };
@@ -112,18 +116,11 @@ export const loader = async (props: Route.LoaderArgs) => {
 };
 
 export default function IndexRoute(props) {
-  const {
-    loaderData: { collections, libs, lib, appearance, userAgent },
-  } = props;
+  const { loaderData } = props;
   const { store } = createStore(
     {
       app: {
-        collections,
-        libs,
-        lib,
-
-        appearance,
-        userAgent,
+        ...loaderData,
       },
     },
     typeof window === "undefined",

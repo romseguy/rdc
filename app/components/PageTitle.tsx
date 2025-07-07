@@ -80,7 +80,7 @@ export const PageTitle = () => {
       id="page-title"
       className="bg-purple-900/50"
       direction="column"
-      gap="1"
+      gap="3"
     >
       <Heading
         onClick={() => {
@@ -149,7 +149,7 @@ export const PageTitle = () => {
               />
               <Select.Content
                 css={css`
-                  *  {
+                  * {
                     margin: 0;
                     padding: 3px;
                   }
