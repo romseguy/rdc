@@ -105,3 +105,33 @@ export const collections: Seed = {
     },
   ],
 };
+
+export const toLibs = (libraries) =>
+  libraries.map((lib, i) => {
+    const id = Number(i + 1).toString();
+    return {
+      ...lib,
+      id,
+      books: lib.books?.map((book, j) => {
+        const bookId = `${id}${j + 1}`;
+        return {
+          ...book,
+          id: bookId,
+          index: j,
+          src: undefined,
+          notes: book.notes?.map((note, k) => {
+            const noteId = `${bookId}${k + 1}`;
+            return {
+              ...note,
+              id: noteId,
+              book_id: bookId,
+              comments: note.comments?.map((comment, l) => ({
+                ...comment,
+                id: `${noteId}${l + 1}`,
+              })),
+            };
+          }),
+        };
+      }),
+    };
+  });

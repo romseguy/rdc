@@ -93,19 +93,19 @@ export default function CatchAllRoute(props) {
     useRoutes([
       {
         path: "livre/:id",
-        element: <Page element={Livre} />,
+        element: <Page component={Livre} />,
       },
       {
         path: "book/:id",
-        element: <Page element={Livre} />,
+        element: <Page component={Livre} />,
       },
       {
         path: "c/:id",
-        element: <Page element={Note} simple />,
+        element: <Page component={Note} simple />,
       },
       {
         path: "q/:id",
-        element: <Page element={Note} simple />,
+        element: <Page component={Note} simple />,
       },
     ])
   );

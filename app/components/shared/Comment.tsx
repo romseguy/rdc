@@ -1,7 +1,7 @@
 import { Badge, Box } from "@radix-ui/themes";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { DeleteIcon, Flex, UserIcon } from "~/components";
+import { DeleteIcon, Flex, UserIcon, useToast } from "~/components";
 import { getState } from "~/store";
 import {
   toUsername,
@@ -13,10 +13,69 @@ import {
 } from "~/utils";
 
 export const Comment = (props) => {
-  const { comment, onDeleteClick, ...p } = props;
+  const { comment, ...p } = props;
   const { auth, locale } = useSelector(getState);
   const user = auth?.user;
   const [isLoading, setIsLoading] = useState(false);
+  const showToast = useToast();
+
+  async function onDeleteClick(comment) {
+    try {
+      alert(
+        localize(
+          "Cette fonctionnalité n'est pas encore disponible",
+          "This function is not yet available",
+        ),
+      );
+      // setIsCommentLoading({
+      //   ...isCommentLoading,
+      //   [comment.id]: true,
+      // });
+      // const { error } = await dispatch(
+      //   deleteComment.initiate({
+      //     url: "/comment?id=" + comment.id,
+      //   }),
+      // );
+
+      // if (data.error) {
+      //   setIsCommentLoading({
+      //     ...isCommentLoading,
+      //     [comment.id]: false,
+      //   });
+
+      //   if (process.env.NODE_ENV === "development") {
+      //   } else {
+      //     showToast(data.message);
+      //     return;
+      //   }
+      // }
+
+      // dispatch(
+      //   setState({
+      //     book: {
+      //       ...book,
+      //       notes: (book.notes || []).map((n) => {
+      //         if (n.id === note.id) {
+      //           return {
+      //             ...n,
+      //             comments: (n.comments || []).filter(
+      //               (c) => c.id !== comment.id,
+      //             ),
+      //           };
+      //         }
+      //         return n;
+      //       }),
+      //     },
+      //   }),
+      // );
+    } catch (error) {
+      showToast(error, true);
+      // setIsCommentLoading({
+      //   ...isCommentLoading,
+      //   [comment.id]: false,
+      // });
+    }
+  }
 
   return (
     <Flex key={"comment-" + comment.id} justify="between" p="3" {...p}>
@@ -52,6 +111,7 @@ export const Comment = (props) => {
           comment.comment_email === user?.email) && (
           <DeleteIcon
             onClick={async () => {
+              if (isLoading) return;
               const ok = confirm(
                 localize(
                   "Êtes-vous sûr de vouloir supprimer ce commentaire ?",

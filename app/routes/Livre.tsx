@@ -1,33 +1,15 @@
 import { css } from "@emotion/react";
-import { Button, Heading, Select } from "@radix-ui/themes";
-import { useEffect, useMemo, useState } from "react";
+import { Select } from "@radix-ui/themes";
+import { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import {
-  deleteComment,
-  deleteNote,
-  editNote,
-  postComments,
-  postNotes,
-} from "~/api";
-import {
-  AddNoteButton,
-  BackButton,
-  BookTitle,
-  Flex,
-  Note,
-  useToast,
-} from "~/components";
+import { AddNoteButton, BookTitle, Flex, Note, useToast } from "~/components";
 import { getState, setState } from "~/store";
-import { ENoteOrder, localize, toCss, type NoteT } from "~/utils";
+import { ENoteOrder, localize, type NoteT } from "~/utils";
 
 export const Livre = (props) => {
-  //#region state
   const { lib, book, auth, isMobile, locale } = useSelector(getState);
   const user = auth?.user;
-  const [isNoteLoading, setIsNoteLoading] = useState<Record<string, boolean>>(
-    {},
-  );
   const hasEditing = useMemo(() => {
     if (!book || !book.notes) return false;
     return book.notes?.filter((n) => n.isEditing).length > 0;
@@ -77,190 +59,11 @@ export const Livre = (props) => {
     }
     return els;
   }, [book, order, locale]);
-  //#endregion
 
-  //#region hooks
   const dispatch = useDispatch<any>();
   const navigate = useNavigate();
   const showToast = useToast();
   const setBook = (b) => dispatch(setState({ book: b }));
-  //#endregion
-
-  //#region effects
-  async function onEditSubmit(note) {
-    try {
-      let id;
-      setIsNoteLoading({
-        ...isNoteLoading,
-        [note.id]: true,
-      });
-
-      if (!note.id) {
-        const { data, error } = await dispatch(
-          postNotes.initiate({
-            note: {
-              book_id: book.id,
-              [`desc${locale === "en" ? "_en" : ""}`]:
-                note[locale === "en" ? "desc_en" : "desc"],
-            },
-          }),
-        );
-        if (data.error) throw new Error(data.error);
-        id = data.id;
-      } else {
-        const { data, error } = await dispatch(
-          editNote.initiate({
-            note: {
-              id: note.id,
-              book_id: book.id,
-              [`desc${locale === "en" ? "_en" : ""}`]:
-                note[locale === "en" ? "desc_en" : "desc"],
-            },
-          }),
-        );
-        if (data.error) throw new Error(data.error);
-      }
-
-      setBook({
-        ...book,
-        notes: book.notes?.map((n) => {
-          if (n.id === note.id)
-            return {
-              ...note,
-              id: id || note.id,
-              isNew: false,
-              isEditing: false,
-              note_email: user.email,
-            };
-          return n;
-        }),
-      });
-      setIsNoteLoading({
-        ...isNoteLoading,
-        [note.id]: false,
-      });
-    } catch (error) {
-      showToast(error, true);
-      setIsNoteLoading({
-        ...isNoteLoading,
-        [note.id]: false,
-      });
-    }
-  }
-  async function onDeleteClick(note) {
-    try {
-      const ok = confirm(
-        localize(
-          "Êtes-vous sûr de vouloir supprimer cette citation ?",
-          "Do you really want to delete this quote?",
-        ),
-      );
-      if (!ok) return;
-
-      setIsNoteLoading({
-        ...isNoteLoading,
-        [note.id]: true,
-      });
-      const { data, error } = await dispatch(
-        deleteNote.initiate({
-          url: "/note?id=" + note.id,
-        }),
-      );
-
-      if (data.error) throw new Error(data.error);
-
-      setBook({
-        ...book,
-        notes: book.notes?.filter((n) => n.id !== note.id),
-      });
-      setIsNoteLoading({
-        ...isNoteLoading,
-        [note.id]: false,
-      });
-    } catch (error) {
-      showToast(error, true);
-      setIsNoteLoading({
-        ...isNoteLoading,
-        [note.id]: false,
-      });
-    }
-  }
-  async function onEditPageClick(note: NoteT) {
-    try {
-      const { data, error } = await dispatch(
-        editNote.initiate({
-          note,
-        }),
-      );
-      if (data.error || error) data.error || error;
-
-      setBook({
-        ...book,
-        notes: book.notes?.map((n) => {
-          if (n.id === note.id) return note;
-          return n;
-        }),
-      });
-    } catch (error) {
-      showToast(error, true);
-    }
-  }
-  async function onSubmitCommentClick(note, comment) {
-    try {
-      const { data, error } = await dispatch(
-        postComments.initiate({
-          comment: {
-            ...comment,
-            note_id: note.id,
-          },
-        }),
-      );
-
-      if (data.error) throw new Error(data.error);
-
-      // if (data.error) {
-      //   if (process.env.NODE_ENV === "development") {
-      //     let r = rand();
-      //     while (
-      //       !!note.comments?.find(
-      //         ({ id }) => id === r.toString(),
-      //       )
-      //     ) {
-      //       r = rand();
-      //     }
-      //     data = {
-      //       ...comment,
-      //       id: r.toString(),
-      //       comment_email: user.email,
-      //       created_at: new Date().toISOString(),
-      //     };
-      //   } else {
-      //     showToast(data.message);
-      //     return;
-      //   }
-      // }
-
-      setBook({
-        ...book,
-        notes: book.notes?.map((n) => {
-          if (n.id === note.id) {
-            return {
-              ...n,
-              comments: (n.comments || []).concat([data]),
-            };
-          }
-          return n;
-        }),
-      });
-    } catch (error) {
-      showToast(error, true);
-      setIsNoteLoading({
-        ...isNoteLoading,
-        [note.id]: false,
-      });
-    }
-  }
-  //#endregion
 
   return (
     <div id="book-page">
@@ -309,46 +112,12 @@ export const Livre = (props) => {
                 .filter((note) => note.isEditing)
                 .map((note) => {
                   return (
-                    <div key={"note-" + note.id}>
-                      <Note notes={book.notes || []} note={note} isEditing />
-
-                      <div
-                        css={toCss({
-                          display: "flex",
-                          justifyContent: "space-between",
-                          background: "rgba(255,255,255,0.1)",
-                          marginBottom: "12px",
-                          padding: "6px",
-                        })}
-                      >
-                        {!isNoteLoading[note.id] && (
-                          <BackButton
-                            onClick={() => {
-                              setBook({
-                                ...book,
-                                notes: book.notes
-                                  ?.filter((n) => {
-                                    if (!note.isNew) return true;
-                                    return n.id !== note.id;
-                                  })
-                                  .map((n) => ({
-                                    ...n,
-                                    isEditing: false,
-                                  })),
-                              });
-                            }}
-                          >
-                            Annuler
-                          </BackButton>
-                        )}
-
-                        <Button onClick={() => onEditSubmit(note)}>
-                          {isNoteLoading[note.id]
-                            ? "Veuillez patienter..."
-                            : "Valider"}
-                        </Button>
-                      </div>
-                    </div>
+                    <Note
+                      key={"note-" + note.id}
+                      notes={book.notes || []}
+                      note={note}
+                      isEditing
+                    />
                   );
                 })}
             </div>
@@ -368,53 +137,6 @@ export const Livre = (props) => {
                         key={"note-" + index + note.id}
                         notes={book.notes || []}
                         note={{ ...note, index }}
-                        isLoading={isNoteLoading[note.id]}
-                        onOpenClick={() => {
-                          navigate(
-                            `/${locale === "en" ? "q" : "c"}/${note.id}`,
-                          );
-                          //setNote(note);
-                        }}
-                        onEditClick={() => {
-                          setIsNoteLoading({
-                            ...isNoteLoading,
-                            [note.id]: true,
-                          });
-                          setBook({
-                            ...book,
-                            notes: book.notes?.map((n) => {
-                              if (n.id === note.id)
-                                return { ...n, isEditing: true };
-                              return n;
-                            }),
-                          });
-                          setIsNoteLoading({
-                            ...isNoteLoading,
-                            [note.id]: false,
-                          });
-                        }}
-                        onShareClick={() => {
-                          dispatch(
-                            setState({
-                              modal: {
-                                id: "share-modal",
-                                isOpen: true,
-                                book,
-                                note,
-                              },
-                            }),
-                          );
-                        }}
-                        onEditPageClick={(page) =>
-                          onEditPageClick({ ...note, page })
-                        }
-                        onDeleteClick={() => onDeleteClick(note)}
-                        onSubmitCommentClick={(comment) =>
-                          onSubmitCommentClick(note, comment)
-                        }
-                        onDeleteCommentClick={(comment) =>
-                          onDeleteCommentClick(note, comment)
-                        }
                       />
                     );
                   })}

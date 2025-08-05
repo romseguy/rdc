@@ -15,7 +15,8 @@ const reducer = (i) => {
         ...state,
         ...action.payload,
       };
-      if (!action.payload.screenWidth) console.log(action, newState);
+      if (!action.payload.screenWidth && process.env.NODE_ENV === "development")
+        console.log(action, newState);
       return newState;
     }
     return state;

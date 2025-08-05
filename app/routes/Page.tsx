@@ -16,7 +16,7 @@ import { getState, setState } from "~/store";
 
 const Page = (props) => {
   //#region state
-  const { element, noTheme, simple } = props;
+  const { component, noTheme, simple } = props;
   const state = useSelector(getState);
   const { appearance, isMobile, modal, toast } = state;
   //#endregion
@@ -34,7 +34,7 @@ const Page = (props) => {
   //#endregion
 
   if (noTheme)
-    return <div id="page">{React.createElement(element, childProps)}</div>;
+    return <div id="page">{React.createElement(component, childProps)}</div>;
 
   if (simple)
     return (
@@ -52,7 +52,7 @@ const Page = (props) => {
             {modal.isOpen && <Modal {...childProps} />}
 
             {!modal.isOpen && (
-              <div id="page">{React.createElement(element, childProps)}</div>
+              <div id="page">{React.createElement(component, childProps)}</div>
             )}
           </>
         )}
@@ -80,7 +80,7 @@ const Page = (props) => {
               <PageTitle {...childProps} />
               <PageHeader {...childProps} />
 
-              {React.createElement(element, childProps)}
+              {React.createElement(component, childProps)}
             </div>
           )}
         </>

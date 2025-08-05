@@ -3,12 +3,43 @@
 //@import "tailwindcss" prefix(tw);
 @import "tailwindcss";
 @import "./palette.css";
-@layer base, utilities, theme, components;
-@import "tailwindcss/preflight.css" layer(base);
-@import "tailwindcss/utilities.css" layer(utilities);
-@import "tailwindcss/theme.css" layer(theme);
+// @layer base, utilities, theme, components;
+// @import "tailwindcss/theme.css" layer(theme);
+// @import "tailwindcss/preflight.css" layer(base);
+// @import "tailwindcss/utilities.css" layer(utilities);
 @import "@radix-ui/themes/styles.css" layer(components);
 // @import url(../node_modules/@radix-ui/themes/styles.css) layer(components);
+
+// https://tailwindcss.com/docs/theme#default-theme-variables
+@theme {
+  // Theme variables aren't just CSS variables — they also instruct Tailwind to create new utility classes that you can use in your HTML.
+  // e.g : .animate-caret-blink
+  --animate-caret-blink: caret-blink 1.2s ease-out infinite;
+  --animate-spinner: rotator 0.45s linear infinite;
+
+  @keyframes caret-blink {
+    0%,
+    70%,
+    100% {
+      opacity: 1;
+    }
+
+    20%,
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes rotator {
+    0% {
+      transform: rotate(0);
+    }
+
+    100% {
+      transform: rotate(270deg);
+    }
+  }
+}
 
 @layer base {
   [data-theme="ocean"] {
@@ -383,6 +414,20 @@
     .bg-border {
       background-color: white;
     }
+
+    .link-button {
+      color: white;
+      background: var(--accent-9);
+      font-weight: var(--font-weight-medium);
+      border-radius: max(var(--radius-2), var(--radius-full));
+      text-decoration: none;
+      text-align: center;
+
+      &:hover {
+        background: var(--accent-10);
+      }
+    }
+
     .prose {
       --tw-prose-body: unset;
       --tw-prose-bold: white;
@@ -407,16 +452,28 @@
     }
   }
 
-  .link-button {
-    color: white;
-    background: var(--accent-9);
-    font-weight: var(--font-weight-medium);
-    border-radius: max(var(--radius-2), var(--radius-full));
-    text-decoration: none;
-    text-align: center;
+  .spinner {
+    display: inline-block;
+    border-color: currentColor;
+    border-style: solid;
+    border-radius: 99999px;
+    border-width: 2px;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    animation: var(--animate-spinner);
+    width: 1.5rem;
+    height: 1.5rem;
 
-    &:hover {
-      background: var(--accent-10);
+    & > span {
+      border: 0px;
+      clip: rect(0px, 0px, 0px, 0px);
+      height: 1px;
+      width: 1px;
+      margin: -1px;
+      padding: 0px;
+      overflow: hidden;
+      white-space: nowrap;
+      position: absolute;
     }
   }
 
@@ -424,60 +481,6 @@
     border-radius: 0 !important;
   }
 }
-
-@keyframes caret-blink {
-  0%,
-  70%,
-  100% {
-    opacity: 1;
-  }
-
-  20%,
-  50% {
-    opacity: 0;
-  }
-}
-.caret-blink {
-  animation: caret-blink 1.2s ease-out infinite;
-}
-
-/* #region spinner */
-@keyframes rotator {
-  0% {
-    transform: rotate(0);
-  }
-
-  100% {
-    transform: rotate(270deg);
-  }
-}
-
-.spinner {
-  display: inline-block;
-  border-color: currentColor;
-  border-style: solid;
-  border-radius: 99999px;
-  border-width: 2px;
-  border-bottom-color: transparent;
-  border-left-color: transparent;
-  animation: rotator 0.45s linear infinite;
-  width: 1.5rem;
-  height: 1.5rem;
-
-  & > span {
-    border: 0px;
-    clip: rect(0px, 0px, 0px, 0px);
-    height: 1px;
-    width: 1px;
-    margin: -1px;
-    padding: 0px;
-    overflow: hidden;
-    white-space: nowrap;
-    position: absolute;
-  }
-}
-
-/* #endregion */
 
 /* #region toast */
 .toasts-container {

@@ -130,7 +130,7 @@ export default function IndexRoute(props) {
   const App = isbot() ? (
     <Sitemap {...props} />
   ) : (
-    <Page element={Home} {...props} />
+    <Page component={Home} {...props} />
   );
 
   return <Provider store={store}>{App}</Provider>;

@@ -1,31 +1,17 @@
 import { css } from "@emotion/react";
-import {
-  ArrowRightIcon,
-  ArrowUpIcon,
-  ChatBubbleIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  PlusCircledIcon,
-  ReaderIcon,
-  Share1Icon,
-} from "@radix-ui/react-icons";
-import { Badge, Box, Button, IconButton } from "@radix-ui/themes";
+import { Badge, Button } from "@radix-ui/themes";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate, useNavigation } from "react-router";
-import { deleteComment } from "~/api";
+import { editNote, postNotes } from "~/api";
 import {
   BackButton,
-  Comment,
-  DeleteIcon,
-  EditIcon,
-  ExternalIcon,
   Flex,
   LocaleSwitch,
-  PageSwitch,
+  NoteFooter,
+  NoteHeaderLeft,
+  NoteHeaderRight,
   RTEditor,
   UserIcon,
-  iconProps,
   useToast,
 } from "~/components";
 import { getState, setState } from "~/store";
@@ -34,7 +20,6 @@ import {
   toCss,
   toUsername,
   user_badge_click,
-  useScroll,
   type NoteT,
   type User,
 } from "~/utils";
@@ -43,31 +28,16 @@ interface NoteP {
   notes: NoteT[];
   note: NoteT;
   user?: User | null;
-  isLoading?: boolean;
   isEditing?: boolean;
-  onOpenClick?: any;
-  onEditClick?: any;
-  onEditPageClick?: any;
-  onDeleteClick?: any;
-  onShareClick?: any;
-  onSubmitCommentClick?: any;
 }
 
 export const Note = (props: NoteP) => {
-  const {
-    notes,
-    note,
-    isEditing = false,
-    isLoading = false,
-    onOpenClick,
-    onEditClick,
-    onEditPageClick,
-    onShareClick,
-    onDeleteClick,
-    onSubmitCommentClick,
-  } = props;
-  const { book, isMobile, locale } = useSelector(getState);
+  const { notes, note, isEditing = false } = props;
+  const { auth, book, isMobile, locale } = useSelector(getState);
+  const user = auth?.user;
 
+  const [isAddComment, setIsAddComment] = useState(false);
+  const [isShowComments, setIsShowComments] = useState(false);
   const desc =
     (locale === "en" ? note.desc_en : note.desc) ||
     `<i>${
@@ -84,21 +54,6 @@ export const Note = (props: NoteP) => {
   //     ? "<p>You can translate the text below :</p><p>&nbsp;</p>" + note.desc
   //     : "No english translation"
   //   : note.desc;
-
-  const [isPageEdit, setIsPageEdit] = useState(false);
-  const [page, setPage] = useState<number | undefined>(note.page);
-  //const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [comment, setComment] = useState<{ html: string }>();
-  const [isShowComments, setIsShowComments] = useState(false);
-
-  const dispatch = useDispatch<any>();
-  const navigate = useNavigate();
-  const location = useLocation();
-  //const [executeScroll, elementToScrollRef] = useScroll<HTMLDivElement>();
-  const [isAddComment, setIsAddComment] = useState(false);
-
-  const showToast = useToast();
-
   const editor = (locale: string) => {
     return (
       <RTEditor
@@ -110,364 +65,176 @@ export const Note = (props: NoteP) => {
     );
   };
 
-  const NoteHeaderLeft = (props) => {
-    const openLabel = localize("Ouvrir le lecteur", "Open the reader");
+  const dispatch = useDispatch<any>();
+  const setBook = (b) => dispatch(setState({ book: b }));
+  //const [executeScroll, elementToScrollRef] = useScroll<HTMLDivElement>();
+  const showToast = useToast();
 
-    return (
-      <Flex
-        direction={isMobile ? "column" : "row"}
-        gap={isMobile ? "0" : "3"}
-        {...props}
-      >
-        <PageSwitch
-          variant="soft"
-          isPageEdit={isPageEdit}
-          setIsPageEdit={setIsPageEdit}
-          page={page}
-          setPage={setPage}
-          note={note}
-          onClick={onEditPageClick}
-        />
-
-        <Button
-          type="button"
-          variant="soft"
-          className="with-icon"
-          onClick={onOpenClick}
-        >
-          <ReaderIcon
-            className="reader-icon"
-            {...iconProps({
-              title: openLabel,
-              style: { border: 0, padding: "unset" },
-            })}
-          />
-          {openLabel}
-        </Button>
-
-        {note.index !== 0 && (
-          <Button variant="soft" type="button">
-            <ChevronLeftIcon />
-            {localize("Précédent", "Previous")}
-          </Button>
-        )}
-
-        {note.index !== notes.length - 1 && (
-          <Button variant="soft" type="button">
-            {localize("Suivant", "Next")}
-            <ChevronRightIcon />
-          </Button>
-        )}
-      </Flex>
-    );
-  };
-
-  const NoteHeaderRight = (props) => {
-    return (
-      <Box {...props}>
-        {!isLoading && (
-          <Flex gap="3">
-            <LocaleSwitch
-              setLocale={(locale) => {
-                navigate(
-                  locale === "fr"
-                    ? location.pathname.replace("book", "livre")
-                    : location.pathname.replace("livre", "book"),
-                );
-              }}
-            />
-            <Share1Icon
-              className="share-icon"
-              color="var(--color-blue-500)"
-              {...iconProps({
-                title: localize("Partager la citation", "Share the quote"),
-                onClick: onShareClick,
-              })}
-            />
-            <EditIcon
-              {...iconProps({
-                title: localize("Modifier la citation", "Edit the quote"),
-                onClick: onEditClick,
-              })}
-            />
-            <DeleteIcon
-              {...iconProps({
-                title: localize("Supprimer la citation", "Delete the quote"),
-                onClick: onDeleteClick,
-              })}
-            />
-          </Flex>
-        )}
-        {isLoading && (
-          <div className="spinner">
-            <span>Chargement...</span>
-          </div>
-        )}
-      </Box>
-    );
-  };
-
-  async function onDeleteCommentClick(comment) {
+  async function onSubmit(note) {
     try {
-      alert(
-        localize(
-          "Cette fonctionnalité n'est pas encore disponible",
-          "This function is not yet available",
-        ),
-      );
-      // setIsCommentLoading({
-      //   ...isCommentLoading,
-      //   [comment.id]: true,
-      // });
-      // const { error } = await dispatch(
-      //   deleteComment.initiate({
-      //     url: "/comment?id=" + comment.id,
-      //   }),
-      // );
+      let id;
 
-      // if (data.error) {
-      //   setIsCommentLoading({
-      //     ...isCommentLoading,
-      //     [comment.id]: false,
-      //   });
+      if (!note.id) {
+        const { data, error } = await dispatch(
+          postNotes.initiate({
+            note: {
+              book_id: book.id,
+              [`desc${locale === "en" ? "_en" : ""}`]:
+                note[locale === "en" ? "desc_en" : "desc"],
+            },
+          }),
+        );
+        if (data.error) throw new Error(data.error);
+        id = data.id;
+      } else {
+        const { data, error } = await dispatch(
+          editNote.initiate({
+            note: {
+              id: note.id,
+              book_id: book.id,
+              [`desc${locale === "en" ? "_en" : ""}`]:
+                note[locale === "en" ? "desc_en" : "desc"],
+            },
+          }),
+        );
+        if (data.error) throw new Error(data.error);
+      }
 
-      //   if (process.env.NODE_ENV === "development") {
-      //   } else {
-      //     showToast(data.message);
-      //     return;
-      //   }
-      // }
-
-      // dispatch(
-      //   setState({
-      //     book: {
-      //       ...book,
-      //       notes: (book.notes || []).map((n) => {
-      //         if (n.id === note.id) {
-      //           return {
-      //             ...n,
-      //             comments: (n.comments || []).filter(
-      //               (c) => c.id !== comment.id,
-      //             ),
-      //           };
-      //         }
-      //         return n;
-      //       }),
-      //     },
-      //   }),
-      // );
+      setBook({
+        ...book,
+        notes: book.notes?.map((n) => {
+          if (n.id === note.id)
+            return {
+              ...note,
+              id: id || note.id,
+              isNew: false,
+              isEditing: false,
+              note_email: user.email,
+            };
+          return n;
+        }),
+      });
     } catch (error) {
       showToast(error, true);
-      // setIsCommentLoading({
-      //   ...isCommentLoading,
-      //   [comment.id]: false,
-      // });
     }
   }
 
   return (
-    <section>
-      {/* note header */}
-      <header>
-        {isEditing && (
-          <Flex gap="3">
-            {note.isNew
-              ? localize("Nouvelle citation", "New quote")
-              : localize("Modifiez cette citation", "Edit this quote")}
-            <LocaleSwitch
-              setLocale={(locale) => dispatch(setState({ locale }))}
-            />
-          </Flex>
-        )}
-
-        {!isEditing && (
-          <>
-            {/* note header */}
-            {isMobile && (
-              <Flex
-                direction="column"
-                css={css`
-                  button {
-                    margin-bottom: 12px;
-                  }
-                `}
-              >
-                <NoteHeaderLeft />
-                <NoteHeaderRight />
-              </Flex>
-            )}
-
-            {!isMobile && (
-              <Flex justify="between">
-                <NoteHeaderLeft />
-
-                <Flex>{/* CENTER */}</Flex>
-
-                <NoteHeaderRight />
-              </Flex>
-            )}
-          </>
-        )}
-      </header>
-
-      {/* note desc */}
-      <main
-        key={"note-" + note.id}
-        css={css`
-          padding: ${isMobile ? "0px" : "6px"};
-          ${isEditing ? "min-height: 250px;" : ""}
-          ${!isEditing ? "overflow-y: scroll" : ""}
-        `}
-      >
-        {isEditing && editor(locale)}
-        {!isEditing && (
-          <>
-            <Badge variant="surface" onClick={() => alert(user_badge_click)}>
-              <UserIcon />
-              {toUsername(note.note_email) || localize("Anonyme", "Anonymous")}
-            </Badge>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: desc,
-              }}
-            />
-          </>
-        )}
-      </main>
-
-      {/* comments */}
-      {!note.isNew && (
-        <footer>
-          {!note.isEditing && (
-            <Flex
-              onClick={async () => {
-                setIsShowComments(!isShowComments);
-                if (!isShowComments) {
-                  // setTimeout(() => {
-                  //   executeScroll();
-                  // }, 100);
-                }
-              }}
-            >
-              {!isAddComment && (
-                <>
-                  <Button
-                    variant="soft"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (!isAddComment) {
-                        setIsAddComment(true);
-                        //setIsShowComments(false);
-                        setTimeout(() => {
-                          executeScroll();
-                        }, 200);
-                      }
-                    }}
-                  >
-                    <PlusCircledIcon
-                      className="add-icon"
-                      {...iconProps({
-                        title: localize(
-                          "Ajouter un commentaire",
-                          "Add a comment",
-                        ),
-                      })}
-                    />
-                    {localize("Ajouter un commentaire", "Add a comment")}
-                  </Button>
-                </>
-              )}
-
-              {Array.isArray(note.comments) && note.comments.length > 0 && (
-                <Button>
-                  <ChatBubbleIcon className="chat-icon" />
-                  {note.comments.length}
-                  {isShowComments ? (
-                    <ArrowUpIcon
-                      className="icon"
-                      {...iconProps({
-                        title: localize(
-                          "Ouvrir la zone des commentaires",
-                          "Open comments area",
-                        ),
-                      })}
-                    />
-                  ) : (
-                    <ArrowRightIcon
-                      className="icon"
-                      {...iconProps({
-                        title: localize(
-                          "Fermer la zone des commentaires",
-                          "Close comments area",
-                        ),
-                      })}
-                    />
-                  )}
-                </Button>
-              )}
+    <>
+      <section>
+        {/* note header */}
+        <header>
+          {isEditing && (
+            <Flex gap="3">
+              {note.isNew
+                ? localize("Nouvelle citation", "New quote")
+                : localize("Modifiez cette citation", "Edit this quote")}
+              <LocaleSwitch
+                setLocale={(locale) => dispatch(setState({ locale }))}
+              />
             </Flex>
           )}
 
-          {isAddComment && (
-            <div>
-              <textarea
-                autoFocus
-                css={toCss({ width: "98%", height: "150px" })}
-                placeholder="Écrivez ici votre commentaire"
-                onChange={(e) => setComment({ html: e.target.value })}
-              />
+          {!isEditing && (
+            <>
+              {/* note header */}
+              {isMobile && (
+                <Flex
+                  direction="column"
+                  css={css`
+                    button {
+                      margin-bottom: 12px;
+                    }
+                  `}
+                >
+                  <NoteHeaderLeft notes={notes} note={note} />
+                  <NoteHeaderRight note={note} />
+                </Flex>
+              )}
+
+              {!isMobile && (
+                <Flex justify="between">
+                  <NoteHeaderLeft notes={notes} note={note} />
+
+                  <Flex>{/* CENTER */}</Flex>
+
+                  <NoteHeaderRight note={note} />
+                </Flex>
+              )}
+            </>
+          )}
+        </header>
+
+        {/* note desc */}
+        <main
+          key={"note-" + note.id}
+          css={css`
+            padding: ${isMobile ? "0px" : "6px"};
+            ${isEditing ? "min-height: 250px;" : ""}
+            ${!isEditing ? "overflow-y: scroll" : ""}
+          `}
+        >
+          {isEditing && editor(locale)}
+          {!isEditing && (
+            <>
+              <Badge variant="surface" onClick={() => alert(user_badge_click)}>
+                <UserIcon />
+                {toUsername(note.note_email) ||
+                  localize("Anonyme", "Anonymous")}
+              </Badge>
               <div
-                css={toCss({
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "12px",
-                  padding: "6px",
-                })}
-              >
-                <BackButton
-                  label="Annuler"
-                  onClick={() => {
-                    setIsAddComment(false);
-                  }}
-                >
-                  Annuler
-                </BackButton>
-
-                <Button
-                  onClick={() => {
-                    setIsAddComment(false);
-                    setIsShowComments(true);
-                    onSubmitCommentClick(comment);
-                  }}
-                >
-                  Valider
-                </Button>
-              </div>
-            </div>
+                dangerouslySetInnerHTML={{
+                  __html: desc,
+                }}
+              />
+            </>
           )}
+        </main>
 
-          {!note.isNew && isShowComments && (
-            <div css={toCss({ background: "rgba(255, 255, 255, 0.2)" })}>
-              {note.comments?.map((c, i) => {
-                return (
-                  <Comment
-                    key={c.id}
-                    css={toCss({
-                      borderBottom:
-                        i !== (note.comments?.length || 0) - 1
-                          ? "1px solid white"
-                          : "",
-                    })}
-                    comment={c}
-                    onDeleteClick={onDeleteCommentClick}
-                  />
-                );
-              })}
-            </div>
-          )}
-          {/* <div ref={elementToScrollRef} /> */}
-        </footer>
+        {/* comments */}
+        {!note.isNew && (
+          <NoteFooter
+            note={note}
+            isAddComment={isAddComment}
+            setIsAddComment={setIsAddComment}
+            isShowComments={isShowComments}
+            setIsShowComments={setIsShowComments}
+          />
+        )}
+      </section>
+
+      {isEditing && (
+        <div
+          css={toCss({
+            display: "flex",
+            justifyContent: "space-between",
+            background: "rgba(255,255,255,0.1)",
+            marginBottom: "12px",
+            padding: "6px",
+          })}
+        >
+          <BackButton
+            onClick={() => {
+              setBook({
+                ...book,
+                notes: book.notes
+                  ?.filter((n) => {
+                    if (!note.isNew) return true;
+                    return n.id !== note.id;
+                  })
+                  .map((n) => ({
+                    ...n,
+                    isEditing: false,
+                  })),
+              });
+            }}
+          >
+            Annuler
+          </BackButton>
+
+          <Button onClick={() => onSubmit(note)}>Valider</Button>
+        </div>
       )}
-    </section>
+    </>
   );
 };

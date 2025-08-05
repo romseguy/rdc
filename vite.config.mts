@@ -20,7 +20,17 @@ export default defineConfig({
       },
     },
   },
-  plugins: [reactRouter(), tsconfigPaths()],
+  plugins: [!process.env.VITEST && reactRouter(), tsconfigPaths()],
   server: { port: 3000 },
+  test: {
+    globals: true,
+    setupFiles: "./test/setup.ts",
+    environment: "jsdom",
+    browser: {
+      enabled: true,
+      provider: "playwright",
+      instances: [{ browser: "chromium" }],
+    },
+  },
   preview: { port: 5000 },
 });
