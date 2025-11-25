@@ -268,7 +268,6 @@
 
             main {
               background-color: var(--color-note-desc);
-              font-family: var(--secondary-font-family);
               letter-spacing: var(--letter-spacing-1);
               line-height: 2;
               max-height: 250px;
@@ -296,7 +295,6 @@
           background: var(--color-note-desc);
           border-radius: var(--radius-4);
           padding: 6px 12px;
-          font-family: var(--secondary-font-family);
           letter-spacing: var(--letter-spacing-1);
           margin: 0 auto;
         }

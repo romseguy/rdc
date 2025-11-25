@@ -9,7 +9,7 @@ export function Home(props) {
       id="home-page"
       css={isMobile ? { padding: "12px" } : { padding: "48px" }}
     >
-      {locale === "en" ? (
+      {/* {locale === "en" ? (
         <>
           In reality, acquiring self-consciousness means long and hard work. How
           can a man agree to this work if he thinks he already possesses the
@@ -22,17 +22,42 @@ export function Home(props) {
         </>
       ) : (
         <>
-          En réalité, l'acquisition de la conscience de soi nécessite un travail
-          dur et prolongé. Comment un Homme accepterait-il de se plier à ce
-          travail s'il estime posséder déjà cette chose même qu'on lui promet
-          comme résultat d'un travail long et difficile ? Naturellement, cet
-          Homme n'entreprendra pas ce travail, ni même n'en éprouvera-t-il la
-          nécessité, avant d'être convaincu qu'il ne possède ni la conscience de
-          soi ni tout ce qui s'y rapporte, à savoir l'unité intérieure ou
-          individualité, un Moi permanent et la volonté. -- p.44{" "}
-          <i>L'évolution possible de l'Homme</i> OUSPENSKY
+          <p>
+            En réalité, l'acquisition de la conscience de soi nécessite un
+            travail dur et prolongé. Comment un Homme accepterait-il de se plier
+            à ce travail s'il estime posséder déjà cette chose même qu'on lui
+            promet comme résultat d'un travail long et difficile ?
+            Naturellement, cet Homme n'entreprendra pas ce travail, ni même n'en
+            éprouvera-t-il la nécessité, avant d'être convaincu qu'il ne possède
+            ni la conscience de soi ni tout ce qui s'y rapporte, à savoir
+            l'unité intérieure ou individualité, un Moi permanent et la volonté.
+            -- p.44 <i>L'évolution possible de l'Homme</i> OUSPENSKY
+          </p>
+          <br />
+          <p>
+            La transformation psychologique de l’Homme veut dire la révision
+            totale et dans tous les recoins de sa conscience des mécanismes qui
+            dans le passé ont constitué sa conscience inférieure. La
+            transformation psychologique de l’Homme veut dire la réorganisation
+            de son mental, la réorganisation de son pouvoir énergétique, la
+            réorganisation de sa volonté, la réorganisation de son intelligence.
+            C’est ça la transformation psychologique de l’Homme nouveau. Ce
+            n’est pas simplement l’appointement spirituel d’une vision
+            philosophique pour le bien-être égoïque d’un désir spiritualisé,
+            c’est le mouvement intégral de l’énergie à travers sa conscience
+            pour le déblocage sur le plan humain d’une force créative qui
+            permettra, éventuellement, selon le nombre et la puissance créative
+            de cette énergie, l’évolution d’une nouvelle civilisation. --{" "}
+            <i>Le contrôle de la vie</i> Bernard de Montréal
+          </p>
         </>
-      )}
+      )} */}
+
+      <p>
+        Sélectionnez un livre dans la bibliothèque pour découvrir une sélection
+        de citations.
+      </p>
+
       {/*<ul>
         <li>
           <b>{localize("Auteur", "Author")} : </b>

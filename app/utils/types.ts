@@ -39,6 +39,7 @@ export type Book = {
   src?: string;
   library_id?: string;
   is_conf?: boolean;
+  pos?: number;
 };
 export type Lib = {
   id: string;

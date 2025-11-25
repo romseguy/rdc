@@ -5,11 +5,23 @@ import { Link, useNavigate } from "react-router";
 import { Book1Icon, bookTitle, Flex, LibTitle } from "~/components";
 import { getState } from "~/store";
 import { localize } from "~/utils";
+Array.prototype.orderBy = function (selector, desc = false) {
+  return [...this].sort((a, b) => {
+    a = selector(a);
+    b = selector(b);
+
+    if (a == b) return 0;
+    return (desc ? a > b : a < b) ? -1 : 1;
+  });
+};
 
 export const PageHeader = (props) => {
   const { isMobile, book, lib } = useSelector(getState);
   const navigate = useNavigate();
-
+  const books = (lib.books || []).orderBy(
+    ({ pos }) => (!pos ? -1 : parseInt(pos)),
+    true,
+  );
   return (
     <div id="page-header">
       {!isMobile && (
@@ -22,7 +34,7 @@ export const PageHeader = (props) => {
 
       {/* books list */}
       <Flex gap="0" overflowX="scroll">
-        {lib.books?.map((b, index) => {
+        {books.map((b, index) => {
           const to = "/" + localize("livre", "book") + "/" + b.id;
           return (
             <div

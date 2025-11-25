@@ -109,7 +109,7 @@ export const loader = async (props: Route.LoaderArgs) => {
     });
   }
 
-  app.lib = app.libs[0] as Seed | Lib;
+  app.lib = app.libs[8] ? app.libs[8] : (app.libs[0] as Seed | Lib);
 
   const initialState = store.getState();
   return { ...initialState.app, ...app };

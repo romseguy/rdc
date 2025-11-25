@@ -34,6 +34,7 @@ export const NoteHeaderLeft = (props) => {
   const showToast = useToast();
 
   async function onEditPageClick(note: NoteT) {
+    console.log("🚀 ~ onEditPageClick ~ note:", note);
     try {
       const { data, error } = await dispatch(
         editNote.initiate({
@@ -71,7 +72,9 @@ export const NoteHeaderLeft = (props) => {
         page={page}
         setPage={setPage}
         note={note}
-        onClick={onEditPageClick}
+        onClick={(pageNumber) => {
+          onEditPageClick({ ...note, page: pageNumber });
+        }}
       />
 
       <Button
