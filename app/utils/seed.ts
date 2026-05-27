@@ -32,6 +32,7 @@ export const collections: Seed = {
     },
     {
       name: "Evolutionary Psychology y y y y y y y y y y y y y y",
+      isVisible: false,
       author: "Bernard de Montréal",
       books: [
         {

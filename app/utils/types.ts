@@ -48,6 +48,7 @@ export type Lib = {
   author: string;
   author_url?: string;
   books?: BookT[];
+  isVisible?: boolean;
 };
 
 export type Collections = { libraries: Lib[]; comments: Comment[] };

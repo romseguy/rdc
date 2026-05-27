@@ -1,3 +1,4 @@
+import { Heading } from "@radix-ui/themes";
 import { useSelector } from "react-redux";
 import { getState } from "~/store";
 
@@ -53,9 +54,10 @@ export function Home(props) {
         </>
       )} */}
 
+      <Heading color="yellow">Bonjour !</Heading>
       <p>
-        Sélectionnez un livre dans la bibliothèque pour découvrir une sélection
-        de citations.
+        Sélectionnez un livre dans la bibliothèque ci-dessus pour découvrir une
+        sélection de citations.
       </p>
 
       {/*<ul>

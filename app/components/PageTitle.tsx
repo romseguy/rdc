@@ -32,6 +32,7 @@ export const PageTitle = () => {
     const rows = [...libs].sort((a, b) => (a.author > b.author ? 1 : -1));
     let els: Record<string, Lib[]> = {};
     for (const row of rows) {
+      if (row.isVisible === false) continue;
       els[row.author] = (els[row.author] || []).concat([row]);
     }
     return els;
@@ -194,7 +195,7 @@ export const PageTitle = () => {
 
       <Flex>
         {LoginButton}
-        <LocaleSwitch
+        {/*<LocaleSwitch
           width={"2em"}
           height={"2em"}
           onClick={(e) => {
@@ -205,7 +206,7 @@ export const PageTitle = () => {
                 : "https://knowmyquotes.com",
             );
           }}
-        />
+        />*/}
       </Flex>
     </Flex>
   );

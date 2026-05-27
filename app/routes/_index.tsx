@@ -109,7 +109,10 @@ export const loader = async (props: Route.LoaderArgs) => {
     });
   }
 
-  app.lib = app.libs[8] ? app.libs[8] : (app.libs[0] as Seed | Lib);
+  app.lib = app.libs[0] as Seed | Lib;
+  const demo = app.libs.find((lib) => lib.name === "Le langage des oiseaux");
+
+  if (demo) app.lib = demo;
 
   const initialState = store.getState();
   return { ...initialState.app, ...app };
